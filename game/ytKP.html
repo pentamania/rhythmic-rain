@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <title>youtubeビデオで音ゲー</title>
+    <style media="screen">
+        #main{
+            text-align: center;
+        }
+        #game-wrapper{
+            width: 100%;
+            height: 400px;
+            margin: 10px;
+        }
+        #game-container{
+            margin: 0 auto;
+            position: relative;
+
+        }
+        #player, #world{
+            position: absolute;
+            left:0;
+            top:0;
+            box-sizing: border-box;
+            width: 640px;
+            height: 390px;
+        }
+        #player{
+            /*display: none;*/
+        }
+        #world{
+            border: solid 1px black;
+        }
+        #playList li{
+            position: relative;
+            float: left;
+            border: solid 1px #4ff216;
+            padding: 2px;
+            margin:0 2px 0 0;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        .musicInfo{
+            position: absolute;
+            top: -100%;
+            left: 0;
+            background: green;
+            opacity: 0.8;
+            width: 100%;
+            height: 100%;
+            transition: all ease .2s;
+        }
+        #playList li:hover > .musicInfo{
+            top: 0;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="main">
+        <div id="game-wrapper">
+            <div id="player"></div>
+            <canvas id="world"></canvas>
+        </div>
+        <ul id="playList"></ul>
+        <button id="playBtn">再生</button>
+        <div id="counter">cnt</div>
+    </div>
+<script src="timerClass.js" charset="utf-8"></script>
+<script type="text/javascript">
+
+    /*
+        process
+        1. user click of icon
+        (1.1. set up player if not available)
+        2. get game info data (ajax) -> fumen, starttime, (endtime),
+        3. get video ->
+        4. onready - > start game
+
+        new Game();
+
+        process for iOs/Android
+        1.
+        2.load video > mute()
+        3. wait for player tap to unlock > stopVid & unmute > start game
+    */
+    var $id = function(id){return document.getElementById(id);}
+    var App = function(element, width, height){
+        this.videoList = [
+            'oihpbzcSMv0', //
+            'c-M7cvJy1IY', // fake fake
+            'qRCchsKmQBk' //freedom
+        ];
+        // this.videoList = [{title:"" ,id:'oihpbzcSMv0'},'c-M7cvJy1IY','M7lc1UVf-VE','qRCchsKmQBk'];
+        this.player = null;
+        this.WIDTH = 640;
+        this.HEIGHT = 390;
+        this.canvas = null;
+        this.ctx;
+
+        var ua = window.navigator.userAgent.toLowerCase();
+        console.log(ua);
+        this.mobileUnlock = (ua.indexOf('iphone') > 0 ||  ua.indexOf('ipad') > 0 || ua.indexOf('ipod') > 0 || ua.indexOf('android') > 0 ) ? false : true;
+        // this.mobileUnlock = false;
+
+        console.log("mobile",this.mobileUnlock);
+        // ゲーム関係
+        this.noteList = [];
+        this.startTime = 3;
+        this.zerohour = 0;
+        this.endTime = null;
+        this.bpmList = [[0,180], [42,360]]; //sofuran
+        this.bpm = this.bpmList[0][1]; //sofuran
+        this.bpmIndex = 0
+        this.speed = 1.5;
+        this.isPlaying = false;
+        this._pastTime = 0
+
+
+        this.timer = new Timer();
+        this.initialize();
+    };
+    App.prototype = {
+        initialize: function(){
+            var self = this;
+            this.setupCanvas('world');
+
+            //set up list
+            var ul = document.getElementById('playList');
+            self.videoList.forEach(function(id, i){
+                var li = document.createElement('li');
+                var img = document.createElement('img');
+                var imgsrc = "http://i.ytimg.com/vi/"+id+"/default.jpg";
+                img.setAttribute("src", imgsrc);
+                // img.setAttribute("data-videoId", imgsrc);
+                li.appendChild(img);
+
+                li.addEventListener('click', function(){
+                    if (!window.YT) {
+                        var tag = document.createElement('script');
+                        tag.src = "https://www.youtube.com/iframe_api";
+                        var firstScriptTag = document.getElementsByTagName('script')[0];
+                        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+                        window.onYouTubeIframeAPIReady = function(){self.setupPlayer(id);}
+                    } else {
+                        var obj = {
+                            'videoId': id,
+                            // 'startSeconds': 5, // 予めシーク
+                            // 'endSeconds': 10,
+                            // 'suggestedQuality': 'large' //推奨再生画質
+                        }
+
+                        self.player.cueVideoById(obj);
+                    }
+
+                });
+
+                // veil: show music info here
+                var div = document.createElement('div');
+                div.textContent = "id: "+id;
+                div.setAttribute('class', 'musicInfo');
+                li.appendChild(div);
+
+                ul.appendChild(li);
+            });
+
+            document.body.appendChild(ul);
+
+        },
+
+        setupPlayer: function(id){
+            var self = this;
+
+            // player events setup
+            var events = {
+                //"event name": "function name"
+                'onReady': 'onPlayerReady',
+                'onStateChange': 'onPlayerStateChange',
+                // 'onError': 'onPlayerError'
+            };
+
+            // deploy event funcs on global(window)
+            // for (var prop in events){
+            //     //ex) window.onPlayerReady = function(){self.onPlayerReady();};
+            //     console.log(prop, events[prop]);
+            //     window[events[prop]] = function(e){ self[events[prop]](e,self);} // NG
+            //     // window[events[p]] =  self[events[p]];
+            // }
+            Object.keys(events).forEach(function (prop) {
+                window[events[prop]] = function(e){ self[events[prop]](e,self);};
+
+              //do something
+            })
+            // console.log(window);
+            var opt = {
+                'width': self.WIDTH,
+                'height': self.HEIGHT,
+                'videoId': id,
+                'playerVars': {
+                    'controls': 0, //コントローラーを表示するかどうか 0:非表示 1:表示(デフォルト)
+                    'modestbranding': 1, //Youtubeのロゴをコントローラーに追加するかどうか 0:表示 1:非表示
+                    'rel': 0, //再生終了後に関連動画を表示するかどうか 0:非表示 1:表示(デフォルト)
+                    'disablekb': 1, // キーボードによる操作を許可するかどうか 0:許可(デフォルト) 1:不許可
+                    'showinfo': 0, // 動画情報の表示（動画の上部のあれ）
+                    // iv_load_policy:3, //動画アノテーション表示
+                },
+                // events: {
+                //     'onReady': events['onReady'], //再生可能後にfire
+                //     'onStateChange': events['onPlayerStateChange'],
+                // }
+            };
+            opt['events'] = events;
+
+            this.player = new YT.Player('player', opt);
+
+            //add player events
+            var playBtn = document.getElementById('playBtn');
+            playBtn.onclick = function(){
+                // window.onPlayerReady();
+                // self.player.playVideo();
+            }
+
+        },
+        // 実質的なinit関数
+        onPlayerReady: function(e){
+            console.log("ready");
+            var data = e.target.getVideoData();
+            this.setupGame(data.video_id);
+            // this.ctx.rotate( 45 * Math.PI / 180 );
+            return 0;
+        },
+        onPlayerStateChange: function(e,s){
+            console.log("change");
+            // console.log(e); //{target:{...}, data:Number}
+            console.log("player state:", e.data); //{target:{...}, data:Number}
+
+            // player ready: cueVideoById
+            if (e.data === 5 && this.mobileUnlock){
+                console.log("頭出し完了");
+                var data = e.target.getVideoData();
+                this.setupGame(data.video_id);
+            }
+
+            // first play to unlock mobile restriction
+            if (e.data === 1 && !this.mobileUnlock){
+                this.player.stopVideo();
+                this.mobileUnlock = true;
+                console.log(this.mobileUnlock, "unlocked");
+                this.canvas.style.display = "block";
+                // load start state -1 > 3 > 1
+
+                // this.resetGame();
+                // this.update();
+            }
+
+            // 最初のズレ
+            if (this.isPlaying && e.data === 1){
+                // this.renderingFlg = true;
+                console.log(this.timer.time(), "補正前");
+                this.timer.setTime(this.startTime*1000);
+                console.log(this.timer.time(), "補正");
+            }
+        },
+
+        setupCanvas: function(id){
+            var canvas = this.canvas = document.getElementById(id);
+            var ctx = this.ctx = canvas.getContext('2d');
+            canvas.width = this.WIDTH;
+            canvas.height = this.HEIGHT;
+            if (!this.mobileUnlock) canvas.style.display = "none";
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
+        },
+
+        setupGame: function(video_id){
+            var self = this;
+            // get noteList data from id or name
+            var xhr = new XMLHttpRequest();
+            xhr.open("get", "./data/"+video_id+".json", true);
+            xhr.onload = function(){
+                // console.log(this.responseText);
+                var dataobj;
+                try {
+                    dataobj = JSON.parse(this.responseText); //オブジェクト化
+                } catch(e) {
+                    alert(e+'\n正しいjsonデータでは無いっぽいです…');
+                    return;
+                }
+
+                self.noteList =  dataobj.noteList;
+                self.zerohour = dataobj.zerohour;
+                // self.bpm = dataobj.BPM;
+                if(dataobj.endhour) self.endTime = dataobj.endhour;
+
+                // start game
+                if (self.mobileUnlock){
+                    self.resetGame();
+                    self.update();
+                }
+            }
+            xhr.onerror = function(e){
+                alert('エラーです', e);
+                throw new Error(e);
+            }
+
+            xhr.send(null);
+        },
+
+        resetGame: function(){
+            this.player.seekTo(this.zerohour);
+            this.player.stopVideo();
+            this.timer.reset();
+            this.timer.run();
+            this.isPlaying = true;
+        },
+        checkPlayerCurrentTime: function(){
+            this._pastTime;
+
+        },
+        update: function(){
+            this.timer.update();
+            this.render();
+            var state = this.player.getPlayerState();
+            //時間が来たら再生　条件： 再生中でない、終了後は再生しない
+            if (this.timer.time() > this.startTime-0.15 && state != 0 && state != 1) this.player.playVideo();
+
+            window.setTimeout(this.update.bind(this), 16);
+        },
+        render: function(){
+            var i, len;
+            var ctx = this.ctx;
+            var time = this.timer.time();
+            var bpmList = this.bpmList,
+                  bpm = this.bpm;
+            var ptime = this.player.getCurrentTime();
+            $id("counter").innerHTML = "idex: "+this.bpmIndex+" time:"+time+" bpm: "+bpm+"  player time: "+(ptime + this.startTime);
+            var delta = Math.abs(time - ptime + this.startTime);
+            if (delta > 0.1 && this.player.getPlayerState() == 1){
+                // console.log("補正");
+                // this.timer.setTime((ptime + this.startTime)*1000);
+            }
+
+            //bpm 加速
+            if(bpmList){
+                for (i = this.bpmIndex; i < bpmList.length; i++) {
+                    if (time > bpmList[i][0] + this.startTime) {
+                        this.bpm=bpmList[i][1];
+                        this.bpmIndex++;
+                    }
+                }
+            }
+
+            // clear
+            ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
+
+            // background
+            ctx.fillStyle = (time < this.startTime + 1.0) ? 'rgba(0, 0, 0, 1)' : 'rgba(0, 0, 0, 0.6)';
+            ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
+
+            // notes
+            var NOTE_DEST = 64;
+            var noteSize;
+            for (i = 0, len=this.noteList.length; i < len; i++) {
+                var note =  this.noteList[i];
+                noteSize = 6;
+                if (note.length > 0) {
+                    note = this.noteList[i][0];
+                    noteSize = (this.noteList[i][1] - this.noteList[i][0]) * bpm*1.5;
+                }
+                var nt = note + this.startTime;
+                var rTime = nt - time;
+                var drawingPointX =  NOTE_DEST + rTime*bpm*1.5;
+
+
+                if (this.WIDTH < drawingPointX) continue;
+
+                // 判定ライン位置でストップ & ロングノートの場合高さを縮める
+                if (rTime < 0){
+                    noteSize -= rTime*bpm*1.5;
+                    drawingPointX =  NOTE_DEST;
+                }
+                ctx.fillStyle = "rgba(224, 103, 95, 0.7)";
+                ctx.fillRect(drawingPointX,0, noteSize, this.HEIGHT);
+            }
+        },
+
+    }
+
+    window.onload = function(){
+        var app = new App();
+    }
+
+    // function getXML(url, fn){
+    //     var xml = new XMLHttpRequest();
+    //     // httpObj.open("get", "./data/midnight-fumen_sorted.json", true);
+    //     xml.onload = function(){
+    //         console.log(this.responseText);
+    //         fn(this.responseText);
+    //     }
+    //     xml.onerror = function(e){
+    //         console.log(e);
+    //     }
+    //     xml.open("get", URL, true);
+    //     xml.send(null);
+    // }
+
+
+    // function onYouTubeIframeAPIReady() {
+    //     // "player"という文字列は、divのID属性の値を指定します。
+    //     player = new YT.Player('player', {
+    //         width: WIDTH,
+    //         height: HEIGHT,
+    //         // src: 'https://youtu.be/oihpbzcSMv0',
+    //         videoId: 'c-M7cvJy1IY',
+    //         // videoId: 'oihpbzcSMv0',
+    //         // videoId: 'M7lc1UVf-VE',
+    //         playerVars: {
+    //             // 'controls': 0, //コントローラーを表示するかどうか 0:非表示 1:表示(デフォルト)
+    //             'modestbranding': 1, //Youtubeのロゴをコントローラーに追加するかどうか 0:表示 1:非表示
+    //             'rel': 0, //再生終了後に関連動画を表示するかどうか 0:非表示 1:表示(デフォルト)
+    //             disablekb: 1, // キーボードによる操作を許可するかどうか 0:許可(デフォルト) 1:不許可
+    //             showinfo: 0, // 動画情報の表示（動画の上部のあれ）
+    //             // iv_load_policy:3, //動画アノテーション表示
+    //         },
+    //         events: {
+    //               'onReady': onPlayerReady, //再生可能後にfire
+    //             //   'onStateChange': onPlayerStateChange
+    //             }
+    //         });
+    // }
+
+    // 再生が可能になると呼び出されます。
+    // function onPlayerReady(event) {
+    //     // player.seekTo(12); // 再生位置変更　秒数？
+    //     event.target.playVideo(); // 再生を開始します。
+    //     console.log(player);
+    //     getCurrentVideoTime();
+    // }
+
+    // 再生した、停止したなどのプレーヤーのステータスが変わった場合に 呼び出されます。
+    // function onPlayerStateChange(event) {
+    //     // 再生が終わったら、alertしてみます
+    //     if (event.data == YT.PlayerState.ENDED) {
+    //         // alert('finish');
+    //     }
+    // }
+
+    // 再生時間
+    // var currentTime;
+    // function getCurrentVideoTime(){
+    //     currentTime = player.getCurrentTime();
+    //     counter.innerHTML = currentTime;
+    //     // console.log(currentTime);
+    //
+    //      setTimeout(function(){
+    //         getCurrentVideoTime();
+    //     }, 17)
+    // }
+
+
+</script>
+</body>
+</html>
