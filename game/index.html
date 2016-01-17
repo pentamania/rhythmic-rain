@@ -6,7 +6,7 @@
             <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
             <title>イーブニング・レイン</title>
             <!-- <link href='https://fonts.googleapis.com/css?family=Shadows+Into+Light|Audiowide|Merienda+One|Henny+Penny' rel='stylesheet' type='text/css'> -->
-            <link href='https://fonts.googleapis.com/css?family=Audiowide|Merienda+One' rel='stylesheet' type='text/css'>
+            <!-- <link href='https://fonts.googleapis.com/css?family=Audiowide|Merienda+One' rel='stylesheet' type='text/css'> -->
 
             <style media="screen">
                 body{
@@ -14,7 +14,7 @@
                     font-family: Merienda One, cursive, monospace;
                     /*background: rgb(12, 154, 133);*/
                     background: url("./assets/images/background.jpg") center center no-repeat fixed;
-                    background-size:cover;
+                    background-size: cover;
                     background-color: black;
                     color: rgb(208, 218, 213);
                 }
@@ -64,14 +64,17 @@
         </div><!-- container -->
 
         <script src="timerClass.js" charset="utf-8"></script>
+        <script src="loader.js" charset="utf-8"></script>
         <script>
 
 /*
 描画最適化
 ・ステートを無闇に変更しない
 ・パスを事前に書いて最後にまとめて
-・バックグラウンドと分ける
+・バックグラウンドと分ける *
 ・バッファを考えてみる（効果的かは未知数だが）
+
+順番　画像ろーど -> 初回描画 addevent -> （初回タップ待ち）->  音源ロード -> コールバックでゲームスタート
 */
 // var game = function(){
 // };
@@ -85,8 +88,46 @@ var makeSpanArray = function(span, m, n){
     }
     return array;
 }
-//定数
-var SCREEN_WIDTH = 640;
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
+if (AudioContext) var waContext = new AudioContext();
+// console.log(context);
+// Audio 用の buffer を読み込む
+var getAudioBuffer = function(context, url, fn) {
+    var req = new XMLHttpRequest();
+    // array buffer を指定
+    req.responseType = 'arraybuffer';
+
+    req.onreadystatechange = function() {
+        if (req.readyState === 4) {
+          if (req.status === 0 || req.status === 200) {
+            // array buffer を audio buffer に変換
+            context.decodeAudioData(req.response, function(buffer) {
+              // コールバックを実行
+              fn(buffer);
+            });
+          }
+        }
+    };
+
+    req.open('GET', url, true);
+    req.send('');
+};
+
+// サウンドを再生
+var playWASound = function(context,buffer) {
+  // source を作成
+  var source = context.createBufferSource();
+  // buffer をセット
+  source.buffer = buffer;
+  // context に connect
+  source.connect(context.destination);
+  // 再生
+  source.start(0);
+};
+
+// 定数
+var SCREEN_WIDTH = (window.innerWidth > 640) ? 640 : window.innerWidth*0.9;
+var RATIO = SCREEN_WIDTH/640;
 var SCREEN_HEIGHT = Math.round(SCREEN_WIDTH/16 * 9); // 16:9 ex> 640:360
 var NOTE_LIST = null;
 
@@ -107,18 +148,20 @@ var WATER_COLOR = "#125779";
 var EFFECT_COLOR = NOTE_COLOR;
 // var EFFECT_COLOR = "rgba(152, 171, 236, 1)";
 
-// var JUDGE_LINE_COLOR ="rgb(9, 112, 126)";
-// var JUDGE_LINE_START_X = 0;
-// var JUDGE_LINE_END_X = SCREEN_WIDTH - JUDGE_LINE_START_X;
-var JUDGE_LINE_Y = SCREEN_HEIGHT * 0.7; //
+var JUDGE_LINE_Y = Math.round(SCREEN_HEIGHT * 0.7); //
 var NOTE_DEST_Y = JUDGE_LINE_Y - NOTE_HEIGHT * 0.5; // ノーツ最終位置Y
 var EFFECT_HEIGHT = JUDGE_LINE_Y * 0.4; // エフェクトの高さ
 
 var RATING_TEXT_POS_X = SCREEN_WIDTH * 0.5;
 var RATING_TEXT_POS_Y = SCREEN_HEIGHT * 0.4;
-var SCORE_TEXT_FONT_SIZE = 20;
+var SCORE_TEXT_FONT_SIZE = 20*RATIO;
 var SCORE_TEXT_POS_X =  SCREEN_WIDTH * 0.9;
 var SCORE_TEXT_POS_Y = SCORE_TEXT_FONT_SIZE * 1.1;
+
+var LIGHT_POS_X = 0;
+var LIGHT_POS_X = 0;
+var GIRL_POS_X = 0;
+var GIRL_POS_Y = 0;
 
 // 判定範囲（sec）
 var RATING = {
@@ -133,20 +176,36 @@ var SCORE = {
     cool: 50,
     great: 100,
     hold: 10
-}
+};
+
+var repertory = [
+    {
+        name: "Game gadget at midnight",
+        author: "MATSU",
+        anchor: "http://dova-s.jp/_contents/author/profile089.html",
+        src: "./assets/Game_gadget_at_midnight.mp3",
+        fumenData: "./data/midnight-fumen_rev1.json"
+    },{
+        name: "dummy",
+        author: "dummy",
+        anchor: "http://dova-s.jp/_contents/author/profile089.html",
+        src: "./assets/dummy.mp3",
+        fumenData: "./data/midnight-fumen_rev1.json"
+    },
+];
 
 var SOUND_ASSETS = {
     // bgm: "./assets/two_tor_real.mp3",
-    bgm: "./assets/Game_gadget_at_midnight.mpav",
+    bgm: "./assets/Game_gadget_at_midnight.mp3",
     clap:"./assets/clap.mp3",
     conga: "./assets/conga.mp3"
 };
 var IMAGE_ASSETS = {
-    streetLight: "./assets/images/streetLight.png",
+    streetLight: "./assets/images/streetLight2.png",
     girl: "./assets/images/girl.png",
 }
 
-// HTML要素取得
+// 要素取得
 var app = $id('app');
 var bgCanvas = $id('bg');
 var holderElement = $id('game-field');
@@ -170,13 +229,15 @@ var noteList = []; //譜面情報
 var hitEffect = null;
 var score = 0;
 var chainNum = 0;
-var maxChain = 0;
+var maxChain = 0; //マックス
+var fullChainNum = 0; // フルコンボ時の数値
 var rateText = null;
 var longNote = null; // ロングノート情報
 var btnFlg = false; // ボタンが押下状態フラグ
 var isPlaying = false; // プレイ中
 var autoPlay = false;
 // var autoPlay = true;
+var enableSE = true;
 
 var bpm = 180; // dummy
 var speed = 1.5;
@@ -195,74 +256,124 @@ var sounds = {} // サウンド管理;
 var images = {} // image管理;
 var music, se1, se2;
 //forEachで回して登録
-var _keys = Object.keys(SOUND_ASSETS);
-_keys.forEach(function(key){
-    var audio = new Audio(SOUND_ASSETS[key]);
-    audio.load();
-    var counter = 0;
-    // event名にかかわらず、コールバックを即時関数にすると必ずじっこうされる？
-    // audio.addEventListener('loadeddata', (function(x){
+// var _preload = function(srcObj, resisterObj, fn){
+//     var _keys = Object.keys(SOUND_ASSETS);
+//     _keys.forEach(function(key){
+//         var audio = new Audio(SOUND_ASSETS[key]);
+//         audio.load();
+//         var counter = 0;
+//
+//         // event名にかかわらず、コールバックを即時関数にすると必ずじっこうされる？
+//         // audio.addEventListener('loadeddata', (function(x){
+//         // }(key));
+//         audio.addEventListener('loadeddata', function(){
+//             sounds[key] = audio; //登録
+//             console.log(Object.keys(sounds).length+" , 全音源:"+Object.keys(SOUND_ASSETS).length);
+//
+//             if (Object.keys(sounds).length === _keys.length){
+//                 // init();
+//                 // image load
+//                 var _imgkeys = Object.keys(IMAGE_ASSETS);
+//                 _imgkeys.forEach(function(key){
+//                     var img = new Image();
+//                     // console.log(img);
+//                     img.onload = function(){
+//                         images[key] = img
+//                         if (Object.keys(images).length === _imgkeys.length){
+//                             init();
+//                         }
+//                     }
+//                     img.src = IMAGE_ASSETS[key];
+//
+//                     img.onerror = function(e){
+//                     console.log(e);
+//                         alert('画像の読み込みに失敗したようです...')
+//                     }
+//                 });
+//             }
+//         });
+//
+//         // canplaythroughイベントはplay()時にも発生するため、ロードがおわったらイベントリスナをremove
+//         // http://webkatu.com/remove-eventlistener/
+//         // audio.addEventListener('loadeddata', (function(x){
+//         //     return function load(){
+//         //         sounds[x] = audio; //登録
+//         //         console.log(Object.keys(sounds).length+" , 全音源:"+Object.keys(SOUND_ASSETS).length);
+//         //         audio.removeEventListener('loadeddata', load);
+//         //         if (Object.keys(sounds).length === _keys.length) {
+//         //
+//         //             init();
+//         //         }
+//         //     }
+//         // })(key));
+//
+//         audio.addEventListener('error', function(e){
+//             counter++;
+//             // console.log(counter);
+//             if (counter>10){
+//                 throw new Error(e.target.error);
+//                 alert('failed sound loading :(. Try reloading the browser', e);
+//             }else{
+//                 // audio.src = "./assets/Game_gadget_at_midnight.mp3"; //test用
+//                 audio.load();
+//             }
+//         });
+//
+//         // 読み込み失敗時の対策、あまり良くない
+//         setTimeout(function(){
+//             console.log('読み込みチェック');
+//             // if(Object.keys(sounds).length !== _keys.length){
+//             if(sounds[key] != audio){
+//                 alert('音声の読み込みに失敗したようです。リロードしてみてください');
+//             }
+//         },3000);
+//
+//     }, this);
+// };
 
-    // }(key));
-    audio.addEventListener('loadeddata', function(){
-        sounds[key] = audio; //登録
-        console.log(Object.keys(sounds).length+" , 全音源:"+Object.keys(SOUND_ASSETS).length);
+// 0. スタート
+window.onload = function(){
+    // 1. 画像ロード
+    _imagePreload(IMAGE_ASSETS, images, function(){
+        // 2. 初期化（canvasセット, 譜面ロード, タイマー, ）
+        init();
+        main();
+        // 2.5 music select ?
+        // 3. タップ、クリックでスタート
+        var _func = (function(e) {
+            return function f(e) {
+                _soundPreload(SOUND_ASSETS, sounds, function(){
+                    music = sounds.bgm;
+                    se1 =  sounds.clap;
+                    se2 =  sounds.conga;
+                    // 入力系
+                    if (!autoPlay) {
+                        app.addEventListener('mousedown',  function(e){ e.preventDefault();onpointdown();}, false);
+                        app.addEventListener('touchstart', function(e){ e.preventDefault();onpointdown();}, false);
+                        document.addEventListener('keydown', function(e){
+                            // if (e.keyCode == 32) return judge();
+                            onpointdown();
+                        });
 
-        if (Object.keys(sounds).length === _keys.length){
-            // init();
-            // image load
-            var _imgkeys = Object.keys(IMAGE_ASSETS);
-            _imgkeys.forEach(function(key){
-                var img = new Image();
-                // console.log(img);
-                img.onload = function(){
-                    images[key] = img
-                    if (Object.keys(images).length === _imgkeys.length){
-                        init();
+                        // keyup系
+                        app.addEventListener('mouseup', onpointup, false);
+                        app.addEventListener('touchend', onpointup, false);
+                        document.addEventListener('keyup', onpointup, false);
                     }
-                }
-                img.src = IMAGE_ASSETS[key];
-            });
-        }
+
+                    isPlaying = true;
+                    gameReset();
+                });
+
+                // イベントリスナ消す
+                window.removeEventListener(e.type, _func, false);
+            }
+        })();
+        window.addEventListener('click', _func, false);
+        window.addEventListener('touchstart', _func, false)
     });
 
-    // canplaythroughイベントはplay()時にも発生するため、ロードがおわったらイベントリスナをremove
-    // http://webkatu.com/remove-eventlistener/
-    // audio.addEventListener('loadeddata', (function(x){
-    //     return function load(){
-    //         sounds[x] = audio; //登録
-    //         console.log(Object.keys(sounds).length+" , 全音源:"+Object.keys(SOUND_ASSETS).length);
-    //         audio.removeEventListener('loadeddata', load);
-    //         if (Object.keys(sounds).length === _keys.length) {
-    //
-    //             init();
-    //         }
-    //     }
-    // })(key));
-
-    audio.addEventListener('error', function(e){
-        counter++;
-        // console.log(counter);
-        if (counter>10){
-            throw new Error(e.target.error);
-            alert('failed sound loading :(. Try reloading the browser', e);
-        }else{
-            // audio.src = "./assets/Game_gadget_at_midnight.mp3"; //test用
-            audio.load();
-        }
-    });
-
-    // 読み込み失敗時の対策、あまり良くない
-    setTimeout(function(){
-        console.log('読み込みチェック');
-        // if(Object.keys(sounds).length !== _keys.length){
-        if(sounds[key] != audio){
-            alert('音声の読み込みに失敗したようです。リロードしてみてください');
-        }
-    },3000);
-
-}, this);
-
+};
 
 function init() {
     // ajaxで譜面情報の取得
@@ -272,36 +383,36 @@ function init() {
     httpObj.onload = function(){
         importData(this.responseText);
 
-        music = sounds.bgm;
-        se1 =  sounds.clap;
-        se2 =  sounds.conga;
         app.width = bgCanvas.width = SCREEN_WIDTH;
         app.height = bgCanvas.height  = SCREEN_HEIGHT;
         holderElement.style.width = SCREEN_WIDTH +"px";
         holderElement.style.height = SCREEN_HEIGHT +"px";
+
+        // フルコンボ数
         noteList = NOTE_LIST.slice();
         noteList.forEach(function(note){
             if(note.length){
-                maxChain += 2;
+                fullChainNum += 2;
             } else {
-                maxChain++;
+                fullChainNum++;
             }
         });
         if (endhour == 0) endhour = music.duration + wait;
 
-        gameReset();
+        // gameReset();
 
         if (autoPlay) btnFlg = true;
 
         // draw once: background
         var bgctx = bgCanvas.getContext('2d');
-        bgctx.fillStyle = "rgba(34, 34, 34, 0.6)";
-        bgctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        bgctx.drawImage(images.girl, SCREEN_WIDTH*0.75, 85);
+        bgctx.fillStyle = "rgba(34, 34, 34, 0.7)";
+        bgctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT); //filter
+        bgctx.drawImage(images.girl, SCREEN_WIDTH*0.75, 75*RATIO, 124*1.1*RATIO, 166*1.1*RATIO);
         drawGradRect(bgctx, 0, JUDGE_LINE_Y,  SCREEN_WIDTH, SCREEN_HEIGHT-JUDGE_LINE_Y, [ [0, WATER_COLOR], [1, "rgba(255, 255, 255, 0)"] ]);
-        bgctx.drawImage(images.streetLight,0,0,177,474, 60, 100, 132, 358);
+        // bgctx.drawImage(images.streetLight,0,0,177,474, 60, 100, 132, 358);
+        bgctx.drawImage(images.streetLight,0,0,118,308, 60*RATIO, 110*RATIO, 132*RATIO, 358*RATIO);
 
-        main();
+        // main();
     }
     httpObj.onerror = function(e){
         console.log(e);
@@ -316,6 +427,7 @@ function gameReset(){
     music.currentTime = zerohour; //0以下の場合は0になる？
     rateText = null;
     chainNum = 0;
+    maxChain = 0;
     score = 0;
     hitEffect = 0;
     timer.reset();
@@ -356,7 +468,7 @@ function calc(){
         music.volume -= 0.1;
         music.pause();
     }
-    if(time > endhour){
+    if (time > endhour){
         isPlaying = false;
     }
 
@@ -400,7 +512,7 @@ function calc(){
             if (rTime > 0) {
                 // console.log('ji');
                 hitEffect = 3;
-                effect('hold');
+                // effect('hold');
             // 規定時間まで押しつづけたら終了
             }else{
                 longNote = null;
@@ -411,7 +523,6 @@ function calc(){
         }else{
             longNote = null;
             effect('miss');
-            // miss();
         }
     }
 
@@ -432,7 +543,6 @@ function screenRender() {
 
     //画面初期化：背景色で塗りつぶす
     // ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // ブラーエフェクト
-    // ctx.fillStyle = "#1c1c1c";
     // ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     ctx.clearRect(0, 0, app.width, app.height);
 
@@ -570,8 +680,8 @@ function screenRender() {
         ctx.globalAlpha = 1; //opacity
         if (score) {ctx.fillText("RESULT", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y);}
         if (score) {ctx.fillText("SCORE: "+score+"", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*1.5);}
-        if (chainNum) {ctx.fillText("CHAIN: "+chainNum+" / "+maxChain, RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*3);}
-        if (score) {ctx.fillText("結構歌えた！", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*5);}
+        if (maxChain) {ctx.fillText("CHAIN: "+maxChain+" / "+fullChainNum, RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*3);}
+        // if (score) {ctx.fillText("結構歌えた！", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*5);}
         ctx.restore();
 
     }
@@ -580,11 +690,10 @@ function screenRender() {
 
 // draw vertical linear gradient rect
 function drawGradRect(context, x, y, width, height, color){
-    // var _color =  'hsla('+ colorHue +', 50%, 50%, 0.7)';
-    // var _color =  color;
     context.save();
 
     // グラデーション領域をセット
+    // console.log(width, height);
     var grad  = context.createLinearGradient(x, y, x, y+height);
 
     // グラデーション終点のオフセットと色をセット
@@ -708,6 +817,10 @@ function effect(rating){
 
 // 使いまわせるように切り出す
 function miss(){
+    // ゼロもしくは更新時に
+    if (maxChain == 0 || maxChain < chainNum) {
+        maxChain = chainNum;
+    }
     chainNum = 0; // チェイン切る
     rateText = "MISS...";
     // console.log("miss...");
@@ -715,6 +828,7 @@ function miss(){
 
 // ショット音再生
 function playShot(audio){
+    if(!enableSE) return;
     if(!audio.ended){
         //巻き戻し再生
         audio.pause();
@@ -725,22 +839,6 @@ function playShot(audio){
     }
 }
 
-// 入力系
-// mousedownとkeydown(スペースバー)で
-if (!autoPlay) {
-    app.addEventListener('mousedown',  function(e){ e.preventDefault();onpointdown();}, false);
-    app.addEventListener('touchstart', function(e){ e.preventDefault();onpointdown();}, false);
-    document.addEventListener('keydown', function(e){
-        // if (e.keyCode == 32) return judge();
-        // console.log(e);
-        onpointdown();
-    });
-
-    // keyup系
-    app.addEventListener('mouseup', onpointup, false);
-    app.addEventListener('touchend', onpointup, false);
-    document.addEventListener('keyup', onpointup, false);
-}
 
 function onpointdown(){
     if (!isPlaying) {
@@ -757,7 +855,8 @@ function onpointdown(){
         isPlaying = true;
     }
 }
-function onpointup(){
+function onpointup(e){
+    e.preventDefault();
     btnFlg = false;
 }
 
@@ -772,7 +871,7 @@ function importData(data){
     bpm = dataobj.BPM;
     NOTE_LIST =  dataobj.noteList;
     zerohour = dataobj.zerohour;
-    if(dataobj.endhour) endhour = dataobj.endhour;
+    if(dataobj.endhour) endhour = dataobj.endhour + wait;
 }
 
 //==============================

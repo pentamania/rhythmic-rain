@@ -1,8 +1,9 @@
 {
   "audioSrc": "blob:http%3A//localhost/011a924c-cefd-49b0-a10c-58af85151cf8",
-  "musicName": "dummy music",
+  "musicName": "Game gadget at midnight",
   "BPM": "130",
   "zerohour": 0.49,
+  "endhour": 82.5,
   "noteList": [
     0,
     0.9230769230769231,
