@@ -4,14 +4,14 @@
             <meta charset="utf-8">
             <meta http-equiv="x-ua-compatible" content="IE=Edge">
             <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
-            <title>イーブニング・レイン</title>
+            <title>リズミックレイン</title>
             <!-- <link href='https://fonts.googleapis.com/css?family=Shadows+Into+Light|Audiowide|Merienda+One|Henny+Penny' rel='stylesheet' type='text/css'> -->
             <!-- <link href='https://fonts.googleapis.com/css?family=Audiowide|Merienda+One' rel='stylesheet' type='text/css'> -->
 
             <style media="screen">
                 body{
                     -webkit-text-size-adjust: 100%;
-                    font-family: Merienda One, cursive, monospace;
+                    font-family: Merienda One, cursive, monospace, sans-serif;
                     /*background: rgb(12, 154, 133);*/
                     background: url("./assets/images/background.jpg") center center no-repeat fixed;
                     background-size: cover;
@@ -39,7 +39,7 @@
         </head>
     <body>
         <div class="container">
-            <h1 class="title">EVENING RAIN</h1>
+            <h1 class="title">RHYTHMIC RAIN</h1>
 
             <div id="game-field">
                 <canvas id="bg"></canvas>
@@ -67,15 +67,7 @@
         <script src="loader.js" charset="utf-8"></script>
         <script>
 
-/*
-描画最適化
-・ステートを無闇に変更しない
-・パスを事前に書いて最後にまとめて
-・バックグラウンドと分ける *
-・バッファを考えてみる（効果的かは未知数だが）
 
-順番　画像ろーど -> 初回描画 addevent -> （初回タップ待ち）->  音源ロード -> コールバックでゲームスタート
-*/
 // var game = function(){
 // };
 
@@ -92,28 +84,28 @@ window.AudioContext = window.AudioContext || window.webkitAudioContext;
 if (AudioContext) var waContext = new AudioContext();
 // console.log(context);
 // Audio 用の buffer を読み込む
-var getAudioBuffer = function(context, url, fn) {
-    var req = new XMLHttpRequest();
-    // array buffer を指定
-    req.responseType = 'arraybuffer';
+// var getAudioBuffer = function(context, url, fn) {
+//     var req = new XMLHttpRequest();
+//     // array buffer を指定
+//     req.responseType = 'arraybuffer';
+//
+//     req.onreadystatechange = function() {
+//         if (req.readyState === 4) {
+//             if (req.status === 0 || req.status === 200) {
+//             // array buffer を audio buffer に変換
+//                 context.decodeAudioData(req.response, function(buffer) {
+//                     // コールバックを実行
+//                     fn(buffer);
+//                 });
+//             }
+//         }
+//     };
+//
+//     req.open('GET', url, true);
+//     req.send('');
+// };
 
-    req.onreadystatechange = function() {
-        if (req.readyState === 4) {
-          if (req.status === 0 || req.status === 200) {
-            // array buffer を audio buffer に変換
-            context.decodeAudioData(req.response, function(buffer) {
-              // コールバックを実行
-              fn(buffer);
-            });
-          }
-        }
-    };
-
-    req.open('GET', url, true);
-    req.send('');
-};
-
-// サウンドを再生
+// webaudioサウンドを再生
 var playWASound = function(context,buffer) {
   // source を作成
   var source = context.createBufferSource();
@@ -158,10 +150,10 @@ var SCORE_TEXT_FONT_SIZE = 20*RATIO;
 var SCORE_TEXT_POS_X =  SCREEN_WIDTH * 0.9;
 var SCORE_TEXT_POS_Y = SCORE_TEXT_FONT_SIZE * 1.1;
 
-var LIGHT_POS_X = 0;
-var LIGHT_POS_X = 0;
-var GIRL_POS_X = 0;
-var GIRL_POS_Y = 0;
+var LIGHT_POS_X = 60*RATIO;
+var LIGHT_POS_Y = 110*RATIO;
+var GIRL_POS_X = SCREEN_WIDTH * 0.75;
+var GIRL_POS_Y = 75 * RATIO;
 
 // 判定範囲（sec）
 var RATING = {
@@ -237,7 +229,7 @@ var btnFlg = false; // ボタンが押下状態フラグ
 var isPlaying = false; // プレイ中
 var autoPlay = false;
 // var autoPlay = true;
-var enableSE = true;
+var enableSE = false;
 
 var bpm = 180; // dummy
 var speed = 1.5;
@@ -335,7 +327,7 @@ var music, se1, se2;
 window.onload = function(){
     // 1. 画像ロード
     _imagePreload(IMAGE_ASSETS, images, function(){
-        // 2. 初期化（canvasセット, 譜面ロード, タイマー, ）
+        // 2. 初期化（canvasセット, 譜面ロード, タイマー）
         init();
         main();
         // 2.5 music select ?
@@ -376,17 +368,28 @@ window.onload = function(){
 };
 
 function init() {
+    // set up main canvas
+    app.width = bgCanvas.width = SCREEN_WIDTH;
+    app.height = bgCanvas.height  = SCREEN_HEIGHT;
+    holderElement.style.width = SCREEN_WIDTH +"px";
+    holderElement.style.height = SCREEN_HEIGHT +"px";
+    // draw once: background
+    var bgctx = bgCanvas.getContext('2d');
+    bgctx.fillStyle = "rgb(249, 250, 207)";
+    bgctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT); //bgcolor
+    bgctx.drawImage(images.girl, GIRL_POS_X, GIRL_POS_Y, 124*1.1*RATIO, 166*1.1*RATIO);
+    drawGradRect(bgctx, 0, JUDGE_LINE_Y,  SCREEN_WIDTH, SCREEN_HEIGHT-JUDGE_LINE_Y, [ [0, WATER_COLOR], [1, "rgba(255, 255, 255, 0)"] ]);
+    // bgctx.drawImage(images.streetLight,0,0,177,474, 60, 100, 132, 358);
+    bgctx.drawImage(images.streetLight,0,0,118,308, LIGHT_POS_X, LIGHT_POS_Y, 132*RATIO, 358*RATIO);
+    bgctx.fillStyle = "rgba(34, 34, 34, 0.7)";
+    bgctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT); //filter
+
     // ajaxで譜面情報の取得
     var httpObj = new XMLHttpRequest();
     // httpObj.open("get", "./data/midnight-fumen_sorted.json", true);
     httpObj.open("get", "./data/midnight-fumen_rev1.json", true);
     httpObj.onload = function(){
         importData(this.responseText);
-
-        app.width = bgCanvas.width = SCREEN_WIDTH;
-        app.height = bgCanvas.height  = SCREEN_HEIGHT;
-        holderElement.style.width = SCREEN_WIDTH +"px";
-        holderElement.style.height = SCREEN_HEIGHT +"px";
 
         // フルコンボ数
         noteList = NOTE_LIST.slice();
@@ -403,19 +406,10 @@ function init() {
 
         if (autoPlay) btnFlg = true;
 
-        // draw once: background
-        var bgctx = bgCanvas.getContext('2d');
-        bgctx.fillStyle = "rgba(34, 34, 34, 0.7)";
-        bgctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT); //filter
-        bgctx.drawImage(images.girl, SCREEN_WIDTH*0.75, 75*RATIO, 124*1.1*RATIO, 166*1.1*RATIO);
-        drawGradRect(bgctx, 0, JUDGE_LINE_Y,  SCREEN_WIDTH, SCREEN_HEIGHT-JUDGE_LINE_Y, [ [0, WATER_COLOR], [1, "rgba(255, 255, 255, 0)"] ]);
-        // bgctx.drawImage(images.streetLight,0,0,177,474, 60, 100, 132, 358);
-        bgctx.drawImage(images.streetLight,0,0,118,308, 60*RATIO, 110*RATIO, 132*RATIO, 358*RATIO);
-
-        // main();
     }
     httpObj.onerror = function(e){
         console.log(e);
+        alert('xmlエラー');
     }
     httpObj.send(null);
 
@@ -423,7 +417,7 @@ function init() {
 
 function gameReset(){
     currentNoteIndex = 0;
-    music.pause();
+    // music.pause();
     music.currentTime = zerohour; //0以下の場合は0になる？
     rateText = null;
     chainNum = 0;
@@ -449,7 +443,7 @@ function main() {
     setTimeout(main, 1000/60);
 }
 
-// 内部処理用
+// 内部処理
 function calc(){
     var i, len;
     var noteTime;
@@ -460,7 +454,8 @@ function calc(){
     // 時間が来たら音楽再生開始
     if (time > wait && music.paused) {
         console.log("music start");
-        music.play();
+        // music.play();
+        playSound(music);
     }
     // endhour に達したら
     if (time > endhour && !music.paused) {
@@ -528,11 +523,10 @@ function calc(){
 
 }
 
-
 function screenRender() {
     var ctx = app.getContext('2d');
     var relativeTime = 0; // 再生位置とノーツ出現情報との差、０のとき判定ライン位置になるように
-    var corr = bpm * 1.5 * speed; // 補正、ハイスピ
+    var corr = bpm * 1.5 * RATIO * speed; // 補正、ハイスピ
     var deltaY; // 判定ラインまでの距離
     var drawingPointX = 100; // X軸 描画位置
     var drawingPointY; // Y軸 描画位置
@@ -545,20 +539,6 @@ function screenRender() {
     // ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // ブラーエフェクト
     // ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     ctx.clearRect(0, 0, app.width, app.height);
-
-    // 判定ライン＆水面の描画
-    ctx.globalAlpha = 1; //opacity
-    // bgctx.drawImage(images.girl, SCREEN_WIDTH*0.75, 85);
-    // ctx.fillStyle = WATER_COLOR;
-    // ctx.fillRect(0, JUDGE_LINE_Y, SCREEN_WIDTH, SCREEN_HEIGHT-JUDGE_LINE_Y);
-    // drawGradRect(ctx, 0, JUDGE_LINE_Y,  SCREEN_WIDTH, SCREEN_HEIGHT-JUDGE_LINE_Y, [ [0, WATER_COLOR], [1, "rgba(255, 255, 255, 0)"] ]);
-    // ctx.strokeStyle = JUDGE_LINE_COLOR;
-    // ctx.beginPath(); // ライン引く
-    // ctx.moveTo(0, JUDGE_LINE_Y);
-    // ctx.lineTo(SCREEN_WIDTH, JUDGE_LINE_Y);
-    // ctx.closePath(); // いらない？
-    // ctx.stroke(); // ライン引く
-    // ctx.drawImage(images.streetLight,0,0,177,474, 60, 100, 132, 358);
 
     // filter
     ctx.fillStyle = "rgba(87, 98, 121, 0.5)";
@@ -839,6 +819,16 @@ function playShot(audio){
     }
 }
 
+function playSound(audio){
+    if (waContext) {
+        playWASound(audio);
+    } else {
+        audio.play();
+    }
+}
+function pauseSound(audio){
+
+}
 
 function onpointdown(){
     if (!isPlaying) {

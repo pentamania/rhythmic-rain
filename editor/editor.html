@@ -114,6 +114,7 @@
                 ズーム[0.2~2.5倍](伸ばし過ぎるとと表示できなくなることがあります)
                 <input type="range" id="scale" max="2.5" min="0.5" step="0.1" value="1"><br>
                 音楽スタート位置(秒): <input type="number" id="zerohour" placeholder="0" step="0.1"><br>
+                音楽終了位置(秒): <input type="number" id="endhour" placeholder="" step="0.1"><br>
                 BPM: <input type="number" id="bpm" value="120" width="60px"><br>
                 <div>クオンタイズ：
                     <select id="quantize">
@@ -194,6 +195,7 @@
       source.connect(context.destination);
       // 再生
       source.start(0);
+    //   console.log(context);
     };
 
     // var raw = ["0_4_8_12", "0_4_12", "4_8_12_14", "5_8_12_14"];
@@ -711,7 +713,7 @@
             // music.currentTime = 0;
             music.currentTime = zerohour;
             _shotList = reloadShotList(music, noteList, zerohour);
-            // console.log(_shotList);
+            console.log(_shotList);
             redraw(c);
             // page = 0;
             return;
@@ -824,10 +826,12 @@
 
         var name = file.name,
               type = file.type;
+              console.log(type);
         if(name.match(/json/)){
             // jsonファイルはテキストとしてファイルを読み込む
             reader.readAsText(file, encode_type);
-        }else if(type.match(/audio/)){
+        }else if(type.match(/audio|mpeg|ogg/)){
+            // 音源ファイルは
             // reader.readAsDataURL(file);
             //https://lostechies.com/derickbailey/2013/09/23/getting-audio-file-information-with-htmls-file-api-and-audio-element/
             _musicName = name;
@@ -955,7 +959,7 @@
             }
             music.onerror = function(e){
                 console.log(e);
-                alert(dataobj.musicName+"の譜面データをロードしました")
+                alert(dataobj.musicName+"の譜面データのみをロードしました")
             }
             // 各数値代入
             bpm = bpmInput.value = dataobj.BPM;
@@ -972,6 +976,7 @@
     function init(){
         getAudioBuffer('./assets/clap.mp3', function(buffer){
             clap = buffer;
+            console.log(clap);
         })
         // clap.onloadeddata = function(){
             loadStorage();
