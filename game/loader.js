@@ -32,8 +32,8 @@ var _soundPreload = function(srcObj, register, fn){
             // webAudio
             getAudioBuffer(context, srcObj[key], function(buffer){
                 register[key] = buffer; // 登録
-                console.log("webAudio",Object.keys(register).length+" , 全音源:"+Object.keys(SOUND_ASSETS).length);
-                if (Object.keys(register).length === _keys.length) fn(); //ロード完了後コールバック実行
+                console.log("webAudio",Object.keys(register).length+" , 全音源: "+Object.keys(SOUND_ASSETS).length);
+                if (Object.keys(register).length === _keys.length) fn(); // ロード完了後コールバック実行
             });
         } else
         {

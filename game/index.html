@@ -34,6 +34,28 @@
                 #app{
                     z-index:2;
                 }
+                #repertory-wrapper{
+                    display: block;
+                    min-height: 300px;
+                    overflow: auto;
+                }
+                #repertory{
+                    /*position: absolute;
+                    top: 40%;
+                    display: block;*/
+                    z-index:3;
+                }
+                #repertory li{
+                    font-size: 0.8rem;
+                    width: 100px;
+                    float: left;
+                    color: white;
+                    z-index:3;
+                    background: rgb(193, 200, 105);
+                    cursor: pointer;
+                    padding: 0.4em;
+                    display: inline-block;
+                }
 
             </style>
         </head>
@@ -45,7 +67,9 @@
                 <canvas id="bg"></canvas>
                 <canvas id="app"></canvas>
             </div>
-
+            <div id="repertory-wrapper">
+                <ul id="repertory"></ul>
+            </div>
             <div class="info">
                 <div id="time"></div>
                 <button id="pause">pause</button>
@@ -55,9 +79,7 @@
                     オーソドックスな音ゲーです。降ってくるノーツに合わせてキーボード（どのキーでもOK）を押すか、タップします。<br>
                     長いノーツは長押しします。
                 </div>
-                <ul class="repertory">
-                    <li> Music : "Game gadget at midnight" by <a href="http://dova-s.jp/_contents/author/profile089.html">MATSU</a></li>
-                </ul>
+
             </div>
 
 
@@ -82,28 +104,6 @@ var makeSpanArray = function(span, m, n){
 }
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 if (AudioContext) var waContext = new AudioContext();
-// console.log(context);
-// Audio 用の buffer を読み込む
-// var getAudioBuffer = function(context, url, fn) {
-//     var req = new XMLHttpRequest();
-//     // array buffer を指定
-//     req.responseType = 'arraybuffer';
-//
-//     req.onreadystatechange = function() {
-//         if (req.readyState === 4) {
-//             if (req.status === 0 || req.status === 200) {
-//             // array buffer を audio buffer に変換
-//                 context.decodeAudioData(req.response, function(buffer) {
-//                     // コールバックを実行
-//                     fn(buffer);
-//                 });
-//             }
-//         }
-//     };
-//
-//     req.open('GET', url, true);
-//     req.send('');
-// };
 
 // webaudioサウンドを再生
 var playWASound = function(context,buffer) {
@@ -169,14 +169,16 @@ var SCORE = {
     great: 100,
     hold: 10
 };
-
-var repertory = [
+var activeMusicIndex = 0;
+var musicList = [
     {
         name: "Game gadget at midnight",
         author: "MATSU",
         anchor: "http://dova-s.jp/_contents/author/profile089.html",
+        difficulty: "normal",
+        theme: "night",
         src: "./assets/Game_gadget_at_midnight.mp3",
-        fumenData: "./data/midnight-fumen_rev1.json"
+        fumen: "./data/midnight-fumen_rev1.json"
     },{
         name: "dummy",
         author: "dummy",
@@ -185,6 +187,36 @@ var repertory = [
         fumenData: "./data/midnight-fumen_rev1.json"
     },
 ];
+
+// レパートリーリスト
+musicList.forEach(function(music, index){
+    // music['active'] = false;
+    var li = document.createElement('li');
+    // li.setAttribute("data-active", "false");
+    li.textContent = music.name;
+
+    li.onclick = function(){
+        var childs = $id('repertory').childNodes;
+        // console.log(childs);
+        // musicList.forEach(function(_music){
+        //     _music.active = false;
+        // })
+        // music.active = true;
+        // console.log(musicList);
+
+        Object.keys(childs).forEach(function(i){
+            var c = childs[i];
+            // console.log(c);
+            // c.dataset.active = 'false';
+            c.style.background = 'rgb(161, 182, 241)';
+        });
+        // this.dataset.active = 'true';
+        activeMusicIndex = index;
+        this.style.background = 'rgb(60, 100, 214)';
+        console.log(activeMusicIndex);
+    }
+    $id('repertory').appendChild(li);
+});
 
 var SOUND_ASSETS = {
     // bgm: "./assets/two_tor_real.mp3",
@@ -214,25 +246,26 @@ $id('seek').onblur = function(){
     music.currentTime = this.value;
 }
 
-var timer = new Timer();
+var timer;
 
-// 情報格納用変数とか
+// 情報格納用変数
 var noteList = []; //譜面情報
 var hitEffect = null;
 var score = 0;
 var chainNum = 0;
 var maxChain = 0; //マックス
-var fullChainNum = 0; // フルコンボ時の数値
+var fullChainNum = 1; // フルコンボ時の数値
 var rateText = null;
 var longNote = null; // ロングノート情報
 var btnFlg = false; // ボタンが押下状態フラグ
+
 var isPlaying = false; // プレイ中
 var autoPlay = false;
 // var autoPlay = true;
 var enableSE = false;
 
-var bpm = 180; // dummy
-var speed = 1.5;
+var bpm = 120; // dummy
+var speed = 1.0;
 
 var currentNoteIndex = 0;
 
@@ -247,81 +280,6 @@ var wait = 3.0; // 音源再生までの待ち時間
 var sounds = {} // サウンド管理;
 var images = {} // image管理;
 var music, se1, se2;
-//forEachで回して登録
-// var _preload = function(srcObj, resisterObj, fn){
-//     var _keys = Object.keys(SOUND_ASSETS);
-//     _keys.forEach(function(key){
-//         var audio = new Audio(SOUND_ASSETS[key]);
-//         audio.load();
-//         var counter = 0;
-//
-//         // event名にかかわらず、コールバックを即時関数にすると必ずじっこうされる？
-//         // audio.addEventListener('loadeddata', (function(x){
-//         // }(key));
-//         audio.addEventListener('loadeddata', function(){
-//             sounds[key] = audio; //登録
-//             console.log(Object.keys(sounds).length+" , 全音源:"+Object.keys(SOUND_ASSETS).length);
-//
-//             if (Object.keys(sounds).length === _keys.length){
-//                 // init();
-//                 // image load
-//                 var _imgkeys = Object.keys(IMAGE_ASSETS);
-//                 _imgkeys.forEach(function(key){
-//                     var img = new Image();
-//                     // console.log(img);
-//                     img.onload = function(){
-//                         images[key] = img
-//                         if (Object.keys(images).length === _imgkeys.length){
-//                             init();
-//                         }
-//                     }
-//                     img.src = IMAGE_ASSETS[key];
-//
-//                     img.onerror = function(e){
-//                     console.log(e);
-//                         alert('画像の読み込みに失敗したようです...')
-//                     }
-//                 });
-//             }
-//         });
-//
-//         // canplaythroughイベントはplay()時にも発生するため、ロードがおわったらイベントリスナをremove
-//         // http://webkatu.com/remove-eventlistener/
-//         // audio.addEventListener('loadeddata', (function(x){
-//         //     return function load(){
-//         //         sounds[x] = audio; //登録
-//         //         console.log(Object.keys(sounds).length+" , 全音源:"+Object.keys(SOUND_ASSETS).length);
-//         //         audio.removeEventListener('loadeddata', load);
-//         //         if (Object.keys(sounds).length === _keys.length) {
-//         //
-//         //             init();
-//         //         }
-//         //     }
-//         // })(key));
-//
-//         audio.addEventListener('error', function(e){
-//             counter++;
-//             // console.log(counter);
-//             if (counter>10){
-//                 throw new Error(e.target.error);
-//                 alert('failed sound loading :(. Try reloading the browser', e);
-//             }else{
-//                 // audio.src = "./assets/Game_gadget_at_midnight.mp3"; //test用
-//                 audio.load();
-//             }
-//         });
-//
-//         // 読み込み失敗時の対策、あまり良くない
-//         setTimeout(function(){
-//             console.log('読み込みチェック');
-//             // if(Object.keys(sounds).length !== _keys.length){
-//             if(sounds[key] != audio){
-//                 alert('音声の読み込みに失敗したようです。リロードしてみてください');
-//             }
-//         },3000);
-//
-//     }, this);
-// };
 
 // 0. スタート
 window.onload = function(){
@@ -331,7 +289,7 @@ window.onload = function(){
         init();
         main();
         // 2.5 music select ?
-        // 3. タップ、クリックでスタート
+        // 3. 初回タップ、クリックでスタート
         var _func = (function(e) {
             return function f(e) {
                 _soundPreload(SOUND_ASSETS, sounds, function(){
@@ -358,16 +316,18 @@ window.onload = function(){
                 });
 
                 // イベントリスナ消す
-                window.removeEventListener(e.type, _func, false);
+                app.removeEventListener(e.type, _func, false);
             }
         })();
-        window.addEventListener('click', _func, false);
-        window.addEventListener('touchstart', _func, false)
+        app.addEventListener('click', _func, false);
+        app.addEventListener('touchstart', _func, false)
     });
 
 };
 
 function init() {
+    timer = new Timer();
+
     // set up main canvas
     app.width = bgCanvas.width = SCREEN_WIDTH;
     app.height = bgCanvas.height  = SCREEN_HEIGHT;
@@ -526,7 +486,7 @@ function calc(){
 function screenRender() {
     var ctx = app.getContext('2d');
     var relativeTime = 0; // 再生位置とノーツ出現情報との差、０のとき判定ライン位置になるように
-    var corr = bpm * 1.5 * RATIO * speed; // 補正、ハイスピ
+    var corr = bpm * 1.75 * RATIO * speed; // 補正、ハイスピ
     var deltaY; // 判定ラインまでの距離
     var drawingPointX = 100; // X軸 描画位置
     var drawingPointY; // Y軸 描画位置
@@ -587,8 +547,6 @@ function screenRender() {
     // ctx.fill();
     ctx.restore();
 
-
-
     // スコア表示とか
     // フォント設定
     ctx.fillStyle = "white"; // 色は白
@@ -643,6 +601,9 @@ function screenRender() {
         ctx.fillStyle = "#5099b6"; // ゲージ色
         ctx.fillRect(11,11, PROGRESS_BAR_WIDTH * remainRatio - 2, 9);
         ctx.restore();
+
+        // レパートリーリスト消す
+        $id('repertory').style.visibility = "hidden";
     }
 
 
@@ -664,6 +625,7 @@ function screenRender() {
         // if (score) {ctx.fillText("結構歌えた！", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*5);}
         ctx.restore();
 
+        $id('repertory').style.visibility = "visible";
     }
 
 }
