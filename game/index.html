@@ -7,57 +7,8 @@
             <title>リズミックレイン</title>
             <!-- <link href='https://fonts.googleapis.com/css?family=Shadows+Into+Light|Audiowide|Merienda+One|Henny+Penny' rel='stylesheet' type='text/css'> -->
             <!-- <link href='https://fonts.googleapis.com/css?family=Audiowide|Merienda+One' rel='stylesheet' type='text/css'> -->
+            <link href='./assets/style.css' rel='stylesheet' type='text/css'>
 
-            <style media="screen">
-                body{
-                    -webkit-text-size-adjust: 100%;
-                    font-family: Merienda One, cursive, monospace, sans-serif;
-                    /*background: rgb(12, 154, 133);*/
-                    background: url("./assets/images/background.jpg") center center no-repeat fixed;
-                    background-size: cover;
-                    background-color: black;
-                    color: rgb(208, 218, 213);
-                }
-                .title{
-                    text-align: center;
-                }
-                #game-field{
-                    position: relative;
-                    margin: 8px auto;
-                }
-                canvas{
-                    position: absolute;
-                }
-                #bg{
-                    z-index: 1;
-                }
-                #app{
-                    z-index:2;
-                }
-                #repertory-wrapper{
-                    display: block;
-                    min-height: 300px;
-                    overflow: auto;
-                }
-                #repertory{
-                    /*position: absolute;
-                    top: 40%;
-                    display: block;*/
-                    z-index:3;
-                }
-                #repertory li{
-                    font-size: 0.8rem;
-                    width: 100px;
-                    float: left;
-                    color: white;
-                    z-index:3;
-                    background: rgb(193, 200, 105);
-                    cursor: pointer;
-                    padding: 0.4em;
-                    display: inline-block;
-                }
-
-            </style>
         </head>
     <body>
         <div class="container">
@@ -69,6 +20,7 @@
             </div>
             <div id="repertory-wrapper">
                 <ul id="repertory"></ul>
+                <ul id="music-info"></ul>
             </div>
             <div class="info">
                 <div id="time"></div>
@@ -85,12 +37,12 @@
 
         </div><!-- container -->
 
+        <script src="./assets/soundjs-0.6.1.min.js" charset="utf-8"></script>
         <script src="timerClass.js" charset="utf-8"></script>
         <script src="loader.js" charset="utf-8"></script>
         <script>
 
-
-// var game = function(){
+// var Game = function(){
 // };
 
 //shorthand
@@ -102,20 +54,6 @@ var makeSpanArray = function(span, m, n){
     }
     return array;
 }
-window.AudioContext = window.AudioContext || window.webkitAudioContext;
-if (AudioContext) var waContext = new AudioContext();
-
-// webaudioサウンドを再生
-var playWASound = function(context,buffer) {
-  // source を作成
-  var source = context.createBufferSource();
-  // buffer をセット
-  source.buffer = buffer;
-  // context に connect
-  source.connect(context.destination);
-  // 再生
-  source.start(0);
-};
 
 // 定数
 var SCREEN_WIDTH = (window.innerWidth > 640) ? 640 : window.innerWidth*0.9;
@@ -123,7 +61,7 @@ var RATIO = SCREEN_WIDTH/640;
 var SCREEN_HEIGHT = Math.round(SCREEN_WIDTH/16 * 9); // 16:9 ex> 640:360
 var NOTE_LIST = null;
 
-// 画面描画用パラメータ（定数（ゲーム中に変更することの無い変数）は慣例として大文字）
+// 画面描画用パラメータ
 var GRID_NUM = 14;
 var NOTE_WIDTH = (SCREEN_WIDTH / GRID_NUM) * 0.8; // ノーツの幅：画面サイズで変える？
 var NOTE_HEIGHT = 6;
@@ -169,7 +107,7 @@ var SCORE = {
     great: 100,
     hold: 10
 };
-var activeMusicIndex = 0;
+var activeMusicPointer = 0;
 var musicList = [
     {
         name: "Game gadget at midnight",
@@ -180,23 +118,40 @@ var musicList = [
         src: "./assets/Game_gadget_at_midnight.mp3",
         fumen: "./data/midnight-fumen_rev1.json"
     },{
-        name: "dummy",
-        author: "dummy",
-        anchor: "http://dova-s.jp/_contents/author/profile089.html",
+        name: "morning",
+        author: "しゃろう",
+        anchor: "http://dova-s.jp/_contents/author/profile106.html",
+        difficulty: "novice",
+        theme: "morning",
         src: "./assets/dummy.mp3",
         fumenData: "./data/midnight-fumen_rev1.json"
     },
 ];
 
 // レパートリーリスト
+
+var changeMusicInfo = function(index){
+    $id("music-info").innerHTML = null;
+    var obj = musicList[index];
+    Object.keys(obj).forEach(function(key){
+        var li = document.createElement('li');
+        li.textContent = obj[key];
+        $id('music-info').appendChild(li);
+    });
+}
+
 musicList.forEach(function(music, index){
+    var DEFAULT_COLOR = 'rgb(161, 182, 241)';
     // music['active'] = false;
     var li = document.createElement('li');
     // li.setAttribute("data-active", "false");
-    li.textContent = music.name;
+    li.textContent = music.name+" / "+music.difficulty;
+    li.style.background = DEFAULT_COLOR;
 
     li.onclick = function(){
+        if(index === activeMusicPointer) return;
         var childs = $id('repertory').childNodes;
+
         // console.log(childs);
         // musicList.forEach(function(_music){
         //     _music.active = false;
@@ -206,21 +161,22 @@ musicList.forEach(function(music, index){
 
         Object.keys(childs).forEach(function(i){
             var c = childs[i];
-            // console.log(c);
             // c.dataset.active = 'false';
-            c.style.background = 'rgb(161, 182, 241)';
+            c.style.background = DEFAULT_COLOR;
         });
         // this.dataset.active = 'true';
-        activeMusicIndex = index;
+        activeMusicPointer = index;
+        changeMusicInfo(index);
         this.style.background = 'rgb(60, 100, 214)';
-        console.log(activeMusicIndex);
+        console.log(activeMusicPointer);
     }
     $id('repertory').appendChild(li);
 });
 
+
 var SOUND_ASSETS = {
     // bgm: "./assets/two_tor_real.mp3",
-    bgm: "./assets/Game_gadget_at_midnight.mp3",
+    // bgm: "./assets/Game_gadget_at_midnight.mp3", //dummy
     clap:"./assets/clap.mp3",
     conga: "./assets/conga.mp3"
 };
@@ -260,9 +216,9 @@ var longNote = null; // ロングノート情報
 var btnFlg = false; // ボタンが押下状態フラグ
 
 var isPlaying = false; // プレイ中
-var autoPlay = false;
-// var autoPlay = true;
-var enableSE = false;
+// var autoPlay = false;
+var autoPlay = true;
+var enableSE = true;
 
 var bpm = 120; // dummy
 var speed = 1.0;
@@ -276,7 +232,7 @@ var endhour = 0; // ゲーム終了時間：音源ロード時に設定
 var wait = 3.0; // 音源再生までの待ち時間
 // var wait = zerohour + _wait; //  計算に利用する最終的な待ち時間
 
-// sound preload
+// assets
 var sounds = {} // サウンド管理;
 var images = {} // image管理;
 var music, se1, se2;
@@ -284,48 +240,72 @@ var music, se1, se2;
 // 0. スタート
 window.onload = function(){
     // 1. 画像ロード
-    _imagePreload(IMAGE_ASSETS, images, function(){
+    imagePreload(IMAGE_ASSETS, images, function(){
         // 2. 初期化（canvasセット, 譜面ロード, タイマー）
         init();
         main();
         // 2.5 music select ?
         // 3. 初回タップ、クリックでスタート
-        var _func = (function(e) {
-            return function f(e) {
-                _soundPreload(SOUND_ASSETS, sounds, function(){
-                    music = sounds.bgm;
-                    se1 =  sounds.clap;
-                    se2 =  sounds.conga;
-                    // 入力系
-                    if (!autoPlay) {
+        var _func = (function(event) {
+            return function f(event) {
+                preloadSounds(SOUND_ASSETS, sounds, function(){
+
+                    // イベントリスナ消す
+                    window.removeEventListener(event.type, _func, false);
+
+                    // 入力系 set up
+                    // サウンドロードが完了した地点で入力できるようにする
+                    var setUpInputEvents = function(){
                         app.addEventListener('mousedown',  function(e){ e.preventDefault();onpointdown();}, false);
                         app.addEventListener('touchstart', function(e){ e.preventDefault();onpointdown();}, false);
                         document.addEventListener('keydown', function(e){
                             // if (e.keyCode == 32) return judge();
                             onpointdown();
                         });
-
                         // keyup系
                         app.addEventListener('mouseup', onpointup, false);
                         app.addEventListener('touchend', onpointup, false);
                         document.addEventListener('keyup', onpointup, false);
                     }
 
-                    isPlaying = true;
-                    gameReset();
-                });
+                    // bgmロード：曲選択していない場合
+                    if(!music) {
+                        var _mObj = musicList[0];
+                        preloadOneSound(_mObj.src, _mObj.name, function(e){
+                            music = createjs.Sound.createInstance(e.id);
+                            console.log(music);
+                            // console.log(sounds["clap"] , music);
+                            playSound(music); //一度再生しないとpausedを設定できない？
+                            music.paused = true;
+                            music.position = zerohour*1000;
+                            // music.startTime = zerohour*1000; // milisec
+                            console.log("paused", music.paused);
+                            // console.log("変えた後",music);
+                            // music.stop();
+                            // console.log(music.playState);
 
-                // イベントリスナ消す
-                app.removeEventListener(e.type, _func, false);
+                            setUpInputEvents();
+                            isPlaying = true;
+                            gameReset();
+                        });
+                    } else {
+                        console.log("no music");
+                        setUpInputEvents();
+                        isPlaying = true;
+                        gameReset();
+                    }
+
+                });
             }
         })();
-        app.addEventListener('click', _func, false);
-        app.addEventListener('touchstart', _func, false)
+        window.addEventListener('keyup', _func, false);
+        window.addEventListener('touchend', _func, false)
     });
 
 };
 
 function init() {
+    //timerset
     timer = new Timer();
 
     // set up main canvas
@@ -333,7 +313,7 @@ function init() {
     app.height = bgCanvas.height  = SCREEN_HEIGHT;
     holderElement.style.width = SCREEN_WIDTH +"px";
     holderElement.style.height = SCREEN_HEIGHT +"px";
-    // draw once: background
+    // set up background canvas : draw once
     var bgctx = bgCanvas.getContext('2d');
     bgctx.fillStyle = "rgb(249, 250, 207)";
     bgctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT); //bgcolor
@@ -344,14 +324,16 @@ function init() {
     bgctx.fillStyle = "rgba(34, 34, 34, 0.7)";
     bgctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT); //filter
 
-    // ajaxで譜面情報の取得
-    var httpObj = new XMLHttpRequest();
-    // httpObj.open("get", "./data/midnight-fumen_sorted.json", true);
-    httpObj.open("get", "./data/midnight-fumen_rev1.json", true);
-    httpObj.onload = function(){
-        importData(this.responseText);
+    // gameReset();
+    if (autoPlay) {
+        btnFlg = true;
+    }
 
-        // フルコンボ数
+    // ajaxで譜面情報の取得
+    getXmlData("./data/midnight-fumen_rev1.json", function(res){
+        importData(res);
+
+        // フルコンボ数決定
         noteList = NOTE_LIST.slice();
         noteList.forEach(function(note){
             if(note.length){
@@ -361,24 +343,17 @@ function init() {
             }
         });
         if (endhour == 0) endhour = music.duration + wait;
+    });
 
-        // gameReset();
-
-        if (autoPlay) btnFlg = true;
-
-    }
-    httpObj.onerror = function(e){
-        console.log(e);
-        alert('xmlエラー');
-    }
-    httpObj.send(null);
 
 }
 
 function gameReset(){
     currentNoteIndex = 0;
+    music.paused = true;
+    music.position = zerohour*1000;
     // music.pause();
-    music.currentTime = zerohour; //0以下の場合は0になる？
+    // music.currentTime = zerohour; //0以下の場合は0になる？
     rateText = null;
     chainNum = 0;
     maxChain = 0;
@@ -411,17 +386,22 @@ function calc(){
     // if (!isPlaying) return;
     var time = timer.time();
 
-    // 時間が来たら音楽再生開始
+    // 時間が来たら音楽再生開始: 一回のみ
     if (time > wait && music.paused) {
+    // if (time > wait && music.paused) {
         console.log("music start");
         // music.play();
         playSound(music);
+        console.log("paused:", music.paused);
+        console.log(music.playState); //playSucceeded
     }
     // endhour に達したら
     if (time > endhour && !music.paused) {
         console.log("music end");
         music.volume -= 0.1;
-        music.pause();
+        stopSound(music);
+        // console.log(music.playState);
+        // music.pause();
     }
     if (time > endhour){
         isPlaying = false;
@@ -450,7 +430,6 @@ function calc(){
         if (autoPlay && !longNote) {
             if (time > noteTime + wait - RATING.great){
                 judge();
-                // noteList.shift();
                 // currentNoteIndex++;
 
             }
@@ -603,7 +582,7 @@ function screenRender() {
         ctx.restore();
 
         // レパートリーリスト消す
-        $id('repertory').style.visibility = "hidden";
+        $id('repertory-wrapper').style.visibility = "hidden";
     }
 
 
@@ -624,8 +603,8 @@ function screenRender() {
         if (maxChain) {ctx.fillText("CHAIN: "+maxChain+" / "+fullChainNum, RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*3);}
         // if (score) {ctx.fillText("結構歌えた！", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*5);}
         ctx.restore();
-
-        $id('repertory').style.visibility = "visible";
+        
+        $id('repertory-wrapper').style.visibility = "visible";
     }
 
 }
@@ -712,7 +691,7 @@ function effect(rating){
         case "great":
             chainNum++;
             rateText = "GREAT!!!";
-            playShot(se1);
+            playShot("clap");
             // se1.play();
             hitEffect = 16;
             score += SCORE.great;
@@ -724,7 +703,7 @@ function effect(rating){
             chainNum++;
             rateText = "COOL!";
             hitEffect = 10;
-            playShot(se1);
+            playShot("clap");
             score += SCORE.cool;
             // console.log("cool!");
             // noteList.shift();
@@ -733,7 +712,7 @@ function effect(rating){
         case "good":
             chainNum++;
             rateText = "GOOD";
-            playShot(se2);
+            playShot("conga");
             score += SCORE.good;
             // console.log("good");
             // noteList.shift();
@@ -769,30 +748,53 @@ function miss(){
 }
 
 // ショット音再生
-function playShot(audio){
+function playShot(id){
     if(!enableSE) return;
-    if(!audio.ended){
-        //巻き戻し再生
-        audio.pause();
-        audio.currentTime = 0;  // 再生位置を0秒にする
-        audio.play();
-    }else{
-        audio.play();
+    var type = createjs.Sound.createInstance(id).constructor.toString().toLowerCase();
+    // var type = Object.prototype.toString.call(createjs.Sound.createInstance(id));
+    // console.log(type);
+    if (type.match(/htmlaudio/) != null) {
+        //html5audio
+        var audio = sounds[id];
+        // if(!audio.ended){
+            //インスタンス使い回し：巻き戻し再生によって連続再生
+            // audio.pause();
+            // audio.currentTime = 0;  // 再生位置を0秒にする
+            audio.paused = true;
+            audio.position = 0;
+            audio.play();
+        // }else{
+        //     audio.play();
+        // }
+    } else {
+        createjs.Sound.play(id);
     }
 }
 
 function playSound(audio){
-    if (waContext) {
-        playWASound(audio);
+    console.log("!play");
+    if (createjs.Sound) {
+        audio.play();
+    // if (waContext) {
+        // playWASound(waContext,audio);
     } else {
         audio.play();
     }
 }
-function pauseSound(audio){
-
+function stopSound(audio){
+    console.log("stop");
+    if (createjs.Sound) {
+        // audio.stop();
+        audio.paused = true; //cjs
+        console.log(audio.paused);
+    } else {
+        audio.pause();
+    }
 }
 
-function onpointdown(){
+function onpointdown(e){
+    // e.preventDefault();
+    if (autoPlay) return;
     if (!isPlaying) {
         gameReset();
         isPlaying = true;
@@ -808,6 +810,7 @@ function onpointdown(){
     }
 }
 function onpointup(e){
+    if (autoPlay) return;
     e.preventDefault();
     btnFlg = false;
 }
@@ -828,38 +831,6 @@ function importData(data){
 
 //==============================
 $id('resetBtn').addEventListener('click', gameReset, false);
-
-// var lastUsedHeap = 0;  // remember the heap size
-//
-// function checkMemory()
-// {
-//     // check if the heap size is this cycle is LESS than what we had last
-//     // cycle; if so, then the garbage collector has kicked in
-//
-//     if (window.performance.memory.usedJSHeapSize < lastUsedHeap)
-//         console.log('Garbage collected!');
-//     lastUsedHeap = window.performance.memory.usedJSHeapSize;
-// }
-//
-// setTimeout(checkMemory, 100); // test 10 times per second
-
-// function audioLoader(key){
-//     var audio = new Audio(SOUND_ASSETS[key]);
-//     audio.addEventListener('canplaythrough', function(){
-//         sounds[key] = audio;
-//         console.log(Object.keys(sounds).length+" "+Object.keys(SOUND_ASSETS).length);
-//         // sounds.push(audio);
-//         audio.removeEventListener('canplaythrough', audioLoader);
-//         if (Object.keys(sounds).length == Object.keys(SOUND_ASSETS).length) {
-//             console.log(sounds[key]);
-//             //loadEnd
-//             init();
-//         }
-//     });
-//     audio.onerror = function(e){
-//         console.warn(e);
-//     }
-// }
 
         </script>
     </body>

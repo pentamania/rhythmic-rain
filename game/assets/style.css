@@ -1,0 +1,48 @@
+
+body{
+    -webkit-text-size-adjust: 100%;
+    font-family: Merienda One, cursive, monospace, sans-serif;
+    /*background: rgb(12, 154, 133);*/
+    background: url("./images/background.jpg") center center no-repeat fixed;
+    background-size: cover;
+    background-color: black;
+    color: rgb(208, 218, 213);
+}
+.title{
+    text-align: center;
+}
+#game-field{
+    position: relative;
+    margin: 8px auto;
+}
+canvas{
+    position: absolute;
+}
+#bg{
+    z-index: 1;
+}
+#app{
+    z-index:2;
+}
+#repertory-wrapper{
+    display: block;
+    min-height: 300px;
+    overflow: auto;
+}
+#repertory{
+    display: block;
+    text-align: center;
+}
+#repertory li{
+    box-sizing: border-box;
+    font-size: 0.8rem;
+    width: 100px;
+    height: 100px;
+    float: left;
+    color: white;
+    z-index:3;
+    cursor: pointer;
+    padding: 0.4em;
+    margin-left: 4px;
+    display: inline-block;
+}
