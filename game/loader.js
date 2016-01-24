@@ -2,14 +2,15 @@
 var preloadOneSound = function(src, id, fn){
     if (createjs.Sound) {
         createjs.Sound.registerSound(src, id);
-        var loadHandler = function(e) {
+        var _loadHandler = function(e) {
             if(createjs.Sound.loadComplete(e.src)) {
-                var instance = createjs.Sound.createInstance(e.id);
+                // var instance = createjs.Sound.createInstance(e.id);
                 // fn(instance);
                 fn(e);
             }
         }
-        createjs.Sound.on("fileload", loadHandler);
+        // createjs.Sound.on("fileload", _loadHandler); // リスナー残る
+        createjs.Sound.on("fileload", _loadHandler, null, true); // 一回のみ実行して消える
     }
 }
 var preloadSounds = function(srcObj, register, fn){
@@ -18,31 +19,36 @@ var preloadSounds = function(srcObj, register, fn){
     // var context = new AudioContext();
     var counter = 0;
     if (createjs.Sound) {
-        console.log("using soundjs");
+        // console.log("using soundjs");
 
-        var loadHandler = function(e) {
+        var _loadHandler = function(e) {
             if(createjs.Sound.loadComplete(e.src)) {
-                // createjs.Sound.play(e.src);
-                console.log("loaded sound: "+e.id, e.src);
+                // console.log(e);
+                // console.log("loaded sound: "+e.id, e.src);
                 register[e.id] = createjs.Sound.createInstance(e.id);
                 counter++;
-                console.log(counter+" , 全音源: "+Object.keys(SOUND_ASSETS).length);
-                if (Object.keys(register).length === _keys.length) fn(); // ロード完了後コールバック実行
+                // console.log(counter+" , 全音源: "+_keys.length);
+                if (counter === _keys.length) {
+                    e.remove(); //イベントリスナ削除
+                    fn(); // ロード完了後コールバック実行
+                }
             }
         }
-        createjs.Sound.on("fileload", loadHandler);
+
+        createjs.Sound.on("fileload", _loadHandler);
     }
     _keys.forEach(function(key){
         if (createjs.Sound) {
             createjs.Sound.registerSound(srcObj[key], key); // (src, id)
 
-            // 以下NG: _keys.length回、実行される
+            // 以下NG: 複数回、実行されたり
             // preloadOneSound(srcObj[key], key, function(e){
+            //     console.log("loaded sound: "+e.id, e.src);
             //     register[e.id] = createjs.Sound.createInstance(e.id);
             //     counter++;
-            //     console.log(counter+" , 全音源: "+Object.keys(SOUND_ASSETS).length);
+            //     console.log(Object.keys(register).length+" , 全音源: "+_keys.length);
             //     if (Object.keys(register).length === _keys.length) fn(); // ロード完了後コールバック実行
-            // })
+            // });
         }
         // if (context){
         //     // webAudio
@@ -100,16 +106,23 @@ var imagePreload = function(srcObj, register, fn){
 }
 
 var getXmlData = function(url, fn){
-    var httpObj = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
+    //disable cache
 
-    httpObj.open("get", url, true);
-    httpObj.onload = function(){
-        return fn(this.responseText); //callback
+    xhr.open("get", url, true);
+    xhr.setRequestHeader('Pragma', 'no-cache');
+    xhr.setRequestHeader('Cache-Control', 'no-cache');
+    xhr.setRequestHeader('If-Modified-Since', 'Thu, 01 Jun 1970 00:00:00 GMT');
+    xhr.onreadystatechange = function(){
+        // console.log(xhr);
+        if ((xhr.readyState === 4) && (xhr.status === 200)) {
+            return fn(xhr.responseText); //callback
+        }
     };
-    httpObj.onerror = function(e){
+    xhr.onerror = function(e){
         console.log(e);
         alert('xmlエラー');
     }
-    httpObj.send(null);
+    xhr.send(null);
 
 };
