@@ -23,7 +23,6 @@ var preloadSounds = function(srcObj, register, fn){
 
         var _loadHandler = function(e) {
             if(createjs.Sound.loadComplete(e.src)) {
-                // console.log(e);
                 // console.log("loaded sound: "+e.id, e.src);
                 register[e.id] = createjs.Sound.createInstance(e.id);
                 counter++;

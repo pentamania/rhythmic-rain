@@ -44,4 +44,3 @@ function shareButtonReadSyncer(){
     //},5000);	//ページを開いて5秒後(5,000ミリ秒後)にシェアボタンを読み込む
 
 }
-xzxｑewe

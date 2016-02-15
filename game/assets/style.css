@@ -32,29 +32,49 @@ canvas{
     display: block;
     min-height: 300px;
     overflow: auto;
+    margin:0 auto;
+    width: 640px;
+
 }
 #repertory{
     display: block;
     text-align: center;
     width: 100%;
-    height: 100px;
+    height: 96px;
+    font-size: 0;
+    overflow: auto;
 }
 #repertory li{
     box-sizing: border-box;
     font-size: 0.8rem;
-    width: 100px;
-    height: 100px;
-    float: left;
+    /*width: 16.66%;*/
+    /*width: 64px;*/
+    /*height: 64px;*/
+    width: 100%;
+    height: 32px;
     color: white;
     z-index:3;
     cursor: pointer;
     padding: 0.4em;
-    margin-left: 4px;
+    /*margin-left: 4px;*/
+    margin-bottom: 4px;
     display: inline-block;
+    vertical-align: top;
+}
+@media screen and (max-width: 640px) {
+    #repertory-wrapper{width: 90%;}
+    #repertory li{width: 50%;}
+}
+#music-info{
+    background: rgba(86, 89, 86, 0.66);
+    text-align: center;
+    margin-top:4px;
+
 }
 #load-filter{
     display:table;
     background: rgba(22, 133, 144, 0.63);
+    background-size: cover;
     text-align: center;
     color: white;
     min-width: 100%;
@@ -77,7 +97,7 @@ canvas{
  * 他のコンテンツと距離を取りたい場合は[margin]を設定して下さい
 
 ******************************/
-.social-area {
+.social-link-area {
 	width: 100% ;
 	min-height: 190px ;
 	background: rgba(#f5f1e9, 0) ;	/* 背景色 */
@@ -86,7 +106,7 @@ canvas{
 
 /* デスクトップPCでは高さを拡張する */
 @media screen and ( min-width:480px ) {
-	.social-area {
+	.social-link-area {
 		min-height: 119px ;
 	}
 }

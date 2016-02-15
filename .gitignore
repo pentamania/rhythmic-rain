@@ -1,3 +1,4 @@
 /_testfiles
 /game/assets/_test
 _ignore
+*.editorconfig
