@@ -13,6 +13,7 @@ var preloadOneSound = function(src, id, fn){
         createjs.Sound.on("fileload", _loadHandler, null, true); // 一回のみ実行して消える
     }
 }
+
 var preloadSounds = function(srcObj, register, fn){
     var _keys = Object.keys(srcObj);
     // window.AudioContext = window.AudioContext || window.webkitAudioContext;

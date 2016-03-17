@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="IE=Edge">
         <meta name="viewport" content="width=device-width, user-scalable=no">
-            <title>音ゲーエディタ！</title>
+            <title>Rain Editor</title>
             <style media="screen">
             /*@import url(https://fonts.googleapis.com/css?family=Russo+One);*/
                 body{
@@ -115,7 +115,7 @@
                 <input type="range" id="scale" max="2.5" min="0.5" step="0.1" value="1"><br>
                 音楽スタート位置(秒): <input type="number" id="zerohour" placeholder="0" step="0.1"><br>
                 音楽終了位置(秒): <input type="number" id="endhour" placeholder="" step="0.1"><br>
-                BPM: <input type="number" id="bpm" value="120" width="60px"><br>
+                BPM: <input type="number" id="bpm" placeholder="120" width="60px"><br>
                 <div>クオンタイズ：
                     <select id="quantize">
                         <option value="4">4分</option>
@@ -139,6 +139,10 @@
                 <label for="autosaveSwitch">
                     <input type="checkbox" id="autosaveSwitch" checked="true">オートセーブ
                 </label>
+                <label for="bpmChanger">
+                    <input type="number" id="pre-bpm" placeholder="120" width="60px"><br>
+                    <input type="number" id="after-bpm" placeholder="120" width="60px">
+                </label>
             </div><!-- input-container -->
             <ul class="tips">
                 TIPS
@@ -157,6 +161,7 @@
 
         </div><!-- container -->
         <script>
+
 ;(function(){
     var $id = function(id) { return document.getElementById(id); }
     // webaudio: http://phiary.me/webaudio-api-getting-started/
@@ -219,6 +224,7 @@
     //
     // console.log(list);
 
+    // utils --end
     //ゲージを描いてみる==============================
 
     var noteList = [];
@@ -253,6 +259,7 @@
     var autoscroll = true;
     var autosaving = true;
     var canPlayShot = true;
+
     //bpm counter
     var counts = [], past = 0;
 
@@ -537,6 +544,7 @@
         // noteList検索し、同じ数字があったらそれをnullにする。（spliceすると全検索できなくなる）
         for (var i = 0,len =  list.length; i < len; i++) {
             // console.log("ckeing "+ i+" : "+list[i])
+
             // tap vs long
             if (list[i].length){
                 // console.log("added:"+ _newNote)
@@ -554,7 +562,8 @@
                 // }
             } else {
                 // tap vs tap
-                if (_newNote === list[i]) {
+                // if (_newNote === list[i]) {
+                if (list[i]-0.001 <= _newNote && _newNote <=  list[i]+0.001) {
                     // list.splice(i, 1);
                     list[i] = null;
                     // _removed.push(i);
@@ -629,7 +638,7 @@
         if (autosaving) saveState();
     }, false);
 
-    //シーク
+    // シーク
     function _seek(audio){
         var _pos = mouse.x / magni;
         audio.currentTime = _pos;
@@ -695,12 +704,29 @@
         setTimeout(arguments.callee, fps);
     })();
 
-    //onscrollでページ数初期化
-    // window.onscroll = function(){
-    //     page = Math.round(document.body.scrollLeft/window.innerWidth);
-    //     // var bo
-    //     console.log(page);
-    // }
+    function bpmExchange(noteList, preBPM, newBPM){
+        var noteList = noteList;
+        var newList = [];
+        var _baseNote = [];
+        var _prebeatTime = (1 / (preBPM/60));
+        var _newbeatTime = (1 / (newBPM/60));
+        noteList.forEach(function(note){
+            if (note.length){
+                var _longnote = [];
+                note.forEach(function(childnote, i){
+                    _longnote[i] = (childnote /_prebeatTime) * _newbeatTime;
+                });
+                note = _longnote;
+            } else{
+                note =  (note /_prebeatTime) * _newbeatTime;
+            }
+
+            newList.push(note);
+        });
+
+        console.log(newList);
+        return newList;
+    }
 
     // keydown
     document.addEventListener('keydown', function(e){
@@ -708,6 +734,12 @@
         // console.log(e.keyCode);
         var kc = e.keyCode;
 
+        // t
+       if (e.keyCode === 84) {
+            noteList = bpmExchange(noteList, 179, 180);
+            console.log('noteList revised');
+            redraw(c);
+        }
          // z key: reset music
         if (e.keyCode == 90) {
             // music.currentTime = 0;
@@ -718,6 +750,7 @@
             // page = 0;
             return;
         }
+
         // space key: play music
         if (!e.shiftKey) {
             if (e.keyCode == 32) {
@@ -782,7 +815,7 @@
         }
     }, false);
 
-    var exportBtn = document.getElementById("export");
+    // var exportBtn = document.getElementById("export");
     function exportData(){
         // starttime, bpm, list, musicname
         //ソートする
@@ -806,11 +839,11 @@
         if (window.navigator.msSaveBlob) {
             window.navigator.msSaveBlob(blob,"fumen.json");
         } else {
-            exportBtn.setAttribute("href", URL.createObjectURL(blob));
+            $id("export").setAttribute("href", URL.createObjectURL(blob));
             URL.revokeObjectURL(blob);
         }
     }
-    exportBtn.addEventListener('click', exportData);
+    $id("export").addEventListener('click', exportData);
 
     // file import
     // http://tmlife.net/programming/javascript/html5-file-api-file-read.html
@@ -854,8 +887,7 @@
         // console.log("drop");
         // File オブジェクトを取得
         var file = e.dataTransfer.files[0];
-        // console.log("ファイル名："+file.name+"ファイルタイプ："+file.type);
-        console.log(file);
+        // console.log(file);
         // ファイル読み込み
         readFile(file);
     }
@@ -984,6 +1016,7 @@
         // }
     }
     window.addEventListener("load", init, false);
+
 })();
 // window.addEventListener("unload", function() {
 // 	alert("ページを離れます。");

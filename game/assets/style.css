@@ -5,7 +5,7 @@ html {
 }
 body{
     -webkit-text-size-adjust: 100%;
-    font-family: Merienda One, cursive, monospace, sans-serif;
+    font-family: Audiowide, cursive, monospace, sans-serif;
     /*background: rgb(12, 154, 133);*/
     background: url("./images/background.jpg") center center no-repeat fixed;
     background-size: cover;
@@ -27,6 +27,19 @@ canvas{
 }
 #app{
     z-index:2;
+}
+#pauseBtn{
+	position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index:3;
+
+}
+#music-name-display{
+	position: absolute;
+    bottom: 8px;
+    left: 8px;
+    z-index:3;
 }
 #repertory-wrapper{
     display: block;
@@ -60,10 +73,11 @@ canvas{
     margin-bottom: 4px;
     display: inline-block;
     vertical-align: top;
+	overflow:hidden;
 }
 @media screen and (max-width: 640px) {
     #repertory-wrapper{width: 90%;}
-    #repertory li{width: 50%;}
+    /*#repertory li{width: 50%;}*/
 }
 #music-info{
     background: rgba(86, 89, 86, 0.66);

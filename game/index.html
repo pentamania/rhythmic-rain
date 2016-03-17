@@ -18,6 +18,8 @@
             <div id="game-field">
                 <canvas id="bg"></canvas>
                 <canvas id="app"></canvas>
+                <button id="pauseBtn">II</button>
+                <div id="music-name-display">♪</div>
             </div>
             <div id="repertory-wrapper">
                 <ul id="repertory"></ul>
@@ -25,10 +27,9 @@
             </div>
             <div class="info">
                 <div id="time"></div>
-                <button id="pause">II</button>
                 <button id="resetBtn">reset</button>
-                <input type="number" id="seek" value="">
-                <input type="checkbox" id="autoplay" value="autoplay">
+                <input type="number" id="seek" value=""><br>
+                AUTOPLAY: <input type="checkbox" id="autoPlayBtn" value="autoplay">
                 <div class="instruction">
                 </div>
             </div>
@@ -63,8 +64,9 @@
                 <img src="./assets/images/gif-load-drip-blue.gif" alt="loading-animation" />
             </span>
         </div>
+
         <script src="./assets/lib/soundjs-0.6.1.min.js" charset="utf-8"></script>
-        <script src="./assets/timer.js" charset="utf-8"></script>
+        <script src="./assets/utils.js" charset="utf-8"></script>
         <script src="./assets/loader.js" charset="utf-8"></script>
         <!-- <script src="./assets/lib/socialLink.js" charset="utf-8"></script> -->
         <script src="main.js" charset="utf-8"></script>
