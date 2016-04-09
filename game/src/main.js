@@ -1,5 +1,8 @@
 ;(function(window){
-    shout();
+    // var test = require('./assets/test');
+    // test.shout('something');
+    console.log(createjs);
+
     // var Game = function(){
     // };
 
@@ -20,6 +23,10 @@
     // var NOTE_POSITIONS = [NOTE_POS_SPAN*3, NOTE_POS_SPAN*4, NOTE_POS_SPAN*5, NOTE_POS_SPAN*6];
     var NOTE_POSITIONS = createSpanArray(NOTE_POS_SPAN, 4, 8);
     var NOTE_POSITIONS_LEN = NOTE_POSITIONS.length;
+    var NOTE_SPEED_RANGE = {
+        max: 3,
+        min: -3
+    }
 
     var NOTE_COLOR = "rgb(139, 236, 242)";
     var LONG_NOTE_COLOR = "rgb(77, 60, 212)";
@@ -70,6 +77,8 @@
         streetLight: "./assets/images/streetLight2.png",
         girl: "./assets/images/girl.png",
     }
+    var MUSIC_LIST_PATH = '../data/music_list.json';
+    var DATA_PATH = "../data/";
 
     // asset register
     var sounds = {} // サウンド管理;
@@ -97,8 +106,8 @@
     // flags
     var btnFlg = false; // ボタンが押下状態フラグ
     var isPlaying = false; // プレイ中
-    // var autoPlay = false;
-    var autoPlay = true;
+    var autoPlay = false;
+    // var autoPlay = true;
     var ua = navigator.userAgent.toLowerCase();
     var enableSE = (ua.indexOf("android")>0) ? false : true; //andriodではSE無効
     var enableInput = true;
@@ -111,24 +120,25 @@
     var zerohour = 0; // （音源中での実際の音楽再生開始時間）譜面load時に修正される
     var endhour = 0; // ゲーム終了時間：音源ロード時に設定
     var wait = 3.0; // 音源再生までの待ち時間
-    var bpm = 120; // dummy: ノーツスピードに絡む
-    var speed = 1.0;
+    var bpm = 120; // ノーツスピードに絡む(数値はダミー)
+    var noteSpeed = 1.0; // ユーザーノーツスピード
 
     // 0. スタート
     window.addEventListener('DOMContentLoaded', function(){
-        // レパートリーリスト
+        // レパートリーリストのロード
         var musicList;
         var activeMusicPointer = 0;
-
-        getXmlData('./data/music_list.json', function (res){
+        getXmlData(MUSIC_LIST_PATH, function (res){
             var data = JSON.parse(res);
             musicList = data.list;
             appInitialize();
         });
 
         function appInitialize(){
+
             // 曲の詳細更新関数
             var updateMusicInfo = function(index){
+                if (index == null) return;
                 var parent = $id("music-info");
                 parent.innerHTML = null;
 
@@ -155,12 +165,13 @@
                 });
             }
 
-            //リストから楽曲一覧生成
+            /* リストから楽曲一覧生成　*/
             musicList.forEach(function(m, index){
                 var DEFAULT_COLOR = 'rgb(60, 100, 214)';
                 var ACTIVE_COLOR = 'rgb(161, 182, 241)';
                 var DEFAULT_OPACITY = 0.5;
 
+                // 選択肢セットアップ
                 var li = document.createElement('li');
                 // li.setAttribute("data-active", "false");
                 li.textContent = m.name;
@@ -168,42 +179,46 @@
                 li.style.opacity = (index === activeMusicPointer) ? 1.0 : DEFAULT_OPACITY;
                 updateMusicInfo(activeMusicPointer);
 
-                //クリック・タップイベント
+                // クリック・タップイベント設定
                 li.addEventListener('mousedown', _musicLoad, false);
                 li.addEventListener('touchstart', _musicLoad, false);
+
                 function _musicLoad(e){
-                    if(index === activeMusicPointer) return;
+                    // if(index === activeMusicPointer) return;
 
                     // 音源のロード
                     if(music) stopSound(music); // 再生中なら止める
-                    if (!createjs.Sound.loadComplete(m.src)){
+
+                    if (!createjs.Sound.loadComplete(DATA_PATH+m.src)){
                         $id('load-filter').style.visibility = "visible";enableInput = false;
 
-                        preloadOneSound(m.src, m.name, function(e){
+                        preloadOneSound(DATA_PATH+m.src, m.name, function(e){
                             music = createjs.Sound.createInstance(e.id);
                             // console.log("代入地点", music);
-                            $id('load-filter').style.visibility = "hidden";enableInput = true;
                             endhour = music.duration*0.001 + wait; //ms -> secに直す
-                            // console.log(endhour);
 
                             // 譜面情報の取得
-                            getXmlData(m.fumen, function(res){
+                            getXmlData(DATA_PATH+m.fumen, function(res){
                                 setupFumen(res);
                                 gameReset();
                                 playSound(music);
                                 musicName = m.name;
                                 $id('music-name-display').innerHTML = "♪ "+m.name;
+                                $id('load-filter').style.visibility = "hidden";enableInput = true;
                             });
                         });
                     } else {
+                        // すでにロード済み
                         music = createjs.Sound.createInstance(m.name);
-                        endhour = music.duration*0.001 + wait;
+                        endhour = music.duration * 0.001 + wait;
                         // 譜面情報の取得
-                        getXmlData(m.fumen, function(res){
+                        $id('load-filter').style.visibility = "visible";enableInput = false;
+                        getXmlData(DATA_PATH+m.fumen, function(res){
                             setupFumen(res);
                             gameReset();
                             playSound(music);
                             $id('music-name-display').innerHTML = "♪ "+m.name;
+                            $id('load-filter').style.visibility = "hidden";enableInput = true;
                         });
                     }
 
@@ -215,6 +230,7 @@
                         c.style.background = DEFAULT_COLOR;
                         c.style.opacity = 0.5;
                     });
+
                     // this.dataset.active = 'true';
                     activeMusicPointer = index;
                     updateMusicInfo(index);
@@ -225,7 +241,7 @@
                 $id('repertory').appendChild(li);
             });
 
-            // ゲーム本体の初期化
+            /* ゲーム本体の初期化 */
             // 1. 画像ロード
             imagePreload(IMAGE_ASSETS, images, function(){
                 // 2. 初期化（canvasセット等）
@@ -233,6 +249,7 @@
                 // 3. 初回タップ、クリックでスタート
                 var _func = (function(event) {
                     return function f(event) {
+                        // 効果音のロード
                         preloadSounds(SOUND_ASSETS, sounds, function(){
                             $id('load-filter').style.visibility = "visible";enableInput = false;
 
@@ -254,34 +271,37 @@
                                 app.addEventListener('touchend', onpointup, false);
                                 document.addEventListener('keyup', onpointup, false);
                             }
+
+                            // オーディオタイプの確認：IE系の場合HTMLaudio
                             var checkAudioType = function(audio){
                                 var _audiotype = audio.constructor.toString().toLowerCase();
                                 isHTMLaudio = _audiotype.match(/htmlaudio/);
                             }
 
-                            // bgmロード：曲選択していない場合
+                            // bgmロード（曲選択していない場合）
                             if(!music) {
                                 if(!musicList){
                                     return console.log("レパートリー情報がありません");
                                 }
-                                var _mObj = musicList[0];
-                                preloadOneSound(_mObj.src, _mObj.name, function(e){
+                                var _mObj = musicList[activeMusicPointer];
+                                preloadOneSound(DATA_PATH+_mObj.src, _mObj.name, function(e){
                                     music = createjs.Sound.createInstance(e.id);
                                     checkAudioType(music);
                                     // console.log(isHTMLaudio);
                                     // stopSound(music); // 一度再生しないとpausedを設定できない？
                                     // music.position = zerohour*1000;
                                     // music.startTime = zerohour*1000; // milisec
-                                    console.log("playstate? :", music.playState);
+                                    // console.log("playstate? :", music.playState);
 
                                     // 譜面情報の取得
-                                    getXmlData(_mObj.fumen, function(res){
+                                    getXmlData(DATA_PATH+_mObj.fumen, function(res){
                                         setupFumen(res);
 
                                         if (endhour == 0) endhour = music.duration + wait;
                                         addInputEvents();
                                         gameReset();
                                         isPlaying = true;
+                                        $id('music-name-display').innerHTML = "♪ "+_mObj.name;
                                         $id('load-filter').style.visibility = "hidden"; enableInput = true;
                                     });
                                 });
@@ -305,6 +325,11 @@
                 app.addEventListener('touchend', _func, false); // SP/tab
             });
 
+        /* コンフィグ入力 */
+        $id('note-speed-up-button').onclick = function(){
+            variableNoteSpeed('up', $id('note-speed-display'));
+        }
+
         }; //--appInitialize
 
         function setupFumen(data){
@@ -327,7 +352,6 @@
         currentNoteIndex = 0;
         music.position = -1;
         music.paused = true;
-        // console.log("music duration:",music.duration);
         if (autoPlay) btnFlg = true;
         // music.position = zerohour*1000;
         // music.pause();
@@ -338,6 +362,7 @@
         score = 0;
         hitEffect = 0;
         timer.reset();
+
         timer.run();
         canPlayMusic = true;
         console.log("reset", music);
@@ -461,13 +486,12 @@
                 effect('miss');
             }
         }
-
     }
 
     function screenRender() {
         var ctx = app.getContext('2d');
         var relativeTime = 0; // 再生位置とノーツ出現情報との差、０のとき判定ライン位置になるように
-        var corr = bpm * 1.75 * RATIO * speed; // 補正、ハイスピ
+        var corr = bpm * 1.75 * RATIO * noteSpeed; // 補正、ハイスピ
         var deltaY; // 判定ラインまでの距離
         var drawingPointX = 100; // X軸 描画位置
         var drawingPointY; // Y軸 描画位置
@@ -706,7 +730,7 @@
         }
     }
 
-    // 使いまわせるように切り出す
+    // ミス時
     function miss(){
         chainNum = 0; // チェイン切る
         rateText = "MISS...";
@@ -751,17 +775,22 @@
         }
     }
 
+    /* 入力処理 */
     function onpointdown(e){
         // e.preventDefault();
         if (!enableInput) return;
+
+        //  ゲーム中以外
         if (!isPlaying) {
             gameReset();
             isPlaying = true;
             return;
         }
+
+        //  ゲーム中
         if (isPlaying){
             if (autoPlay) return;
-            if(btnFlg) return;
+            if (btnFlg) return;
             btnFlg = true;
             // if(longNote) return;
             judge();
@@ -769,6 +798,7 @@
             isPlaying = true;
         }
     }
+
     function onpointup(e){
         e.preventDefault();
         if (!enableInput) return;
@@ -776,12 +806,21 @@
         btnFlg = false;
     }
 
+    function variableNoteSpeed(dir, element){
+        if (dir === 'up' && noteSpeed < NOTE_SPEED_RANGE.max){
+            noteSpeed += 0.2;
+        } else if (dir === 'down' && NOTE_SPEED_RANGE.min < noteSpeed) {
+            noteSpeed -= 0.2;
+        }
+        console.log(noteSpeed);
+    }
+
     function importData(jsonData){
         var dataobj;
         try {
             dataobj = JSON.parse(jsonData); //オブジェクト化
         } catch(e) {
-            alert('jsonデータをパース出来ませんでした');
+            alert('譜面データをパース出来ませんでした');
             console.log(e);
         }
         // 各数値代入

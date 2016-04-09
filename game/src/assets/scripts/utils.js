@@ -56,20 +56,20 @@ var createSpanArray = function(span, m, n, randomize){
     for (var i = m; i < m+n; i++) {
         array.push(span * i);
     }
-	if (randomize === true){
-		for(var i = 0; i < array.length; i++) {
+    if (randomize === true){
+        for(var i = 0; i < array.length; i++) {
             swap(array, i, ((Math.random() * (array.length - i)) + i) | 0);
         }
-	}
+    }
 
     return array;
 
     // randomize: http://nmi.jp/archives/541
     function swap(a, s, d) {
-    var t = a[s];
-    a[s] = a[d];
-    a[d] = t;
-}
+        var t = a[s];
+        a[s] = a[d];
+        a[d] = t;
+    }
 
 }
 

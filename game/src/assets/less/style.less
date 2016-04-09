@@ -1,0 +1,284 @@
+@import url("http://yui.yahooapis.com/3.15.0/build/cssreset/cssreset-min.css");
+@import url("https://fonts.googleapis.com/css?family=Audiowide|Merienda+One' rel='stylesheet' type='text/css");
+
+html {
+    /*https://hail2u.net/blog/webdesign/yui3-css-reset-problem.html*/
+    background-color: transparent;
+    background-image: none;
+
+    -webkit-text-size-adjust: 100%;
+    font-family: Audiowide, cursive, monospace, sans-serif;
+    font-size: 18px;
+}
+
+body{
+    /*background: rgb(12, 154, 133);*/
+    background: url("images/background.jpg") center center no-repeat fixed;
+    background-size: cover;
+    background-color: black;
+    color: rgb(208, 218, 213);
+}
+
+.title{
+    text-align: center;
+}
+
+#game-field{
+    position: relative;
+    margin: 8px auto;
+}
+
+canvas{
+    position: absolute;
+}
+#bg{
+    z-index: 1;
+}
+#app{
+    z-index:2;
+}
+#pauseBtn{
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index:3;
+}
+#music-name-display{
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    z-index:3;
+}
+
+#repertory-wrapper{
+    display: block;
+    min-height: 300px;
+    overflow: auto;
+    margin:0 auto;
+    width: 640px;
+
+    .repertory-title{
+        width: 100%;
+        font-size: 1.2rem;
+        text-align: center;
+    }
+}
+
+#repertory{
+    display: block;
+    text-align: center;
+    width: 100%;
+    height: 96px;
+    font-size: 0;
+    overflow: auto;
+    margin: 20px auto;
+
+    li{
+        box-sizing: border-box;
+        font-size: 0.8rem;
+        /*width: 16.66%;*/
+        /*width: 64px;*/
+        /*height: 64px;*/
+        width: 100%;
+        height: 32px;
+        color: white;
+        z-index:3;
+        cursor: pointer;
+        padding: 0.4em;
+        /*margin-left: 4px;*/
+        margin-bottom: 4px;
+        display: inline-block;
+        vertical-align: top;
+        overflow:hidden;
+
+        &:hover{
+
+        }
+    }
+}
+
+@media screen and (max-width: 640px) {
+    #repertory-wrapper{width: 90%;}
+    /*#repertory li{width: 50%;}*/
+}
+
+#music-info{
+    background: rgba(86, 89, 86, 0.66);
+    text-align: center;
+    margin-top:4px;
+}
+
+#load-filter{
+    display:table;
+    background: rgba(22, 133, 144, 0.63);
+    background-size: cover;
+    text-align: center;
+    color: white;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: 100;
+    position: absolute;
+    top: 0;
+    left: 0;
+    visibility: hidden;
+    span{
+        display: table-cell;
+        vertical-align: middle;
+    }
+}
+
+.counter-wrapper{
+    @width: 80px;
+    @color:#4D85D9;
+    @hoverColor:#45AFBF;
+    float: left;
+    text-align: center;
+    width: @width;
+
+    .counter-header{
+    }
+
+    .half-circle{
+        @rad: @width/2;
+        height: @rad;
+        width: @rad*2.4;
+        background: @color;
+        text-align: center;
+        vertical-align: middle;
+        display: table-cell;
+        &:hover{
+            background: @hoverColor;
+        }
+        &.upper{
+            border-radius:50px 50px 0 0;
+        }
+        &.lower{
+            border-radius: 0 0 50px 50px;
+        }
+    }
+}
+
+
+
+/******************************
+
+ ソーシャルエリア全体を囲む要素
+ * 他のコンテンツと距離を取りたい場合は[margin]を設定して下さい
+
+******************************/
+.social-link-area {
+    width: 100% ;
+    min-height: 190px ;
+    // background: rgba('#f5f1e9', 0) ;  /* 背景色 */
+    padding: 1.0em 0 ;
+}
+
+/* デスクトップPCでは高さを拡張する */
+@media screen and ( min-width:480px ) {
+    .social-link-area {
+        min-height: 119px ;
+    }
+}
+
+
+/******************************
+
+ [ul]要素
+
+******************************/
+/* スマホ */
+ul.social-button {
+    width: 238px ;
+    margin: 24px auto ;
+    padding: 0 ;
+    border: none ;
+    list-style-type: none ;
+}
+
+/* デスクトップ */
+@media screen and ( min-width:480px ) {
+    ul.social-button {
+        width: 410px ;
+    }
+}
+
+
+/******************************
+
+ [li]要素
+
+******************************/
+ul.social-button li {
+    float: left ;
+    text-align: center ;
+    height: 71px ;
+    margin: 0 8px ;
+    padding:0 ;
+}
+
+
+/******************************
+
+ 各種ボタン
+
+******************************/
+/* [Twitter] */
+.sc-tw {
+    width: 71px ;
+}
+
+.sc-tw svg {
+    width: 30px ;
+    height: 30px ;
+ }
+
+.sc-tw a {
+    height: 56px ;
+    margin: 0 auto ;
+    padding-top: 6px ;
+    display: block ;
+    background: #1B95E0 ;
+    font-size: 12px ;
+    color: #fff ;
+    font-weight: 700 ;
+    text-decoration: none ;
+    letter-spacing: .5px ;
+    border-radius: 2px ;
+}
+
+.sc-tw a:hover {
+    color: #fff ;
+    background: #0c7abf ;
+}
+
+.sc-tw span:before {
+    white-space: pre ;
+    content: '\A' ;
+}
+
+/* [Facebook] */
+.sc-fb {
+    z-index: 99 ;
+    width: 69px ;
+}
+
+/* [LINE] */
+.sc-li {
+    width: 50px ;
+}
+
+.sc-li-img {
+    border: none ;
+    margin: 0 auto ;
+    padding:0 ;
+    width: 36px ;
+    height: 60px ;
+}
+
+/* デスクトップPCではLINEボタンを表示しない */
+@media screen and ( min-width:480px ) {
+    .sc-li {
+        display: none ;
+    }
+}
+

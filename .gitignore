@@ -1,4 +1,7 @@
-/_testfiles
+npm-debug.log
+_testfiles
 /game/assets/_test
 _ignore
 *.editorconfig
+tmp
+node_modules

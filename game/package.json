@@ -1,0 +1,52 @@
+{
+  "name": "rhythmic-rain-game",
+  "version": "1.0.0",
+  "description": "Simple Otoge",
+  "main": "app.js",
+  "devDependencies": {
+    "uglifyjs": "2.6.2",
+    "chokidar-cli": "1.2.0",
+    "pleeease-cli": "4.0.0",
+    "imagemin-cli": "2.1.0",
+    "less": "2.6.1"
+  },
+  "scripts": {
+    "clean": "rm -rf ./dist/* ./tmp/*",
+
+    "js:concat:lib": "cat src/assets/scripts/lib/*.js src/assets/scripts/*.js > ./tmp/lib.js",
+    "js:minify": "uglifyjs ./tmp/lib.js src/main.js > ./dist/all.min.js",
+    "build:js": "npm run js:concat:lib && npm run js:minify",
+
+    "css:compile": "lessc src/assets/less/style.less tmp/assets/style.css",
+    "css:min": "pleeease compile",
+    "build:css": "npm run css:compile && npm run css:min",
+
+    "build:image": "imagemin src/assets/images/*.{png,jpg,gif} dist/assets/images",
+    "build:sound": "cp -r src/assets/sounds dist/assets/sounds",
+    "build:assets": "npm run build:image & npm run build:sound",
+
+    "build:html": "cp src/index.html dist",
+
+    "release": "npm run clean && npm run build:html & npm run build:assets & npm run build:js & npm run build:css",
+    "build": "npm run build:html & npm run build:js & npm run build:css",
+
+    "watch:js": "chokidar \"src/assets/**/*.js\" -c \"npm run build:js\"",
+    "watch:css": "chokidar \"src/assets/less/*.less\" -c \"npm run build:css\"",
+    "watch": "chokidar \"src/\" -c \"npm run build\"",
+
+    "js:min": "uglifyjs ./src/bundle.js > ./dist/bundle.min.js",
+    "webpack": "webpack src/main.js src/bundle.js",
+    "watch:js": "webpack src/main.js src/bundle.js --watch",
+    "browserify": "browserify src/main.js > src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "rrain"
+  },
+  "keywords": [
+    "rhythm",
+    "game"
+  ],
+  "author": "pentamania",
+  "license": "ISC"
+}

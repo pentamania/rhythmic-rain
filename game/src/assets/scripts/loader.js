@@ -1,3 +1,21 @@
+// ( function ( mod ) {
+
+//   // browserify ( commonJS )
+//   if ( typeof exports === "object" ) {
+//     var createjs = require( 'createjs' );
+//     module.exports = mod();
+//   } else {
+//     window.loader = mod();
+//   }
+
+// } ) ( function ( ) {
+
+//   var loader = function () {
+//     // モジュールの本体
+//   };
+//   return  loader;
+
+// } );
 
 var preloadOneSound = function(src, id, fn){
     if (createjs.Sound) {

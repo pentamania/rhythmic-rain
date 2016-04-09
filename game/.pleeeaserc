@@ -1,0 +1,6 @@
+{
+  "in": ["tmp/assets/style.css"],
+  "out": "dist/assets/style.css",
+  "browsers": ["last 3 versions", "Android 2.3"],
+  "rebaseUrls":false
+}
