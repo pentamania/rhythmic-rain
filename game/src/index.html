@@ -1,73 +1,80 @@
 <!DOCTYPE html>
 <html lang="ja">
     <head>
-            <meta charset="utf-8">
-            <meta name="author" content="pentamania">
-            <meta http-equiv="x-ua-compatible" content="IE=Edge">
-            <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
-            <title>リズミックレイン</title>
-            <!-- <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.15.0/build/cssreset/cssreset-min.css"> -->
-            <!-- <link href='https://fonts.googleapis.com/css?family=Audiowide|Merienda+One' rel='stylesheet' type='text/css'> -->
-            <link href='./assets/style.css' rel='stylesheet' type='text/css'>
-        </head>
+        <meta charset="utf-8">
+        <meta name="author" content="pentamania">
+        <meta http-equiv="x-ua-compatible" content="IE=Edge">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+        <title>RHYTHMIC RAIN</title>
+        <!-- <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.15.0/build/cssreset/cssreset-min.css"> -->
+        <!-- <link href='https://fonts.googleapis.com/css?family=Audiowide|Merienda+One' rel='stylesheet' type='text/css'> -->
+        <link href='./assets/style.css' rel='stylesheet' type='text/css'>
+    </head>
     <body>
         <div class="container">
             <h1 class="title">RHYTHMIC RAIN</h1>
 
-            <div id="game-field">
+            <section id="game-field">
                 <canvas id="bg"></canvas>
                 <canvas id="app"></canvas>
                 <button id="pauseBtn">II</button>
                 <div id="music-name-display">♪</div>
-            </div>
+            </section>
 
-            <div id="repertory-wrapper">
+            <section id="repertory-wrapper">
                 <h3 class="repertory-title">SELECT MUSIC</h3>
                 <ul id="repertory"></ul>
                 <ul id="music-info"></ul>
-            </div>
+            </section>
 
             <section id="config">
                 <div class="counter-wrapper">
                     <p class="counter-header">SPEED</p>
-                    <div id="note-speed-up-button" class="half-circle upper">↑</div>
+                    <div id="note-speed-up-button" class="half-circle upper">&uarr</div>
                     <div id="note-speed-display" class="counter-body">0</div>
-                    <div id="note-speed-down-button" class="half-circle lower">下</div>
+                    <div id="note-speed-down-button" class="half-circle lower">&darr</div>
+                </div>
+
+                <div class="counter-wrapper">
+                    <p class="counter-header">JUDGE ADJUSTMENT</p>
+                    <div id="judge-increment-button" class="half-circle upper green">&uarr</div>
+                    <div id="judge-adjustment-display" class="counter-body">0</div>
+                    <div id="judge-decrement-button" class="half-circle lower green">&darr</div>
                 </div>
             </section>
 
-            <div class="info">
+            <div class="debug">
                 <div id="time"></div>
                 <button id="resetBtn">reset</button>
                 <input type="number" id="seek" value=""><br>
                 AUTOPLAY: <input type="checkbox" id="autoPlayBtn" value="autoplay">
-                <div class="instruction">
-                </div>
             </div>
-            <div class="social-link-area">
-            	<ul class="social-button">
-            		<!-- twitter -->
-                        <li class="sc-tw"><a data-url="" href="https://twitter.com/share" class="twitter-share-button" data-lang="ja" data-count="vertical" data-dnt="true" target="_blank"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="1.414"><path d="M16 3.038c-.59.26-1.22.437-1.885.517.677-.407 1.198-1.05 1.443-1.816-.634.375-1.337.648-2.085.795-.598-.638-1.45-1.036-2.396-1.036-1.812 0-3.282 1.468-3.282 3.28 0 .258.03.51.085.75C5.152 5.39 2.733 4.084 1.114 2.1.83 2.583.67 3.147.67 3.75c0 1.14.58 2.143 1.46 2.732-.538-.017-1.045-.165-1.487-.41v.04c0 1.59 1.13 2.918 2.633 3.22-.276.074-.566.114-.865.114-.21 0-.416-.02-.617-.058.418 1.304 1.63 2.253 3.067 2.28-1.124.88-2.54 1.404-4.077 1.404-.265 0-.526-.015-.783-.045 1.453.93 3.178 1.474 5.032 1.474 6.038 0 9.34-5 9.34-9.338 0-.143-.004-.284-.01-.425.64-.463 1.198-1.04 1.638-1.7z" fill="#fff" fill-rule="nonzero"/></svg><span>Tweet</span></a></li>
 
-            		<!-- Facebook -->
-            		<li class="sc-fb"><div class="fb-like" data-layout="box_count" data-action="like" data-show-faces="true" data-share="false"></div></li>
+            <section class="social-link-area">
+                <ul class="social-button">
+                    <!-- twitter -->
+                    <li class="sc-tw"><a data-url="" href="https://twitter.com/share" class="twitter-share-button" data-lang="ja" data-count="vertical" data-dnt="true" target="_blank"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="1.414"><path d="M16 3.038c-.59.26-1.22.437-1.885.517.677-.407 1.198-1.05 1.443-1.816-.634.375-1.337.648-2.085.795-.598-.638-1.45-1.036-2.396-1.036-1.812 0-3.282 1.468-3.282 3.28 0 .258.03.51.085.75C5.152 5.39 2.733 4.084 1.114 2.1.83 2.583.67 3.147.67 3.75c0 1.14.58 2.143 1.46 2.732-.538-.017-1.045-.165-1.487-.41v.04c0 1.59 1.13 2.918 2.633 3.22-.276.074-.566.114-.865.114-.21 0-.416-.02-.617-.058.418 1.304 1.63 2.253 3.067 2.28-1.124.88-2.54 1.404-4.077 1.404-.265 0-.526-.015-.783-.045 1.453.93 3.178 1.474 5.032 1.474 6.038 0 9.34-5 9.34-9.338 0-.143-.004-.284-.01-.425.64-.463 1.198-1.04 1.638-1.7z" fill="#fff" fill-rule="nonzero"/></svg><span>Tweet</span></a></li>
 
-            		<!-- Google+ -->
-            		<li><div data-href="https://mysite.net" class="g-plusone" data-size="tall"></div></li>
+                    <!-- Facebook -->
+                    <li class="sc-fb"><div class="fb-like" data-layout="box_count" data-action="like" data-show-faces="true" data-share="false"></div></li>
 
-            		<!-- はてなブックマーク -->
-            		<li><a href="http://b.hatena.ne.jp/entry/https://mysite" class="hatena-bookmark-button" data-hatena-bookmark-layout="vertical-balloon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border:none;" /></a></li>
+                    <!-- Google+ -->
+                    <li><div data-href="http://pentamania.github.io/rhythmic-rain/game/dist/index.html" class="g-plusone" data-size="tall"></div></li>
 
-            		<!-- pocket -->
-            		<li><a data-pocket-label="pocket" data-pocket-count="vertical" class="pocket-btn" data-lang="en"></a></li>
+                    <!-- はてなブックマーク -->
+                    <li><a href="http://b.hatena.ne.jp/entry/http://pentamania.github.io/rhythmic-rain/game/dist/index.html" class="hatena-bookmark-button" data-hatena-bookmark-layout="vertical-balloon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border:none;" /></a></li>
 
-            		<!-- LINE [画像は公式ウェブサイトからダウンロードして下さい] -->
-            		<!-- <li class="sc-li"><a href="http://line.me/R/msg/text/?https://syncer.jp"><img src="./linebutton_36x60.png" width="36" height="60" alt="LINEに送る" class="sc-li-img"></a></li> -->
-            	</ul>
+                    <!-- pocket -->
+                    <li><a data-pocket-label="pocket" data-pocket-count="vertical" class="pocket-btn" data-lang="en"></a></li>
+
+                    <!-- LINE [画像は公式ウェブサイトからダウンロードして下さい] -->
+                    <!-- <li class="sc-li"><a href="http://line.me/R/msg/text/?https://syncer.jp"><img src="./linebutton_36x60.png" width="36" height="60" alt="LINEに送る" class="sc-li-img"></a></li> -->
+                </ul>
 
                 <!-- Facebook用 -->
                 <div id="fb-root"></div>
-            </div><!-- social-link-area -->
+            </section><!-- social-link-area -->
+
         </div><!-- container -->
 
         <div id="load-filter">

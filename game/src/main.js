@@ -1,21 +1,16 @@
 ;(function(window){
-    // var test = require('./assets/test');
-    // test.shout('something');
-    console.log(createjs);
+    console.log('Hi, What a wonderful day');
 
-    // var Game = function(){
-    // };
-
-    // window.Game = Game;
-
-    // 定数
+    /* 定数 */
+    // 画面描画用パラメータ
     var SCREEN_WIDTH = (window.innerWidth > 640) ? 640 : window.innerWidth * 0.9;
     var RATIO = SCREEN_WIDTH / 640; //640よりも小さい画面の場合に縮小比を保持
     var SCREEN_HEIGHT = Math.round(SCREEN_WIDTH/16 * 9); // 比率16:9 == 640:360
     var NOTE_LIST = null;
+    var FPS = 60;
 
     // 画面描画用パラメータ
-    var GRID_NUM = 14; //画面幅の分割数
+    var GRID_NUM = 14; // 画面幅の分割数
     var NOTE_WIDTH = (SCREEN_WIDTH / GRID_NUM) * 0.8; // ノーツの幅：画面サイズで変える？
     var NOTE_HEIGHT = 6 * RATIO;
 
@@ -26,14 +21,22 @@
     var NOTE_SPEED_RANGE = {
         max: 3,
         min: -3
-    }
+    };
 
+    // 色
     var NOTE_COLOR = "rgb(139, 236, 242)";
     var LONG_NOTE_COLOR = "rgb(77, 60, 212)";
     var WATER_COLOR = "#125779";
     var EFFECT_COLOR = NOTE_COLOR;
     // var EFFECT_COLOR = "rgba(152, 171, 236, 1)";
+    var THEME_COLOR = {
+        morning: "rgb(249, 250, 207)",
+        daytime: "#B9F5EF",
+        night: "rgb(0, 0, 0)"
+    };
+    var FILTER_COLOR = "rgba(164, 146, 146, 0.59)";
 
+    // アセット位置
     var JUDGE_LINE_Y = SCREEN_HEIGHT * 0.7 | 0; //
     var NOTE_DEST_Y = JUDGE_LINE_Y - NOTE_HEIGHT * 0.5; // ノーツ最終位置Y
     var EFFECT_HEIGHT = JUDGE_LINE_Y * 0.4; // エフェクトの高さ
@@ -61,14 +64,16 @@
         nice: 0.05,
         great: 0.03
     };
+
     // 加点設定
     var SCORE = {
+        // hold: 10,
         good: 10,
         nice: 50,
-        great: 100,
-        // hold: 10
+        great: 100
     };
 
+    // path
     var SOUND_ASSETS = {
         clap:"./assets/sounds/clap.mp3",
         conga: "./assets/sounds/conga.mp3"
@@ -108,8 +113,8 @@
     var isPlaying = false; // プレイ中
     var autoPlay = false;
     // var autoPlay = true;
-    var ua = navigator.userAgent.toLowerCase();
-    var enableSE = (ua.indexOf("android")>0) ? false : true; //andriodではSE無効
+    var _ua = navigator.userAgent.toLowerCase();
+    var enableSE = (_ua.indexOf("android")>0) ? false : true; // andriodではSE無効
     var enableInput = true;
     var isHTMLaudio = null;
     var canPlayMusic = true;
@@ -123,7 +128,6 @@
     var bpm = 120; // ノーツスピードに絡む(数値はダミー)
     var noteSpeed = 1.0; // ユーザーノーツスピード
 
-    // 0. スタート
     window.addEventListener('DOMContentLoaded', function(){
         // レパートリーリストのロード
         var musicList;
@@ -131,222 +135,219 @@
         getXmlData(MUSIC_LIST_PATH, function (res){
             var data = JSON.parse(res);
             musicList = data.list;
+
             appInitialize();
         });
+    }, false); // --window DOMContentLoaded callback
 
-        function appInitialize(){
+    function appInitialize(){
+        /* 曲の詳細更新 */
+        var updateMusicInfo = function(index){
+            if (index == null) return;
+            var parent = $id("music-info");
+            parent.innerHTML = null;
 
-            // 曲の詳細更新関数
-            var updateMusicInfo = function(index){
-                if (index == null) return;
-                var parent = $id("music-info");
-                parent.innerHTML = null;
+            var obj = musicList[index];
+            Object.keys(obj).forEach(function(key){
+                if (key == "src" || key == "fumen" || key == "url" || key == "theme") return;
 
-                var obj = musicList[index];
-                Object.keys(obj).forEach(function(key){
-                    if (key == "src" || key == "fumen" || key == "url" || key == "theme") return;
-
-                    var li = document.createElement('li');
-                    if (key == "author"){
-                        //アンカー付き
-                        var inner = "<a href="+obj['url']+">"+obj[key]+"</a>";
-                        li.innerHTML = key.toUpperCase()+": "+ inner;
-                    } else if (key == "difficulty"){
-                        //星の数で表す
-                        li.innerHTML += key.toUpperCase()+": ";
-                        for (var i = 0; i < obj[key]; i++) {
-                            li.innerHTML +="&#9733";
-                        }
-                    } else {
-                        li.textContent = key.toUpperCase()+": "+ obj[key];
-                    }
-
-                    parent.appendChild(li);
-                });
-            }
-
-            /* リストから楽曲一覧生成　*/
-            musicList.forEach(function(m, index){
-                var DEFAULT_COLOR = 'rgb(60, 100, 214)';
-                var ACTIVE_COLOR = 'rgb(161, 182, 241)';
-                var DEFAULT_OPACITY = 0.5;
-
-                // 選択肢セットアップ
                 var li = document.createElement('li');
-                // li.setAttribute("data-active", "false");
-                li.textContent = m.name;
-                li.style.background = (index === activeMusicPointer) ? ACTIVE_COLOR : DEFAULT_COLOR;
-                li.style.opacity = (index === activeMusicPointer) ? 1.0 : DEFAULT_OPACITY;
-                updateMusicInfo(activeMusicPointer);
+                if (key == "author"){
+                    //アンカー付き
+                    var inner = "<a href="+obj['url']+">"+obj[key]+"</a>";
+                    li.innerHTML = key.toUpperCase()+": "+ inner;
+                } else if (key == "difficulty"){
+                    //星の数で表す
+                    li.innerHTML += key.toUpperCase()+": ";
+                    for (var i = 0; i < obj[key]; i++) {
+                        li.innerHTML +="&#9733";
+                    }
+                } else {
+                    li.textContent = key.toUpperCase()+": "+ obj[key];
+                }
 
-                // クリック・タップイベント設定
-                li.addEventListener('mousedown', _musicLoad, false);
-                li.addEventListener('touchstart', _musicLoad, false);
+                parent.appendChild(li);
+            });
+        }
 
-                function _musicLoad(e){
-                    // if(index === activeMusicPointer) return;
+        /* リストから楽曲一覧生成　*/
+        musicList.forEach(function(m, index){
+            var DEFAULT_COLOR = 'rgb(60, 100, 214)';
+            var ACTIVE_COLOR = 'rgb(161, 182, 241)';
+            var DEFAULT_OPACITY = 0.5;
 
-                    // 音源のロード
-                    if(music) stopSound(music); // 再生中なら止める
+            /* 選択肢のセットアップ */
+            var li = document.createElement('li');
+            // li.setAttribute("data-active", "false");
+            li.textContent = m.name;
+            li.style.background = (index === activeMusicPointer) ? ACTIVE_COLOR : DEFAULT_COLOR;
+            li.style.opacity = (index === activeMusicPointer) ? 1.0 : DEFAULT_OPACITY;
+            updateMusicInfo(activeMusicPointer);
 
-                    if (!createjs.Sound.loadComplete(DATA_PATH+m.src)){
-                        $id('load-filter').style.visibility = "visible";enableInput = false;
+            // 各選択肢にクリック・タップイベント設定
+            li.addEventListener('mousedown', _musicLoad, false);
+            li.addEventListener('touchstart', _musicLoad, false);
 
-                        preloadOneSound(DATA_PATH+m.src, m.name, function(e){
-                            music = createjs.Sound.createInstance(e.id);
-                            // console.log("代入地点", music);
-                            endhour = music.duration*0.001 + wait; //ms -> secに直す
+            function _musicLoad(e){
+                // if(index === activeMusicPointer) return;
 
-                            // 譜面情報の取得
-                            getXmlData(DATA_PATH+m.fumen, function(res){
-                                setupFumen(res);
-                                gameReset();
-                                playSound(music);
-                                musicName = m.name;
-                                $id('music-name-display').innerHTML = "♪ "+m.name;
-                                $id('load-filter').style.visibility = "hidden";enableInput = true;
-                            });
-                        });
-                    } else {
-                        // すでにロード済み
-                        music = createjs.Sound.createInstance(m.name);
-                        endhour = music.duration * 0.001 + wait;
+                // 音源のロード
+                if(music) stopSound(music); // 再生中なら止める
+
+                if (!createjs.Sound.loadComplete(DATA_PATH+m.src)){
+                    $id('load-filter').style.visibility = "visible";enableInput = false;
+
+                    preloadOneSound(DATA_PATH+m.src, m.name, function(e){
+                        music = createjs.Sound.createInstance(e.id);
+                        // console.log("代入地点", music);
+                        endhour = music.duration*0.001 + wait; //ms -> secに直す
+
                         // 譜面情報の取得
-                        $id('load-filter').style.visibility = "visible";enableInput = false;
                         getXmlData(DATA_PATH+m.fumen, function(res){
                             setupFumen(res);
                             gameReset();
                             playSound(music);
+                            musicName = m.name;
                             $id('music-name-display').innerHTML = "♪ "+m.name;
                             $id('load-filter').style.visibility = "hidden";enableInput = true;
                         });
-                    }
-
-                    // 選択中のli要素をアクティブ化
-                    var childs = $id('repertory').childNodes;
-                    Object.keys(childs).forEach(function(i){
-                        var c = childs[i];
-                        // c.dataset.active = 'false';
-                        c.style.background = DEFAULT_COLOR;
-                        c.style.opacity = 0.5;
                     });
-
-                    // this.dataset.active = 'true';
-                    activeMusicPointer = index;
-                    updateMusicInfo(index);
-                    e.target.style.background = ACTIVE_COLOR;
-                    e.target.style.opacity = 1;
-                }
-
-                $id('repertory').appendChild(li);
-            });
-
-            /* ゲーム本体の初期化 */
-            // 1. 画像ロード
-            imagePreload(IMAGE_ASSETS, images, function(){
-                // 2. 初期化（canvasセット等）
-                gameInit();
-                // 3. 初回タップ、クリックでスタート
-                var _func = (function(event) {
-                    return function f(event) {
-                        // 効果音のロード
-                        preloadSounds(SOUND_ASSETS, sounds, function(){
-                            $id('load-filter').style.visibility = "visible";enableInput = false;
-
-                            // イベントリスナ消す
-                            window.removeEventListener(event.type, _func, false);
-                            app.removeEventListener(event.type, _func, false);
-
-                            // 入力系 set up
-                            // サウンドロードが完了した地点で入力できるようにする
-                            var addInputEvents = function(){
-                                app.addEventListener('mousedown',  function(e){ e.preventDefault();onpointdown();}, false);
-                                app.addEventListener('touchstart', function(e){ e.preventDefault();onpointdown();}, false);
-                                document.addEventListener('keydown', function(e){
-                                    // if (e.keyCode == 32) return judge();
-                                    onpointdown();
-                                });
-                                // keyup系
-                                app.addEventListener('mouseup', onpointup, false);
-                                app.addEventListener('touchend', onpointup, false);
-                                document.addEventListener('keyup', onpointup, false);
-                            }
-
-                            // オーディオタイプの確認：IE系の場合HTMLaudio
-                            var checkAudioType = function(audio){
-                                var _audiotype = audio.constructor.toString().toLowerCase();
-                                isHTMLaudio = _audiotype.match(/htmlaudio/);
-                            }
-
-                            // bgmロード（曲選択していない場合）
-                            if(!music) {
-                                if(!musicList){
-                                    return console.log("レパートリー情報がありません");
-                                }
-                                var _mObj = musicList[activeMusicPointer];
-                                preloadOneSound(DATA_PATH+_mObj.src, _mObj.name, function(e){
-                                    music = createjs.Sound.createInstance(e.id);
-                                    checkAudioType(music);
-                                    // console.log(isHTMLaudio);
-                                    // stopSound(music); // 一度再生しないとpausedを設定できない？
-                                    // music.position = zerohour*1000;
-                                    // music.startTime = zerohour*1000; // milisec
-                                    // console.log("playstate? :", music.playState);
-
-                                    // 譜面情報の取得
-                                    getXmlData(DATA_PATH+_mObj.fumen, function(res){
-                                        setupFumen(res);
-
-                                        if (endhour == 0) endhour = music.duration + wait;
-                                        addInputEvents();
-                                        gameReset();
-                                        isPlaying = true;
-                                        $id('music-name-display').innerHTML = "♪ "+_mObj.name;
-                                        $id('load-filter').style.visibility = "hidden"; enableInput = true;
-                                    });
-                                });
-                            } else {
-                                //すでに曲が選択ずみ
-                                checkAudioType(music);
-                                stopSound(music); //一度再生しないとpausedを設定できない？
-                                // music.paused = true;
-                                // music.position = 0;
-
-                                addInputEvents();
-                                gameReset();
-                                isPlaying = true;
-                                $id('load-filter').style.visibility = "hidden"; enableInput = true;
-                            }
-
-                        });
-                    }
-                })();
-                window.addEventListener('keyup', _func, false); // PC
-                app.addEventListener('touchend', _func, false); // SP/tab
-            });
-
-        /* コンフィグ入力 */
-        $id('note-speed-up-button').onclick = function(){
-            variableNoteSpeed('up', $id('note-speed-display'));
-        }
-
-        }; //--appInitialize
-
-        function setupFumen(data){
-            importData(data);
-            // フルコンボ数決定
-            noteList = NOTE_LIST.slice();
-            fullChainNum = 0;
-            noteList.forEach(function(note){
-                if(note.length){
-                    fullChainNum += 2;
                 } else {
-                    fullChainNum++;
+                    // すでにロード済み
+                    music = createjs.Sound.createInstance(m.name);
+                    endhour = music.duration * 0.001 + wait;
+                    // 譜面情報の取得
+                    $id('load-filter').style.visibility = "visible";enableInput = false;
+                    getXmlData(DATA_PATH+m.fumen, function(res){
+                        setupFumen(res);
+                        gameReset();
+                        playSound(music);
+                        $id('music-name-display').innerHTML = "♪ "+m.name;
+                        $id('load-filter').style.visibility = "hidden";enableInput = true;
+                    });
                 }
-            });
-        }
 
-    }, false); // --window DOMContentLoaded callback
+                // 選択中のli要素をアクティブ化
+                var childs = $id('repertory').childNodes;
+                Object.keys(childs).forEach(function(i){
+                    var c = childs[i];
+                    // c.dataset.active = 'false';
+                    c.style.background = DEFAULT_COLOR;
+                    c.style.opacity = 0.5;
+                });
+
+                // this.dataset.active = 'true';
+                activeMusicPointer = index;
+                updateMusicInfo(index);
+                e.target.style.background = ACTIVE_COLOR;
+                e.target.style.opacity = 1;
+            }
+
+            $id('repertory').appendChild(li);
+        });
+
+        /* ゲーム本体の初期化 */
+        // 1. 画像ロード
+        imagePreload(IMAGE_ASSETS, images, function(){
+            // 2. 初期化（canvasセット等）
+            gameInit();
+
+            // 3. 初回タップ、クリックでスタート
+            var _func = (function(event) {
+                return function f(event) {
+                    // 効果音のロード
+                    preloadSounds(SOUND_ASSETS, sounds, function(){
+                        $id('load-filter').style.visibility = "visible";enableInput = false;
+
+                        // イベントリスナ消す
+                        window.removeEventListener(event.type, _func, false);
+                        app.removeEventListener(event.type, _func, false);
+
+                        // 入力系 set up
+                        // サウンドロードが完了した地点で入力できるようにする
+                        var addInputEvents = function(){
+                            app.addEventListener('mousedown',  function(e){ e.preventDefault();onpointdown();}, false);
+                            app.addEventListener('touchstart', function(e){ e.preventDefault();onpointdown();}, false);
+                            document.addEventListener('keydown', function(e){
+                                // if (e.keyCode == 32) return judge();
+                                onpointdown();
+                            });
+                            // keyup系
+                            app.addEventListener('mouseup', onpointup, false);
+                            app.addEventListener('touchend', onpointup, false);
+                            document.addEventListener('keyup', onpointup, false);
+                        }
+
+                        // オーディオタイプの確認：IE系の場合HTMLaudio
+                        var checkAudioType = function(audio){
+                            var _audiotype = audio.constructor.toString().toLowerCase();
+                            isHTMLaudio = _audiotype.match(/htmlaudio/);
+                        }
+
+                        // bgmロード（曲選択していない場合）
+                        if(!music) {
+                            if(!musicList){
+                                return console.log("レパートリー情報がありません");
+                            }
+                            var _mObj = musicList[activeMusicPointer];
+                            preloadOneSound(DATA_PATH+_mObj.src, _mObj.name, function(e){
+                                music = createjs.Sound.createInstance(e.id);
+                                checkAudioType(music);
+                                // console.log(isHTMLaudio);
+                                // stopSound(music); // 一度再生しないとpausedを設定できない？
+                                // music.position = zerohour*1000;
+                                // music.startTime = zerohour*1000; // milisec
+                                // console.log("playstate? :", music.playState);
+
+                                // 譜面情報の取得
+                                getXmlData(DATA_PATH+_mObj.fumen, function(res){
+                                    setupFumen(res);
+
+                                    if (endhour == 0) endhour = music.duration + wait;
+                                    addInputEvents();
+                                    gameReset();
+                                    isPlaying = true;
+                                    $id('music-name-display').innerHTML = "♪ "+_mObj.name;
+                                    $id('load-filter').style.visibility = "hidden"; enableInput = true;
+                                });
+                            });
+                        } else {
+                            //すでに曲が選択ずみ
+                            checkAudioType(music);
+                            stopSound(music); //一度再生しないとpausedを設定できない？
+                            // music.paused = true;
+                            // music.position = 0;
+
+                            addInputEvents();
+                            gameReset();
+                            isPlaying = true;
+                            $id('load-filter').style.visibility = "hidden"; enableInput = true;
+                        }
+
+                    });
+                }
+            })();
+
+            window.addEventListener('keyup', _func, false); // PC
+            app.addEventListener('touchend', _func, false); // SP/tab
+        });
+
+    }; //--appInitialize
+
+    function setupFumen(data){
+        importData(data);
+        // フルコンボ数決定
+        noteList = NOTE_LIST.slice();
+        fullChainNum = 0;
+        noteList.forEach(function(note){
+            if(note.length){
+                fullChainNum += 2;
+            } else {
+                fullChainNum++;
+            }
+        });
+    }
+
 
     function gameReset(){
         currentNoteIndex = 0;
@@ -382,14 +383,16 @@
 
         // set up background canvas : draw once
         var bgctx = bgCanvas.getContext('2d');
-        bgctx.fillStyle = "rgb(0, 0, 0)"; // themeによって変える？
-        // bgctx.fillStyle = "rgb(249, 250, 207)"; //　TODO:themeによって変える？
+        bgctx.fillStyle = "rgb(0, 0, 0)"; // TODO: themeによって変える？
         bgctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT); //bgcolor
+
+        // 女の子、水面と電灯の描画
         bgctx.drawImage(images.girl, GIRL_POS_X, GIRL_POS_Y, 124*1.1*RATIO, 166*1.1*RATIO);
         drawGradRect(bgctx, 0, JUDGE_LINE_Y,  SCREEN_WIDTH, SCREEN_HEIGHT-JUDGE_LINE_Y, [ [0, WATER_COLOR], [1, "rgba(255, 255, 255, 0)"] ]);
         bgctx.drawImage(images.streetLight,0,0,118,308, LIGHT_POS_X, LIGHT_POS_Y, 132*RATIO, 358*RATIO);
-        // Filter
-        bgctx.fillStyle = "rgba(164, 146, 146, 0.59)";
+
+        // フィルタ
+        bgctx.fillStyle = FILTER_COLOR;
         bgctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
         main();
@@ -404,7 +407,7 @@
         };
         screenRender();
 
-        setTimeout(main, 1000/60);
+        setTimeout(main, 1000/FPS);
     }
 
     // 内部処理
@@ -441,7 +444,8 @@
             noteTime = noteList[i];
 
             // ロングノートだったら
-            if (typeof noteTime == 'object') {
+            // if (typeof noteTime === 'object') {
+            if (noteTime.length) {
                 noteTime = noteTime[0];
             }
 
@@ -475,13 +479,13 @@
                     hitEffect = 3;
                     // effect('hold');
                 // 規定時間まで押しつづけた
-                }else{
+                } else {
                     longNote = null;
                     effect('great');
                 }
 
             // 途中で離してしまった
-            }else{
+            } else {
                 longNote = null;
                 effect('miss');
             }
@@ -630,7 +634,7 @@
         }
     }
 
-    //  判定処理
+    /* 判定処理 */
     function judge() {
         var noteTime = noteList[currentNoteIndex]; // いまのノーツを見る
         var _longEnd = null; //ロング最終位置を一時保持
@@ -676,7 +680,7 @@
 
     }
 
-    // 判定時の反応 reactionでもいいかも
+    /* 判定時の反応 reactionでもいいかも */
     function effect(rating){
         if (longNote == null) currentNoteIndex++; //ロングでなければ現在ノート消す
 
@@ -763,6 +767,7 @@
             audio.play();
         }
     }
+
     function stopSound(audio){
         // console.log("stop");
         if (createjs.Sound) {
@@ -806,13 +811,15 @@
         btnFlg = false;
     }
 
-    function variableNoteSpeed(dir, element){
+    function varyNoteSpeed(dir, element){
+        var dir = (dir != null) ? dir : null;
         if (dir === 'up' && noteSpeed < NOTE_SPEED_RANGE.max){
-            noteSpeed += 0.2;
+            noteSpeed += 1;
         } else if (dir === 'down' && NOTE_SPEED_RANGE.min < noteSpeed) {
-            noteSpeed -= 0.2;
+            noteSpeed -= 1;
         }
-        console.log(noteSpeed);
+        element.textContent = noteSpeed;
+        // console.log(noteSpeed);
     }
 
     function importData(jsonData){
@@ -830,25 +837,35 @@
         if(dataobj.endhour) endhour = dataobj.endhour + wait;
     }
 
-    //==============================
-
-    $id('autoPlayBtn').addEventListener('click', setAutoPlay, false);
-    function setAutoPlay(){
-        autoPlay = (!autoPlay) ? true : false;
-        console.log('autoplay: ', autoPlay);
-    }
-    $id('resetBtn').addEventListener('click', gameReset, false);
-
     function pause(){
         stopSound(music);
         timer.pause();
         isPlaying = false;
     }
+
+    function setAutoPlay(){
+        autoPlay = (!autoPlay) ? true : false;
+        console.log('autoplay: ', autoPlay);
+    }
+    //==============================
+
+    /* コンフィグ入力 */
+    $id('note-speed-up-button').onclick = function(){
+        varyNoteSpeed('up', $id('note-speed-display'));
+    }
+    $id('note-speed-down-button').onclick = function(){
+        varyNoteSpeed('down', $id('note-speed-display'));
+    }
+
+    $id('autoPlayBtn').addEventListener('click', setAutoPlay, false);
+
+    $id('resetBtn').addEventListener('click', gameReset, false);
+
     $id('pauseBtn').addEventListener('click', pause);
 
-    $id('seek').onblur = function(){
-        timer.setTime(this.value);
-        music.currentTime = this.value;
-    }
+    // $id('seek').onblur = function(){
+    //     timer.setTime(this.value);
+    //     music.currentTime = this.value;
+    // }
 
 })(window);

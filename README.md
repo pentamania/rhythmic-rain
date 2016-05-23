@@ -1,19 +1,17 @@
-## Evening rain
+## About game
 Simple JavaScript rhythm action game using HTML5 canvas.
 
-[url](http://pentamania.github.io/simple-otoge/game)
+[Play now](http://pentamania.github.io/rhythmic-rain/game/dist/index.html)
 
-Recommended browser is Google Chrome.
+Recommended browser: Google Chrome(PC), iOS safari(SP/tab)
 
 ### How to Play
-Tap any key or screen at the timing when note object reaches the surface.
-Hold the key
+Tap any key or screen at the timing when the note object reaches the surface.
+If the target is long, you should hold the key until it reaches the end.
 
-### Back-story
-One girl is waiting at the station for her parents in the rain.
+### Background-story
+One girl is waiting for her parents in the rain.
 
 What should she do while waiting?
 
 Yes, of course, sing a song.
-
-Sing a song with the rain drop chorus!

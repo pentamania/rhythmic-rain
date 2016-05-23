@@ -1,7 +1,5 @@
-npm-debug.log
-_testfiles
-/game/assets/_test
-_ignore
+_temp
 *.editorconfig
+*.log
 tmp
 node_modules

@@ -90,7 +90,7 @@ var resizeCover = function(element){
     target.style.width = MaxWidth + "px";
 }
 
-// draw vertical 2-tone linear gradient rect
+// Draw vertical 2-tone linear gradient rect
 var drawGradRect = function(context, x, y, width, height, color){
     context.save();
 
