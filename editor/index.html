@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="IE=Edge">
+        <meta name="viewport" content="width=device-width, user-scalable=no">
+        <title>Rain Editor</title>
+        <link href='./assets/style.css' rel='stylesheet' type='text/css'>
+    </head>
+    <body>
+        <div class="container">
+            <div id="top-menu">
+                <h1 id="appname" class="cell">譜面エディタ！！</h1>
+                <div id="import-field" class="cell">
+                    <input id="readerBtn" type="file" value="読み込み">
+                    ここにファイルをドロップしてもOK
+                </div>
+
+                <button id="clearBtn">譜面クリア</button>
+                <div id="exportBtn">
+                    <a id="export" target="_blank" download="fumen.json">
+                        エクスポート
+                    </a>
+                </div>
+            </div>
+            <div id="info">
+                <div id="mousePos"></div>
+                <!-- <div id="bpmOutput"></div> -->
+                <div id="currentTime"></div>
+            </div>
+
+            <div class="input-container">
+                ズーム[0.2~2.5倍](伸ばし過ぎるとと表示できなくなることがあります)
+                <input type="range" id="scale" max="2.5" min="0.5" step="0.1" value="1"><br>
+                音楽スタート位置(秒): <input type="number" id="zerohour" placeholder="0" step="0.1"><br>
+                音楽終了位置(秒): <input type="number" id="endhour" placeholder="" step="0.1"><br>
+                BPM: <input type="number" id="bpm" placeholder="120" width="60px"><br>
+                <div>クオンタイズ：
+                    <select id="quantize">
+                        <option value="4">4分</option>
+                        <option value="8">8分</option>
+                        <option value="16">16分</option>
+                        <option value="32">32分</option>
+                        <option value="12">4分の3（4分三連・12分）</option>
+                        <option value="24">8分の3（8分三連・24分）</option>
+                    </select>
+                </div>
+                <div>再生速度：
+                    <select id="playbackRate">
+                        <option value="1">等倍</option>
+                        <option value="0.5">0.5倍</option>
+                        <option value="2">2倍</option>
+                    </select>
+                </div>
+                <label for="autoscrollSwitch">
+                    <input type="checkbox" id="autoscrollSwitch" checked="true">自動スクロール
+                </label>
+                <label for="autosaveSwitch">
+                    <input type="checkbox" id="autosaveSwitch" checked="true">オートセーブ
+                </label>
+                <label for="bpmChanger">
+                    <input type="number" id="pre-bpm" placeholder="120" width="60px"><br>
+                    <input type="number" id="after-bpm" placeholder="120" width="60px">
+                </label>
+            </div><!-- input-container -->
+            <ul class="tips">
+                TIPS
+                <li>クリックでノートをセット</li>
+                <li>始点・終点で Crtl + クリックでロングノートをセット</li>
+                <li>スペースキーで再生</li>
+                <li>shift + スペースキーでBPM計測（４回タップで更新）</li>
+                <li>上部バークリックでシーク</li>
+            </ul>
+            <div id="main">
+                Seek Bar <canvas id="timeline" width="1000" height="30"></canvas>
+                Part.1<canvas id="canvas" width="1000" height="40"></canvas>
+            </div>
+
+            <br>
+        </div><!-- container -->
+        <script src="./BPMcounter.js"></script>
+        <script src="./editor.js"></script>
+    </body>
+</html>

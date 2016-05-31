@@ -1,180 +1,18 @@
-<!DOCTYPE html>
-<html lang="ja">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="x-ua-compatible" content="IE=Edge">
-        <meta name="viewport" content="width=device-width, user-scalable=no">
-            <title>Rain Editor</title>
-            <style media="screen">
-            /*@import url(https://fonts.googleapis.com/css?family=Russo+One);*/
-                body{
-                    background: rgb(64,78, 145);
-                    color: #a9dea6;
-                }
-                #appname{
-                    font-family: cursive;
-                    font-size: 2rem;
-                }
-                #top-menu{
-                    position: fixed;
-                    top: 0;
-                    height: 60px;
-                    display: table;
-                    background: rgba(42, 161, 132, 0.68);
-                    /*width: 100%;*/
-                }
-                #main{
-                    font-size: .5rem;
-                    margin-top: 70px;
-
-                }
-                #import-field{
-                    /*margin: 20px auto;*/
-                    /*width: 200px;*/
-                    /*height: 100px;*/
-                    padding: 1em;
-                    box-shadow: 0 0 1px 1px rgb(167, 162, 162);
-                    background: rgb(214, 214, 214);
-                    border-radius: 6px;
-                    color: rgb(134, 132, 132);
-                }
-                #exportBtn{
-                    color: rgb(161, 211, 221);
-                    margin: 2px 0;
-                    background: rgb(100, 79, 208);
-                    border: solid 2px #1e71ad;
-                    /*border-width: 0 0 2px 0;*/
-                    border-radius: 4px;
-                    padding: 4px;
-                    display: inline-block;
-                }
-                #timeline{
-                    margin-bottom: 4px;
-                }
-                canvas{
-                    box-sizing: border-box;
-                    display: block;
-                }
-                #info{
-                    position: fixed;
-                    /*bottom: 0;*/
-                    top: 0;
-                    right: 0;
-                    background: #a4bcf5;
-                    color: #101350;
-                    padding: .5em;
-                    border-radius: 0 0 0 3px;
-                    width: 200px;
-                    /*text-align: center;*/
-                }
-                .input-container{
-                    position: fixed;
-                    /*top: 0;*/
-                    bottom: 0;
-                    left: 0;
-                    background: hsla(124, 59%, 61%, 0.63);
-                    padding: .3em;
-                    width: 100%;
-                }
-                .tips{
-                    position: fixed;
-                    bottom: 0;
-                    right: 0;
-                    background: rgb(73, 72, 94);
-                    color: rgb(255, 255, 255);
-                }
-                .cell{
-                    display: table-cell;
-                }
-            </style>
-    </head>
-    <body>
-        <div class="container">
-            <div id="top-menu">
-                <h1 id="appname" class="cell">譜面エディタ！！</h1>
-                <div id="import-field" class="cell">
-                    <input id="readerBtn" type="file" value="読み込み">
-                    ここにファイルをドロップしてもOK
-                </div>
-
-                <button id="clearBtn">譜面クリア</button>
-                <div id="exportBtn">
-                    <a id="export" target="_blank" download="fumen.json">
-                        エクスポート
-                    </a>
-                </div>
-            </div>
-            <div id="info">
-                <div id="mousePos"></div>
-                <!-- <div id="bpmOutput"></div> -->
-                <div id="currentTime"></div>
-            </div>
-
-            <div class="input-container">
-                ズーム[0.2~2.5倍](伸ばし過ぎるとと表示できなくなることがあります)
-                <input type="range" id="scale" max="2.5" min="0.5" step="0.1" value="1"><br>
-                音楽スタート位置(秒): <input type="number" id="zerohour" placeholder="0" step="0.1"><br>
-                音楽終了位置(秒): <input type="number" id="endhour" placeholder="" step="0.1"><br>
-                BPM: <input type="number" id="bpm" placeholder="120" width="60px"><br>
-                <div>クオンタイズ：
-                    <select id="quantize">
-                        <option value="4">4分</option>
-                        <option value="8">8分</option>
-                        <option value="16">16分</option>
-                        <option value="32">32分</option>
-                        <option value="12">4分の3（4分三連・12分）</option>
-                        <option value="24">8分の3（8分三連・24分）</option>
-                    </select>
-                </div>
-                <div>再生速度：
-                    <select id="playbackRate">
-                        <option value="1">等倍</option>
-                        <option value="0.5">0.5倍</option>
-                        <option value="2">2倍</option>
-                    </select>
-                </div>
-                <label for="autoscrollSwitch">
-                    <input type="checkbox" id="autoscrollSwitch" checked="true">自動スクロール
-                </label>
-                <label for="autosaveSwitch">
-                    <input type="checkbox" id="autosaveSwitch" checked="true">オートセーブ
-                </label>
-                <label for="bpmChanger">
-                    <input type="number" id="pre-bpm" placeholder="120" width="60px"><br>
-                    <input type="number" id="after-bpm" placeholder="120" width="60px">
-                </label>
-            </div><!-- input-container -->
-            <ul class="tips">
-                TIPS
-                <li>クリックでノートをセット</li>
-                <li>始点・終点で Crtl + クリックでロングノートをセット</li>
-                <li>スペースキーで再生</li>
-                <li>shift + スペースキーでBPM計測（４回タップで更新）</li>
-                <li>上部バークリックでシーク</li>
-            </ul>
-            <div id="main">
-                Seek Bar <canvas id="timeline" width="1000" height="30"></canvas>
-                Part.1<canvas id="canvas" width="1000" height="40"></canvas>
-            </div>
-
-            <br>
-
-        </div><!-- container -->
-        <script>
 
 ;(function(){
     var $id = function(id) { return document.getElementById(id); }
+
     // webaudio: http://phiary.me/webaudio-api-getting-started/
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     var context = new AudioContext();
 
     // Audio 用の buffer を読み込む
     var getAudioBuffer = function(url, fn) {
-      var req = new XMLHttpRequest();
-      // array buffer を指定
-      req.responseType = 'arraybuffer';
+        var req = new XMLHttpRequest();
+        // array buffer を指定
+        req.responseType = 'arraybuffer';
 
-      req.onreadystatechange = function() {
+        req.onreadystatechange = function() {
         if (req.readyState === 4) {
           if (req.status === 0 || req.status === 200) {
             // array buffer を audio buffer に変換
@@ -184,10 +22,10 @@
             });
           }
         }
-      };
+        };
 
-      req.open('GET', url, true);
-      req.send('');
+        req.open('GET', url, true);
+        req.send('');
     };
 
     // サウンドを再生
@@ -203,43 +41,16 @@
     //   console.log(context);
     };
 
-    // var raw = ["0_4_8_12", "0_4_12", "4_8_12_14", "5_8_12_14"];
-    // var bpm = 120;
-    // var beat = (1 / (bpm/60)); //4分ノーツの時間
-    // var u = (1 / (bpm/60)) * 0.25; //16分ノーツの時間
-    // //console.log(u);
-    //
-    // var list = [];
-    // for(var i = 0; i < raw.length; i++) {
-    //     var bar = String(raw[i]);
-    //     //console.log(bar);
-    //     var _arr = bar.split('_');
-    //     //var _sum = 0;
-    //     for (var j = 0; j < _arr.length; j++) {
-    //         console.log(_arr[j]);
-    //         var n = (Number(_arr[j]) + 16*i) * u;
-    //         list.push(n);
-    //     }
-    // }
-    //
-    // console.log(list);
-
-    // utils --end
-    //ゲージを描いてみる==============================
-
     var noteList = [];
     var _shotList = []; // テスト再生用List
-    // var music = new Audio("./assets/dualmoon.mp3");
     // var music = new Audio("file:///C:/Users/masa/Dropbox/codesDB/simpleOtoge/assets/Game_gadget_at_midnight.mp3");
     var music = null;
-    // var music = new Audio("./assets/ダライアスバースト クロニクルセイバーズ ＴＧＳ2015Ver_qRCchsKmQBk.mp3");
     var clap;// = new Audio('./assets/clap.mp3');
-    // console.log(music);
     var duration = 0; //再生時間
     var _baseMag  = 90;
     var userMag  = 1.0;
-    var magni = _baseMag * userMag; // 再生時間延長率
-    var zerohour = 0; // 秒
+    var magni = _baseMag * userMag; // 表示幅拡張率
+    var zerohour = 0; // sec
     var _zero = zerohour * magni;
     var endhour = 0;
     // var bpm = 147;
@@ -254,6 +65,7 @@
     // var unit = barTimeWidth / 16; // 16分の幅
     var beatUnit = barTimeWidth / quant; // 表示上の拍の長さ
     var NOTE_WIDTH = 3;
+    var _longNoteStart = null;
 
     // flag
     var autoscroll = true;
@@ -261,7 +73,7 @@
     var canPlayShot = true;
 
     //bpm counter
-    var counts = [], past = 0;
+    var bpmCounter = new BPMcounter();
 
     var currentTime = document.getElementById('currentTime');
     var mousePos = document.getElementById('mousePos');
@@ -327,8 +139,8 @@
     }
 
     // オートセーブスイッチ
-    $id("autosaveSwitch") .checked = autosaving;
-    $id("autosaveSwitch") .onclick = function(){
+    $id("autosaveSwitch").checked = autosaving;
+    $id("autosaveSwitch").onclick = function(){
         autosaving = !autosaving;
         $id("autosaveSwitch").checked = autosaving;
         this.blur();
@@ -366,7 +178,6 @@
 
         redraw(c);
     }
-
 
     // ロード後の初期化
     // music.onloadeddata = function(){
@@ -498,7 +309,7 @@
             tlc.fillStyle = "white";
             if (i%2 === 0){
                 tlc.fillRect(_zero+barTimeWidth/2*i,  tl.height*0.5, 2, tl.height);
-            }else{
+            } else {
                 tlc.fillRect(_zero+barTimeWidth/2*i,  tl.height*0.5, 2, tl.height*0.5);
             }
             // text
@@ -520,7 +331,6 @@
         this.x = 0;
         this.y = 0;
     }
-
     function mouseMove(event){
         // マウスカーソル座標の更新
         mouse.x = event.pageX - canvas.offsetLeft;
@@ -531,7 +341,6 @@
     canvas.addEventListener('mousemove', mouseMove, true);
     tl.addEventListener('mousemove', mouseMove, true);
 
-    var _longNoteStart = null;
     function _addNote(list, e){
         var _x = mouse.x - _zero;
         // console.log(_x);
@@ -624,7 +433,6 @@
             // }
         })
         // list = list.filter(function(x){return x != null;}) // NG:値渡しできない
-        // console.log(list);
 
         redraw(c);
 
@@ -667,7 +475,7 @@
         }
     }
 
-    // loop
+    // Main loop
     (function(){
         if(music){
             var cTime = music.currentTime;
@@ -704,6 +512,7 @@
         setTimeout(arguments.callee, fps);
     })();
 
+    // 後からBPM値を変えたときに、ノーツ時間を調整する
     function bpmExchange(noteList, preBPM, newBPM){
         var noteList = noteList;
         var newList = [];
@@ -729,7 +538,7 @@
     }
 
     // keydown
-    document.addEventListener('keydown', function(e){
+    var handleKeyDown = function(e){
         // e.preventDefault();
         // console.log(e.keyCode);
         var kc = e.keyCode;
@@ -773,47 +582,25 @@
         }
 
         //shift+space: bpm counter
-        var now,delta,sum,avg,_bpm,i;
-        if (e.shiftKey) {
-            if (e.keyCode == 32) {
-                if (!past) {
-                    past = performance.now();
-                }else{
-                    now = performance.now();
-                    delta = now - past; //前回タップから差分
-                    past = now;
-
-                    counts.push(delta);
-
-                    //4タップごとにｂｐｍ出力
-                    if (counts.length%4 == 0) {
-                        // 差分の平均を得る
-                        // sum = 0;
-                        sum = counts.reduce(function(x,y){ return x+y });
-                        avg = sum / counts.length;
-                        _bpm = Math.round(60 / avg*1000);
-
-                        // document.getElementById('bpmOutput').innerHTML = bpm +" BPM";
-                        bpmInput.value = _bpm;
-                        updateVal();
-                    }
-                }
-            }
+        if (e.shiftKey && e.keyCode === 32) {
+            bpmCounter.count();
+            bpmInput.value = bpmCounter.bpm.toFixed(2);
+            updateVal();
         }
-    });
 
-    document.addEventListener('keyup', function(e){
+    };
+    document.addEventListener('keydown', handleKeyDown, false);
+
+    var handleKeyUp = function(e){
         if(!e.ctrlKey){
             // release long note info
             if (_longNoteStart) _longNoteStart = null;
         }
-        //bpm counts clear
         if (!e.shiftKey) {
-            counts = [];
-            past = 0;
-            // beater.classList.remove('shiftPressed');
+            bpmCounter.clear()
         }
-    }, false);
+    };
+    document.addEventListener('keyup', handleKeyUp, false);
 
     // var exportBtn = document.getElementById("export");
     function exportData(){
@@ -858,8 +645,8 @@
         };
 
         var name = file.name,
-              type = file.type;
-              console.log(type);
+        type = file.type;
+        console.log(type);
         if(name.match(/json/)){
             // jsonファイルはテキストとしてファイルを読み込む
             reader.readAsText(file, encode_type);
@@ -916,6 +703,7 @@
             alert(this.src+"\nは見つかりませんでした…")
         }
     }
+
     function importData(data){
         var dataobj;
         // console.log(data);
@@ -990,7 +778,7 @@
                 updateVal();
             }
             music.onerror = function(e){
-                console.log(e);
+                // console.log(e);
                 alert(dataobj.musicName+"の譜面データのみをロードしました")
             }
             // 各数値代入
@@ -1000,46 +788,21 @@
 
         }
     }
-    // 以前の
+    // TODO:以前のデータ消す
     function deleteStorage(){
-
+        return 0;
     }
 
     function init(){
         getAudioBuffer('./assets/clap.mp3', function(buffer){
             clap = buffer;
-            console.log(clap);
         })
+        loadStorage();
         // clap.onloadeddata = function(){
-            loadStorage();
             // clap.play();
         // }
     }
     window.addEventListener("load", init, false);
 
 })();
-// window.addEventListener("unload", function() {
-// 	alert("ページを離れます。");
-// }, false);
-    /*
-     new note List draft
-     [[type, bar, noteInfo, ],[xxx],...]
-     noteInfo = 01 // 2文字で
-    */
 
-    /*
-
-otoge gameinfoデザイン
-{
-    type: yt or HTMLaudio
-    musicSrc:
-    startTime: // 音源内での、音楽の再生開始位置； ここがゼロの場合、waitに自動的に補正がかかるようにする
-    // 音源の途中からスタートしたい場合も
-    wait: 0 // ゲーム開始 ～ 音源スタートまでの待機時間：猶予がなさ過ぎる場合に zerohour = wait + startTime
-    endTime: //音源終了 _endTime = zerohour +
-}
-
-    */
-        </script>
-    </body>
-</html>

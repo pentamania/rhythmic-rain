@@ -1,0 +1,80 @@
+/*@import url(https://fonts.googleapis.com/css?family=Russo+One);*/
+body{
+    background: rgb(64,78, 145);
+    color: #a9dea6;
+}
+#appname{
+    font-family: cursive;
+    font-size: 2rem;
+}
+#top-menu{
+    position: fixed;
+    top: 0;
+    height: 60px;
+    display: table;
+    background: rgba(42, 161, 132, 0.68);
+    /*width: 100%;*/
+}
+#main{
+    font-size: .5rem;
+    margin-top: 70px;
+
+}
+#import-field{
+    /*margin: 20px auto;*/
+    /*width: 200px;*/
+    /*height: 100px;*/
+    padding: 1em;
+    box-shadow: 0 0 1px 1px rgb(167, 162, 162);
+    background: rgb(214, 214, 214);
+    border-radius: 6px;
+    color: rgb(134, 132, 132);
+}
+#exportBtn{
+    color: rgb(161, 211, 221);
+    margin: 2px 0;
+    background: rgb(100, 79, 208);
+    border: solid 2px #1e71ad;
+    /*border-width: 0 0 2px 0;*/
+    border-radius: 4px;
+    padding: 4px;
+    display: inline-block;
+}
+#timeline{
+    margin-bottom: 4px;
+}
+canvas{
+    box-sizing: border-box;
+    display: block;
+}
+#info{
+    position: fixed;
+    /*bottom: 0;*/
+    top: 0;
+    right: 0;
+    background: #a4bcf5;
+    color: #101350;
+    padding: .5em;
+    border-radius: 0 0 0 3px;
+    width: 200px;
+    /*text-align: center;*/
+}
+.input-container{
+    position: fixed;
+    /*top: 0;*/
+    bottom: 0;
+    left: 0;
+    background: hsla(124, 59%, 61%, 0.63);
+    padding: .3em;
+    width: 100%;
+}
+.tips{
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    background: rgb(73, 72, 94);
+    color: rgb(255, 255, 255);
+}
+.cell{
+    display: table-cell;
+}

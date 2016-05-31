@@ -19,6 +19,9 @@ body{
     color: rgb(208, 218, 213);
 }
 
+.container{
+    width:640px;
+}
 .title{
     text-align: center;
 }
@@ -98,8 +101,9 @@ canvas{
 }
 
 @media screen and (max-width: 640px) {
-    #repertory-wrapper{width: 90%;}
+    // #repertory-wrapper{width: 90%;}
     /*#repertory li{width: 50%;}*/
+    .container{width: 90%;}
 }
 
 #music-info{
@@ -127,13 +131,24 @@ canvas{
     }
 }
 
+#config{
+    display: block;
+    overflow: hidden;
+    margin: 0 auto;
+    width: 640px;
+}
+
 .counter-wrapper{
     @width: 80px;
-    @color:#4D85D9;
-    @hoverColor:#45AFBF;
-    float: left;
+    @color: #4D85D9;
+    @hoverColor: #45AFBF;
+    @fontSize: 0.7rem;
+
+    // float: left;
+    display: inline-block;
     text-align: center;
     width: @width;
+    font-size: @fontSize;
 
     .counter-header{
     }

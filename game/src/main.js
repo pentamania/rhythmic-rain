@@ -35,6 +35,10 @@
         night: "rgb(0, 0, 0)"
     };
     var FILTER_COLOR = "rgba(164, 146, 146, 0.59)";
+    // レパートリー背景
+    var DEFAULT_COLOR = 'rgb(60, 100, 214)';
+    var ACTIVE_COLOR = 'rgb(161, 182, 241)';
+    var DEFAULT_OPACITY = 0.5;
 
     // アセット位置
     var JUDGE_LINE_Y = SCREEN_HEIGHT * 0.7 | 0; //
@@ -128,10 +132,12 @@
     var bpm = 120; // ノーツスピードに絡む(数値はダミー)
     var noteSpeed = 1.0; // ユーザーノーツスピード
 
+    // other
+    var musicList;
+    var activeMusicPointer = 0;
+
     window.addEventListener('DOMContentLoaded', function(){
         // レパートリーリストのロード
-        var musicList;
-        var activeMusicPointer = 0;
         getXmlData(MUSIC_LIST_PATH, function (res){
             var data = JSON.parse(res);
             musicList = data.list;
@@ -172,9 +178,6 @@
 
         /* リストから楽曲一覧生成　*/
         musicList.forEach(function(m, index){
-            var DEFAULT_COLOR = 'rgb(60, 100, 214)';
-            var ACTIVE_COLOR = 'rgb(161, 182, 241)';
-            var DEFAULT_OPACITY = 0.5;
 
             /* 選択肢のセットアップ */
             var li = document.createElement('li');
@@ -250,7 +253,7 @@
         // 1. 画像ロード
         imagePreload(IMAGE_ASSETS, images, function(){
             // 2. 初期化（canvasセット等）
-            gameInit();
+            init();
 
             // 3. 初回タップ、クリックでスタート
             var _func = (function(event) {
@@ -369,7 +372,7 @@
         console.log("reset", music);
     }
 
-    function gameInit() {
+    function init() {
 
         //timer set up
         timer = new Timer();
@@ -379,7 +382,12 @@
         app.height = bgCanvas.height  = SCREEN_HEIGHT;
         holderElement.style.width = SCREEN_WIDTH +"px";
         holderElement.style.height = SCREEN_HEIGHT +"px";
+
         resizeCover($id('load-filter'));
+        window.addEventListener('resize', function(){
+            console.log('resized');
+            resizeCover($id('load-filter'));
+        });
 
         // set up background canvas : draw once
         var bgctx = bgCanvas.getContext('2d');
@@ -495,7 +503,9 @@
     function screenRender() {
         var ctx = app.getContext('2d');
         var relativeTime = 0; // 再生位置とノーツ出現情報との差、０のとき判定ライン位置になるように
-        var corr = bpm * 1.75 * RATIO * noteSpeed; // 補正、ハイスピ
+        // var corr = bpm * 1.75 * RATIO * noteSpeed; // 補正、ハイスピ
+        // Memo: corrをマイナスにすると、画面の下側からノーツが降ってきます。
+        var corr = bpm * 1.75 * RATIO * (noteSpeed); // 補正、ハイスピ
         var deltaY; // 判定ラインまでの距離
         var drawingPointX = 100; // X軸 描画位置
         var drawingPointY; // Y軸 描画位置
@@ -818,7 +828,7 @@
         } else if (dir === 'down' && NOTE_SPEED_RANGE.min < noteSpeed) {
             noteSpeed -= 1;
         }
-        element.textContent = noteSpeed;
+        element.innerHTML = noteSpeed;
         // console.log(noteSpeed);
     }
 
