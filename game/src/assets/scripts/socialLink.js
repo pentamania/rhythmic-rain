@@ -9,7 +9,7 @@ if(window.addEventListener) {
 function shareButtonReadSyncer(){
 
     // 遅延ロードする場合は次の行と、終わりの方にある行のコメント(//)を外す
-    // setTimeout(function(){
+    setTimeout(function(){
 
     // Twitter (オリジナルボタンを使用するので、コメントアウトして無効化)
     // window.twttr=(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return;js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);t._e=[];t.ready=function(f){t._e.push(f);};return t;}(document,"script","twitter-wjs"));
@@ -41,6 +41,6 @@ function shareButtonReadSyncer(){
     // pocket
     (!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js"));
 
-    //},5000);	//ページを開いて5秒後(5,000ミリ秒後)にシェアボタンを読み込む
+    },1000);	//ページを開いて5秒後(5,000ミリ秒後)にシェアボタンを読み込む
 
 }

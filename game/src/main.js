@@ -1,7 +1,8 @@
 ;(function(window){
-    console.log('Hi, What a wonderful day');
+    console.log('Hi, What a wonderful day today');
 
     /* 定数 */
+    var DEBUG_MODE = false;
     // 画面描画用パラメータ
     var SCREEN_WIDTH = (window.innerWidth > 640) ? 640 : window.innerWidth * 0.9;
     var RATIO = SCREEN_WIDTH / 640; //640よりも小さい画面の場合に縮小比を保持
@@ -19,8 +20,8 @@
     var NOTE_POSITIONS = createSpanArray(NOTE_POS_SPAN, 4, 8);
     var NOTE_POSITIONS_LEN = NOTE_POSITIONS.length;
     var NOTE_SPEED_RANGE = {
-        max: 3,
-        min: -3
+        max: 5,
+        min: 0
     };
 
     // 色
@@ -68,7 +69,6 @@
         nice: 0.05,
         great: 0.03
     };
-
     // 加点設定
     var SCORE = {
         // hold: 10,
@@ -130,7 +130,7 @@
     var endhour = 0; // ゲーム終了時間：音源ロード時に設定
     var wait = 3.0; // 音源再生までの待ち時間
     var bpm = 120; // ノーツスピードに絡む(数値はダミー)
-    var noteSpeed = 1.0; // ユーザーノーツスピード
+    var noteSpeed = 0; // ユーザーノーツスピード
 
     // other
     var musicList;
@@ -255,7 +255,7 @@
             // 2. 初期化（canvasセット等）
             init();
 
-            // 3. 初回タップ、クリックでスタート
+            // 3. 初回タップ、クリックのみ実行
             var _func = (function(event) {
                 return function f(event) {
                     // 効果音のロード
@@ -273,6 +273,8 @@
                             app.addEventListener('touchstart', function(e){ e.preventDefault();onpointdown();}, false);
                             document.addEventListener('keydown', function(e){
                                 // if (e.keyCode == 32) return judge();
+                                // if (!(e.keyCode === 116)) e.preventDefault();
+                                e.preventDefault();
                                 onpointdown();
                             });
                             // keyup系
@@ -351,7 +353,6 @@
         });
     }
 
-
     function gameReset(){
         currentNoteIndex = 0;
         music.position = -1;
@@ -403,6 +404,12 @@
         bgctx.fillStyle = FILTER_COLOR;
         bgctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+        //NoteSpeed表示
+        $id('note-speed-display').innerHTML = noteSpeed;
+        //
+        var debugElm = $id('debug');
+        if (!DEBUG_MODE) debugElm.parentNode.removeChild(debugElm);
+
         main();
     }
 
@@ -410,8 +417,8 @@
     function main() {
         if (isPlaying){
             timer.update();
-            $id('time').innerHTML = timer.time(); //DEBUG
             calc();
+            if (DEBUG_MODE) $id('time').innerHTML = timer.time(); //DEBUG
         };
         screenRender();
 
@@ -505,7 +512,7 @@
         var relativeTime = 0; // 再生位置とノーツ出現情報との差、０のとき判定ライン位置になるように
         // var corr = bpm * 1.75 * RATIO * noteSpeed; // 補正、ハイスピ
         // Memo: corrをマイナスにすると、画面の下側からノーツが降ってきます。
-        var corr = bpm * 1.75 * RATIO * (noteSpeed); // 補正、ハイスピ
+        var corr = bpm * 1.75 * RATIO * (1+noteSpeed*0.5); // 補正、ハイスピ
         var deltaY; // 判定ラインまでの距離
         var drawingPointX = 100; // X軸 描画位置
         var drawingPointY; // Y軸 描画位置
@@ -792,7 +799,6 @@
 
     /* 入力処理 */
     function onpointdown(e){
-        // e.preventDefault();
         if (!enableInput) return;
 
         //  ゲーム中以外

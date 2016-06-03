@@ -2,72 +2,84 @@
 @import url("https://fonts.googleapis.com/css?family=Audiowide|Merienda+One' rel='stylesheet' type='text/css");
 
 html {
-    /*https://hail2u.net/blog/webdesign/yui3-css-reset-problem.html*/
-    background-color: transparent;
-    background-image: none;
+  /*https://hail2u.net/blog/webdesign/yui3-css-reset-problem.html*/
+  background-color: transparent;
+  background-image: none;
 
-    -webkit-text-size-adjust: 100%;
-    font-family: Audiowide, cursive, monospace, sans-serif;
-    font-size: 18px;
+  -webkit-text-size-adjust: 100%;
+  font-family: Audiowide, cursive, monospace, sans-serif;
+  font-size: 18px;
 }
 
 body{
-    /*background: rgb(12, 154, 133);*/
-    background: url("images/background.jpg") center center no-repeat fixed;
-    background-size: cover;
-    background-color: black;
-    color: rgb(208, 218, 213);
+  /*background: rgb(12, 154, 133);*/
+  background: url("images/background.jpg") center center no-repeat fixed;
+  background-size: cover;
+  background-color: black;
+  color: rgb(208, 218, 213);
 }
 
 .container{
-    width:640px;
+  width:640px;
 }
 .title{
-    text-align: center;
+  text-align: center;
 }
 
 #game-field{
-    position: relative;
-    margin: 8px auto;
+  position: relative;
+  margin: 8px auto;
 }
 
 canvas{
-    position: absolute;
+  position: absolute;
 }
 #bg{
-    z-index: 1;
+  z-index: 1;
 }
 #app{
-    z-index:2;
+  z-index: 2;
 }
+
+.UI-layer{
+  z-index:3;
+}
+
 #pauseBtn{
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    z-index:3;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+
+  @color: #687696;
+  background: white;
+  border: solid 2px @color;
+  border-radius: 2px;
+  color: @color;
+  text-align: center;
+  padding: 0.2rem;
+  cursor: pointer;
+  font-size: 0.8rem;
 }
 #music-name-display{
-    position: absolute;
-    bottom: 8px;
-    left: 8px;
-    z-index:3;
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
 }
 
 #repertory-wrapper{
-    display: block;
-    min-height: 300px;
-    overflow: auto;
-    margin:0 auto;
-    width: 640px;
+  display: block;
+  min-height: 300px;
+  overflow: auto;
+  margin:0 auto;
+  width: 640px;
 
-    .repertory-title{
-        width: 100%;
-        font-size: 1.2rem;
-        text-align: center;
-    }
-}
+  .repertory-title{
+    width: 100%;
+    font-size: 1.2rem;
+    text-align: center;
+  }
 
-#repertory{
+  #repertory{
     display: block;
     text-align: center;
     width: 100%;
@@ -77,100 +89,109 @@ canvas{
     margin: 20px auto;
 
     li{
-        box-sizing: border-box;
-        font-size: 0.8rem;
-        /*width: 16.66%;*/
-        /*width: 64px;*/
-        /*height: 64px;*/
-        width: 100%;
-        height: 32px;
-        color: white;
-        z-index:3;
-        cursor: pointer;
-        padding: 0.4em;
-        /*margin-left: 4px;*/
-        margin-bottom: 4px;
-        display: inline-block;
-        vertical-align: top;
-        overflow:hidden;
+      box-sizing: border-box;
+      font-size: 0.8rem;
+      width: 100%;
+      height: 32px;
+      color: white;
+      z-index:3;
+      cursor: pointer;
+      padding: 0.4em;
+      /*margin-left: 4px;*/
+      margin-bottom: 4px;
+      display: inline-block;
+      vertical-align: top;
+      overflow:hidden;
 
-        &:hover{
+      &:hover{
 
-        }
+      }
     }
+  }
 }
 
+
 @media screen and (max-width: 640px) {
-    // #repertory-wrapper{width: 90%;}
-    /*#repertory li{width: 50%;}*/
-    .container{width: 90%;}
+  // #repertory-wrapper{width: 90%;}
+  /*#repertory li{width: 50%;}*/
+  .container{width: 90%;}
 }
 
 #music-info{
-    background: rgba(86, 89, 86, 0.66);
-    text-align: center;
-    margin-top:4px;
+  background: rgba(86, 89, 86, 0.66);
+  text-align: center;
+  margin-top:4px;
 }
 
 #load-filter{
-    display:table;
-    background: rgba(22, 133, 144, 0.63);
-    background-size: cover;
-    text-align: center;
-    color: white;
-    min-width: 100%;
-    min-height: 100%;
-    z-index: 100;
-    position: absolute;
-    top: 0;
-    left: 0;
-    visibility: hidden;
-    span{
-        display: table-cell;
-        vertical-align: middle;
-    }
+  display:table;
+  background: rgba(22, 133, 144, 0.63);
+  background-size: cover;
+  text-align: center;
+  color: white;
+  min-width: 100%;
+  min-height: 100%;
+  z-index: 100;
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+
+  span{
+    display: table-cell;
+    vertical-align: middle;
+  }
 }
 
-#config{
-    display: block;
-    overflow: hidden;
-    margin: 0 auto;
-    width: 640px;
+#option{
+  display: inline-block;
+  position: absolute;
+  box-sizing: border-box;
+  bottom: 0;
+  right: 0;
+  overflow: hidden;
+  padding: 4px;
+  opacity: 0.6;
 }
 
+/*
+* component: counter
+*/
 .counter-wrapper{
-    @width: 80px;
-    @color: #4D85D9;
-    @hoverColor: #45AFBF;
-    @fontSize: 0.7rem;
+  /* main parameters */
+  @width: 50px;
+  @color: #4D85D9;
+  @hoverColor: #45AFBF;
+  @fontSize: @width/5;
 
-    // float: left;
-    display: inline-block;
+  // float: left;
+  display: inline-block;
+  text-align: center;
+  width: @width;
+  font-size: @fontSize;
+  cursor: pointer;
+
+  .counter-header{
+  }
+
+  .half-circle{
+    @rad: @width/2;
+    height: @rad;
+    width: @rad*2.4;
+    background: @color;
     text-align: center;
-    width: @width;
-    font-size: @fontSize;
-
-    .counter-header{
+    vertical-align: middle;
+    display: table-cell;
+    &:hover{
+      background: @hoverColor;
     }
-
-    .half-circle{
-        @rad: @width/2;
-        height: @rad;
-        width: @rad*2.4;
-        background: @color;
-        text-align: center;
-        vertical-align: middle;
-        display: table-cell;
-        &:hover{
-            background: @hoverColor;
-        }
-        &.upper{
-            border-radius:50px 50px 0 0;
-        }
-        &.lower{
-            border-radius: 0 0 50px 50px;
-        }
+    &.upper{
+      border-radius:50px 50px 0 0;
     }
+    &.lower{
+      border-radius: 0 0 50px 50px;
+    }
+  }
 }
 
 
@@ -203,18 +224,18 @@ canvas{
 ******************************/
 /* スマホ */
 ul.social-button {
-    width: 238px ;
-    margin: 24px auto ;
-    padding: 0 ;
-    border: none ;
-    list-style-type: none ;
+  width: 238px ;
+  margin: 24px auto ;
+  padding: 0 ;
+  border: none ;
+  list-style-type: none ;
 }
 
 /* デスクトップ */
 @media screen and ( min-width:480px ) {
-    ul.social-button {
-        width: 410px ;
-    }
+  ul.social-button {
+    width: 410px ;
+  }
 }
 
 
