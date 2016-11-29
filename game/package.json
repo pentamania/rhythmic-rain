@@ -14,7 +14,7 @@
     "clean": "rm -rf ./dist/* ./tmp/*",
 
     "js:concat:lib": "cat src/assets/scripts/lib/*.js src/assets/scripts/*.js > ./tmp/lib.js",
-    "js:minify": "uglifyjs ./tmp/lib.js src/main.js > ./dist/all.min.js",
+    "js:minify": "uglifyjs ./tmp/lib.js src/constants.js src/main.js > ./dist/all.min.js",
     "build:js": "npm run js:concat:lib && npm run js:minify",
 
     "css:compile": "lessc src/assets/less/style.less tmp/assets/style.css",
