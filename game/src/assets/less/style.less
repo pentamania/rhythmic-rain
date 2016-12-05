@@ -1,6 +1,15 @@
 @import url("http://yui.yahooapis.com/3.15.0/build/cssreset/cssreset-min.css");
 @import url("https://fonts.googleapis.com/css?family=Audiowide|Merienda+One' rel='stylesheet' type='text/css");
 
+// mixins
+.app-layer {
+  z-index: 2;
+}
+
+.UI-layer {
+  z-index: 3;
+}
+
 html {
   /*https://hail2u.net/blog/webdesign/yui3-css-reset-problem.html*/
   background-color: transparent;
@@ -19,19 +28,19 @@ body{
   color: rgb(208, 218, 213);
 }
 
-.container{
+.container {
   width:640px;
 }
-.title{
+.title {
   text-align: center;
 }
 
-#game-field{
+#game-field {
   position: relative;
   margin: 8px auto;
 }
 
-canvas{
+canvas {
   position: absolute;
 }
 #bg{
@@ -41,11 +50,10 @@ canvas{
   z-index: 2;
 }
 
-.UI-layer{
-  z-index:3;
-}
 
-#pauseBtn{
+#pauseBtn {
+  .UI-layer;
+
   position: absolute;
   top: 8px;
   right: 8px;

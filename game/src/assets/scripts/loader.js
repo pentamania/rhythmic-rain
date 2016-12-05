@@ -58,7 +58,7 @@ var RRAIN = RRAIN || {};
 
     loadSound: function(src, key) {
       var self = this;
-      if (!Howl || !Howler) {
+      if (typeof Howl === "undefined") {
         console.error('Howler.js is not load');
         return;
       }

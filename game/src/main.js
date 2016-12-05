@@ -1,6 +1,6 @@
 ;(function(window){
     // asset register
-    var sounds = {} // サウンド管理;
+    // var sounds = {} // サウンド管理;
     // var images = {} // image管理;
     var music = null;
     var musicName = null;
