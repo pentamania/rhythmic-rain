@@ -53,6 +53,6 @@ gulp.task('sound', (cb)=> {
 })
 
 // TOOD:全ビルド clean -> css/js/assets -> end
-gulp.task('build', ['clean'], (cb)=> {
+gulp.task('build:app', ['clean'], (cb)=> {
   return gulp.src(['js:minify'])
 })

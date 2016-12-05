@@ -1,4 +1,7 @@
 ;(function(window){
+
+    new RRAIN.App();
+
     // asset register
     // var sounds = {} // サウンド管理;
     // var images = {} // image管理;
@@ -29,7 +32,7 @@
     // var autoPlay = true;
     var _ua = navigator.userAgent.toLowerCase();
     // IE andriodではSE無効
-    console.log(_ua)
+    // console.log(_ua)
     var enableSE = (_ua.indexOf("android")>0 || _ua.indexOf("MSIE")>0 || _ua.indexOf("trident")>0) ? false : true;
     var enableInput = true;
     var isHTMLaudio = null;
@@ -49,13 +52,14 @@
     var activeMusicPointer = 0;
 
     // 汎用素材プリロード　-> 立ち上げ
-    RRAIN.Loader.loadBatch({
-      "image": IMAGE_ASSETS,
-      "sound": SOUND_ASSETS,
-      "json": {
-        "musicList": MUSIC_LIST_PATH
-      }
-    }).then(appInitialize);
+    // RRAIN.Loader.loadBatch({
+    //   "image": IMAGE_ASSETS,
+    //   "sound": SOUND_ASSETS,
+    //   "json": {
+    //     "musicList": MUSIC_LIST_PATH
+    //   }
+    // }).then(appInitialize);
+
 
     // window.addEventListener('DOMContentLoaded', function(){
     //     // レパートリーリストのロード

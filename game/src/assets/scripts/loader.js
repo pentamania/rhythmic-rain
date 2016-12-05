@@ -79,7 +79,7 @@ var RRAIN = RRAIN || {};
 
     loadImage: function(src, key) {
       var self = this;
-      console.log(self)
+      // console.log(self)
 
       return new Promise(function(resolve, reject) {
         var img = new Image();
