@@ -8,7 +8,7 @@ var RRAIN = RRAIN || {};
   var App = function() {
     var canvas = this.canvas = $id("app");
 
-    // this.game = new ns.Game(canvas, this);
+    this.game = new ns.Game(this);
     this.music = null;
     this.musicList;
     this.noteSpeed = 0;
@@ -16,11 +16,9 @@ var RRAIN = RRAIN || {};
 
     // flag
     this.enableInput = true;
-    this.enableSE = true;
-    this.isPlaying = false;
-    // this.isLoading;
+    // this.isPlaying = false; // gameがもつ
 
-    // nodes
+    // Node refs
     this.refs = {
       musicDetail: $id("music-info"),
       repertoryList: $id("repertory"),
@@ -28,9 +26,11 @@ var RRAIN = RRAIN || {};
       pauseBtn: $id('pause-btn'),
       filterNode: $id("load-filter"),
       gameField: $id('game-field'),
+      noteSpeedDisplay: $id('note-speed-display'),
+      // twitterShareLink: $id(),
+      // startBtn: $id(),
     };
 
-    this.noteSpeedDisplay = $id('note-speed-display');
     // this.timingAdjustment = $id('');
     // this.twitterShareLink = $id('');
 
@@ -44,10 +44,13 @@ var RRAIN = RRAIN || {};
 
     init: function() {
       // サイズを合わせ
-      this.refs.gameField.style = {
-        width: SCREEN_WIDTH +"px",
-        height: SCREEN_HEIGHT +"px",
-      };
+      this.refs.gameField.style.width = SCREEN_WIDTH +"px";
+      this.refs.gameField.style.height = SCREEN_HEIGHT +"px";
+
+      // this.refs.gameField.style = {
+      //   width: SCREEN_WIDTH +"px",
+      //   height: SCREEN_HEIGHT +"px",
+      // };
 
       resizeCover(this.refs.filterNode);
       window.addEventListener('resize', function(){
@@ -68,6 +71,7 @@ var RRAIN = RRAIN || {};
         this._checkBrowserSupport();
         this.setupInputEvent();
         this.setupRepertoryList(musicList);
+        this.game.init();
         console.log("init end");
       }.bind(this));
     },
@@ -92,13 +96,13 @@ var RRAIN = RRAIN || {};
 
         // TODO： ポーズ中など、より細かい状態に対応する？
         // ゲーム中： インタラクション
-        if (this.isPlaying) {
+        if (self.game.isPlaying) {
           if (self.game.pointstart) self.game.pointstart(e);
 
         // ゲーム中以外: リセットしてゲーム開始
         } else {
           self.game.reset();
-          self.isPlaying = true;
+          self.game.isPlaying = true;
         }
       };
 
@@ -112,13 +116,14 @@ var RRAIN = RRAIN || {};
       }
 
       // keydown
-      this.canvas.addEventListener('mousedown', function(e){ e.preventDefault(); this.onpointdown();}, false);
+      this.canvas.addEventListener('mousedown', function(e){ e.preventDefault(); onpointdown(e);}, false);
       this.canvas.addEventListener('touchstart', onpointdown, false);
       document.addEventListener('keydown', function(e){
         // e.preventDefault();
         onpointdown();
       });
-      // keyup系
+
+      // keyup
       this.canvas.addEventListener('mouseup', onpointup, false);
       this.canvas.addEventListener('touchend', onpointup, false);
       document.addEventListener('keyup', onpointup, false);
@@ -203,7 +208,7 @@ var RRAIN = RRAIN || {};
             self.toggleLoadingState(false);
             self.endhour = self.music.duration() + self.wait;
             self.music.play(); // 試聴
-            // self.game.reset();
+            self.game.setMusic(self.music);
             self.refs.musicNameDisplay.innerHTML = "♪ " + music.name;
           }
         }
@@ -222,7 +227,7 @@ var RRAIN = RRAIN || {};
         var val = musicObj[key];
         var li = document.createElement('li');
         if (key === "author") {
-          // 作者名表示 アンカー付き
+          // 作者名表示 アンカーつける
           var inner = "<a href=" + musicObj['url'] + ">" + val + "</a>";
           li.innerHTML = key.toUpperCase()+": "+ inner;
         } else if (key === "difficulty"){
@@ -242,9 +247,9 @@ var RRAIN = RRAIN || {};
 
     toggleSE: function(force) {
       if (force) {
-        this.enableSE = force;
+        this.game.enableSE = force;
       } else {
-        this.enableSE = !this.enableSE;
+        this.game.enableSE = !this.game.enableSE;
       }
     },
 
@@ -278,7 +283,7 @@ var RRAIN = RRAIN || {};
 
   ns.App = App;
 
-  /* uitls */
+  /* utils */
   function $id(id) { return document.getElementById(id); }
 
   /* 指定要素の幅・高さを画面全体に広げる */
@@ -286,14 +291,14 @@ var RRAIN = RRAIN || {};
     var target = element;
 
     var MaxHeight = Math.max(
-        Math.max(document.body.clientHeight, document.body.scrollHeight),
-        Math.max(document.documentElement.scrollHeight, document.documentElement.clientHeight)
+      Math.max(document.body.clientHeight, document.body.scrollHeight),
+      Math.max(document.documentElement.scrollHeight, document.documentElement.clientHeight)
     );
     target.style.height = MaxHeight+"px";
 
     var MaxWidth = Math.max(
-        Math.max(document.body.clientWidth, document.body.scrollWidth),
-        Math.max(document.documentElement.scrollWidth, document.documentElement.clientWidth)
+      Math.max(document.body.clientWidth, document.body.scrollWidth),
+      Math.max(document.documentElement.scrollWidth, document.documentElement.clientWidth)
     );
     target.style.width = MaxWidth + "px";
   }
