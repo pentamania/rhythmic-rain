@@ -30,6 +30,9 @@ var RRAIN = RRAIN || {};
     this.isPlaying = false;
     this.isPressed = true;
     this.isAutoPlay = false;
+
+    this._notePositions = createSpanArray(NOTE_POS_SPAN, 4, 8)
+    this._notePositionsLen = this._notePositions.length;
   };
 
   Game.prototype = {
@@ -176,7 +179,7 @@ var RRAIN = RRAIN || {};
       // ノーツレイヤー
       ctx.save();
       for (i=this.currentNoteIndex, len=noteList.length; i<len; i++) {
-        drawingPointX = NOTE_POSITIONS[i%NOTE_POSITIONS_LEN];
+        drawingPointX = this._notePositions[i%this._notePositionsLen];
         noteTime = noteList[i];
 
         // noteTimeがarrayだったら == ロングノートだったら
@@ -289,7 +292,7 @@ var RRAIN = RRAIN || {};
     },
 
     setNoteSpeed: function(v) {
-      // TODO 計算
+      // TODO: 計算
       this.noteSpeed = v;
     },
 
@@ -444,5 +447,27 @@ var RRAIN = RRAIN || {};
 
     context.restore();
   }
+
+  /* arrayから */
+  function createSpanArray(span, m, n, randomize){
+    var array = [];
+    for (var i = m; i < m+n; i++) {
+      array.push(span * i);
+    }
+    if (randomize === true){
+      for(var i = 0; i < array.length; i++) {
+        swap(array, i, ((Math.random() * (array.length - i)) + i) | 0);
+      }
+    }
+
+    return array;
+
+    // randomize: http://nmi.jp/archives/541
+    function swap(a, s, d) {
+      var t = a[s];
+      a[s] = a[d];
+      a[d] = t;
+    }
+  };
 
 }(RRAIN))

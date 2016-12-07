@@ -5,51 +5,51 @@
     // asset register
     // var sounds = {} // サウンド管理;
     // var images = {} // image管理;
-    var music = null;
-    var musicName = null;
+    // var music = null;
+    // var musicName = null;
 
-    // 要素取得
-    var app = $id('app');
-    var bgCanvas = $id('bg');
-    var holderElement = $id('game-field');
-    var repertoryWrapper = $id('repertory-wrapper');
+    // // 要素取得
+    // var app = $id('app');
+    // var bgCanvas = $id('bg');
+    // var holderElement = $id('game-field');
+    // var repertoryWrapper = $id('repertory-wrapper');
 
-    // ゲーム情報格納用変数
-    var timer;
-    var noteList = []; //譜面情報
-    var hitEffect = null; //@int
-    var score = 0; //@int
-    var chainNum = 0; // @int
-    var maxChain = 0; // 最大チェイン数 @int
-    var fullChainNum = 1; // フルコンボ時の数値 @int
-    var rateText = null; // GREAT!などのラベル @string
-    var longNote = null; // ロングノート情報 @float
+    // // ゲーム情報格納用変数
+    // var timer;
+    // var noteList = []; //譜面情報
+    // var hitEffect = null; //@int
+    // var score = 0; //@int
+    // var chainNum = 0; // @int
+    // var maxChain = 0; // 最大チェイン数 @int
+    // var fullChainNum = 1; // フルコンボ時の数値 @int
+    // var rateText = null; // GREAT!などのラベル @string
+    // var longNote = null; // ロングノート情報 @float
 
-    // flags
-    var btnFlg = false; // ボタンが押下状態フラグ
-    var isPlaying = false; // プレイ中
-    var autoPlay = false;
-    // var autoPlay = true;
-    var _ua = navigator.userAgent.toLowerCase();
-    // IE andriodではSE無効
-    // console.log(_ua)
-    var enableSE = (_ua.indexOf("android")>0 || _ua.indexOf("MSIE")>0 || _ua.indexOf("trident")>0) ? false : true;
-    var enableInput = true;
-    var isHTMLaudio = null;
-    var canPlayMusic = true;
+    // // flags
+    // var btnFlg = false; // ボタンが押下状態フラグ
+    // var isPlaying = false; // プレイ中
+    // var autoPlay = false;
+    // // var autoPlay = true;
+    // var _ua = navigator.userAgent.toLowerCase();
+    // // IE andriodではSE無効
+    // // console.log(_ua)
+    // var enableSE = (_ua.indexOf("android")>0 || _ua.indexOf("MSIE")>0 || _ua.indexOf("trident")>0) ? false : true;
+    // var enableInput = true;
+    // var isHTMLaudio = null;
+    // var canPlayMusic = true;
 
-    // 譜面位置・判定調整用
-    var currentNoteIndex = 1;
-    var calib = Math.min(0, RATING.good); // 判定調整用　RATING.good判定より小さいこと
-    var zerohour = 0; // （音源中での実際の音楽再生開始時間）譜面load時に修正される
-    var endhour = 0; // ゲーム終了時間：音源ロード時に設定
-    var wait = 3.0; // 音源再生までの待ち時間
-    var bpm = 120; // ノーツスピードに絡む(数値はダミー)
-    var noteSpeed = 0; // ユーザーノーツスピード
+    // // 譜面位置・判定調整用
+    // var currentNoteIndex = 1;
+    // var calib = Math.min(0, RATING.good); // 判定調整用　RATING.good判定より小さいこと
+    // var zerohour = 0; // （音源中での実際の音楽再生開始時間）譜面load時に修正される
+    // var endhour = 0; // ゲーム終了時間：音源ロード時に設定
+    // var wait = 3.0; // 音源再生までの待ち時間
+    // var bpm = 120; // ノーツスピードに絡む(数値はダミー)
+    // var noteSpeed = 0; // ユーザーノーツスピード
 
-    // other
-    // var musicList;
-    var activeMusicPointer = 0;
+    // // other
+    // // var musicList;
+    // var activeMusicPointer = 0;
 
     // 汎用素材プリロード　-> 立ち上げ
     // RRAIN.Loader.loadBatch({
@@ -856,18 +856,18 @@
     //==============================
 
     /* コンフィグ入力 */
-    $id('note-speed-up-button').onclick = function(){
-        varyNoteSpeed('up', $id('note-speed-display'));
-    }
-    $id('note-speed-down-button').onclick = function(){
-        varyNoteSpeed('down', $id('note-speed-display'));
-    }
+    // $id('note-speed-up-button').onclick = function(){
+    //     varyNoteSpeed('up', $id('note-speed-display'));
+    // }
+    // $id('note-speed-down-button').onclick = function(){
+    //     varyNoteSpeed('down', $id('note-speed-display'));
+    // }
 
-    $id('autoPlayBtn').addEventListener('click', setAutoPlay, false);
+    // $id('autoPlayBtn').addEventListener('click', setAutoPlay, false);
 
-    $id('resetBtn').addEventListener('click', gameReset, false);
+    // $id('resetBtn').addEventListener('click', gameReset, false);
 
-    $id('pauseBtn').addEventListener('click', pause);
+    // $id('pauseBtn').addEventListener('click', pause);
 
     // $id('seek').onblur = function(){
     //     timer.setTime(this.value);
