@@ -10,16 +10,19 @@ var RRAIN = RRAIN || {};
     this.timer = new Timer();
     this.canvas = app.canvas;
     this.bufferCanvas = document.createElement('canvas');
-    this.music = app.music;
+    this.music = null;
     this.bpm = 120;
+    this.wait = 4;
 
-    this._activeLongNote;
+    // 判定
+    this.currentNoteIndex = 0;
+    this._activeLongNote = null;
     this.hitEffects = [];
     this.noteList = [];
 
     // 設定関連
-    this.adjustNum = 0;
-    this.noteSpeed = 0;
+    this.adjustTime = 0;
+    this.noteSpeedRate = 1;
 
     // 記録系
     this.score = 0;
@@ -79,6 +82,7 @@ var RRAIN = RRAIN || {};
     _update: function() {
       var i, len;
       var noteTime;
+      var noteList = this.noteList;
       var time = this.timer.time();
       var rTime;
 
@@ -88,21 +92,21 @@ var RRAIN = RRAIN || {};
       // if (DEBUG_MODE) $id('time').innerHTML = timer.time(); //DEBUG
 
       // 時間が来たら音楽再生開始: 一回のみ
-      if (!this.music._played && this.wait-zerohour < time) {
-        this.music._played = true;
+      if (!this.music._played && this.wait-this.zerohour < time) {
+        console.log("music start");
         this.music.play();
+        this.music._played = true;
       }
 
       // ゲーム終了
-      if (this.endhour < time) {
-        console.log("music end");
-        if (this.music.playing()) this.music.stop();
-        this.isPlaying = false;
-      }
+      // if (this.endhour < time) {
+      //   console.log("music end");
+      //   if (this.music.playing()) this.music.stop();
+      //   this.isPlaying = false;
+      // }
 
-      //
-      for (i = currentNoteIndex, len=noteList.length; i < len; i++) {
-        noteTime = this.noteList[i];
+      for (i=this.currentNoteIndex, len=noteList.length; i < len; i++) {
+        noteTime = noteList[i];
 
         // ロングノートだったら
         // if (typeof noteTime === 'object') {
@@ -112,24 +116,23 @@ var RRAIN = RRAIN || {};
 
         // 無入力判定： 判定ラインを超え、かつ判定時間を過ぎたらmiss判定、そして次のターゲットへ
         // ロングノート判定中は引っかからないようにする
-        if (!this._activeLongNote && noteTime+wait + RATING.good < time) {
+        if (!this._activeLongNote && noteTime+this.wait + RATING.good < time) {
           this.judge();
-          currentNoteIndex++;
         }
 
-        //オートプレイ
+        // TODO: オートプレイ
         //great範囲内に入ったら即座に反応
         // ロングノート判定中にロングノート情報を消さないようにする
         if (this.isAutoPlay && !this._activeLongNote) {
-          if (time > noteTime + wait - RATING.great*0.5) {
-            judge();
+          if (noteTime + wait - RATING.great*0.5 < time) {
+            this.judge();
           }
         }
       }
 
       // long note 処理
       if (this._activeLongNote != null) {
-        rTime = this._activeLongNote - time + calib;
+        rTime = this._activeLongNote - time + this.adjustTime;
 
         // ボタンを押している
         if (this.isPressed) {
@@ -158,8 +161,10 @@ var RRAIN = RRAIN || {};
       var noteList = this.noteList;
       var len = noteList.length;
       var buffer = this.bufferCanvas;
-      var noteHeight = NOTE_HEIGHT; // LNの場合は伸びる
-      var corr = this.bpm * 1.75 * RATIO * this.noteSpeed; // 補正、ハイスピ
+      var timer = this.timer;
+      var noteHeight; // LNの場合は伸びる
+       // ハイスピ等の補正
+      var corr = this.bpm * 1.75 * RATIO * this.noteSpeedRate;
 
       var relativeTime = 0;
       var deltaY; // 判定ラインまでの距離
@@ -189,11 +194,12 @@ var RRAIN = RRAIN || {};
           noteHeight = - (noteTime[1] - noteTime[0]) * corr; //上方向に伸ばすため、マイナス値
           noteTime = noteTime[0];
         } else {
+          noteHeight = NOTE_HEIGHT;
           ctx.fillStyle = NOTE_COLOR;
         }
 
         // 待ち時間を加算
-        noteTime += wait;
+        noteTime += this.wait;
 
         // 描画位置を決める
         relativeTime = noteTime - timer.time();
@@ -241,19 +247,19 @@ var RRAIN = RRAIN || {};
         }
 
         // スコア
-        ctx.textAlign = 'right'; //軸を文字列中央に持ってくる
-        ctx.fillText(score, SCORE_TEXT_POS_X,  SCORE_TEXT_POS_Y);
+        ctx.textAlign = 'right'; // 軸を文字列中央に持ってくる
+        ctx.fillText(this.score, SCORE_TEXT_POS_X, SCORE_TEXT_POS_Y);
 
-        // エフェクト（破壊的なのでfor-reverse文）
-        for (i = this.hitEffects.length - 1; i >= 0; i -= 1) {
-          effect = this.hitEffects[i];
-          ctx.save();
-          ctx.globalAlpha = effect.life * 0.1; //opacity
-          drawGradRect(ctx, effect.posX, JUDGE_LINE_Y-EFFECT_HEIGHT,  NOTE_WIDTH, EFFECT_HEIGHT, [[0,"rgba(0, 0, 0, 0)"], [1, effect.color]]);
-          effect.life--;
-          if (effect.life < 0) this.hitEffects.splice(i, 1);
-          ctx.restore();
-        }
+        // TODO エフェクト（破壊的なのでfor-reverse文）
+        // for (i = this.hitEffects.length - 1; i >= 0; i -= 1) {
+        //   effect = this.hitEffects[i];
+        //   ctx.save();
+        //   ctx.globalAlpha = effect.life * 0.1; //opacity
+        //   drawGradRect(ctx, effect.posX, JUDGE_LINE_Y-EFFECT_HEIGHT,  NOTE_WIDTH, EFFECT_HEIGHT, [[0,"rgba(0, 0, 0, 0)"], [1, effect.color]]);
+        //   effect.life--;
+        //   if (effect.life < 0) this.hitEffects.splice(i, 1);
+        //   ctx.restore();
+        // }
 
         // progress bar
         ctx.save();
@@ -263,10 +269,6 @@ var RRAIN = RRAIN || {};
         ctx.fillStyle = "#5099b6"; // ゲージ色
         ctx.fillRect(PROGRESSBAR_X,PROGRESSBAR_Y, PROGRESSBAR_WIDTH * remainRatio, PROGRESSBAR_HEIGHT);
         ctx.restore();
-
-        // DOM操作
-        repertoryWrapper.style.visibility = "hidden";
-        $id('pauseBtn').style.visibility = "visible";
       }
 
       // スタート＆リザルト画面
@@ -291,12 +293,18 @@ var RRAIN = RRAIN || {};
       }
     },
 
-    setNoteSpeed: function(v) {
+    setNoteSpeedRate: function(v) {
       // TODO: 計算
-      this.noteSpeed = v;
+      this.noteSpeedRate = v;
     },
 
     setMusic: function(music) {
+      music.on('end', function() {
+        console.log("game end");
+        this.isPlaying = false;
+        this.timer.pause();
+      }.bind(this));
+
       this.music = music;
       this.endhour = music.duration();
     },
@@ -326,36 +334,39 @@ var RRAIN = RRAIN || {};
       // repertoryWrapper.style.visibility = "visible";
       // $id('pauseBtn').style.visibility = "hidden";
       this.timer.run();
+      this.isPlaying = true;
     },
 
     pause: function() {
       this.music.pause();
       this.timer.pause();
-      // this.isPlaying = false;
+      this.isPlaying = false;
     },
 
     judge: function() {
-      if (!this.isPlaying) return;
+      // if (!this.isPlaying) return;
 
-      var noteTime = noteList[this.currentNoteIndex];
-      var _longEnd ; // ロング最終位置を一時保持
-      var reaction = this.reaction;
+      var noteTime = this.noteList[this.currentNoteIndex];
+      var _longEnd; // ロング最終位置を一時保持
+      var reaction = this.reaction.bind(this);
 
       // array(ロングノート)だったら
       if (typeof noteTime == 'object') {
         _longEnd = noteTime[1];
         noteTime = noteTime[0];
-        _longEnd += wait;
+        _longEnd += this.wait;
       }
-      noteTime += wait;
+
+      noteTime += this.wait;
 
       // 正判定位置からどれくらいずれているか
-      var rTime = Math.abs(noteTime - this.timer.time() + this.calib);
-
+      var rTime = Math.abs(noteTime - this.timer.time() + this.adjustTime);
+      // console.log("rt", rTime);
       // 判定範囲外なら何もせず終了
       if (rTime > RATING.out) return;
 
-      this._activeLongNote = _longEnd;
+      // ロング成功時
+      if (_longEnd) this._activeLongNote = _longEnd;
 
       if (rTime < RATING.great) return reaction("great");
       if (rTime < RATING.nice) return reaction("nice");
@@ -368,8 +379,13 @@ var RRAIN = RRAIN || {};
 
     // TODO: effect描画位置の指定
     reaction: function(rating) {
-      // ロングノートでなければ描画進める
-      if (this._activeLongNote == null) currentNoteIndex++;
+      // ロングノートでなければターゲット進める
+      // if (this._activeLongNote == null) this.currentNoteIndex++;
+
+      this.currentNoteIndex++;
+      // TEMP
+      console.log(this, rating);
+      return;
 
       if (rating === "hold") return;
 
@@ -380,7 +396,7 @@ var RRAIN = RRAIN || {};
         this.playShot(ratingData.sound);
         this.hitEffects.push({
           life: ratingData.effectTime,
-          posX: 0,
+          posX: this._notePositions[this.currentNoteIndex%this._notePositionsLen],
           color: ratingData.effectColor,
         });
         this.score += ratingData.score;
@@ -405,6 +421,7 @@ var RRAIN = RRAIN || {};
 
     pointstart: function() {
       if (this.isAutoPlay) return;
+      // console.log("push!", this.currentNoteIndex);
 
       this.isPressed = true;
       this.judge();

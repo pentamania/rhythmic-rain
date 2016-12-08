@@ -12,7 +12,6 @@ var RRAIN = RRAIN || {};
     this.music = null;
     this.musicList;
     this.noteSpeed = 0;
-    this.wait = 200;
 
     // flag
     this.enableInput = true;
@@ -29,12 +28,11 @@ var RRAIN = RRAIN || {};
       noteSpeedDisplay: $id('note-speed-display'),
       // twitterShareLink: $id(),
       // startBtn: $id(),
+      // this.timingAdjustment: $id('');
+    // this.twitterShareLink = $id('');
+    // var debugElm = $id('debug');
     };
 
-    // this.timingAdjustment = $id('');
-    // this.twitterShareLink = $id('');
-
-    // var debugElm = $id('debug');
     // if (!DEBUG_MODE) debugElm.parentNode.removeChild(debugElm);
 
     this.init();
@@ -46,11 +44,6 @@ var RRAIN = RRAIN || {};
       // サイズを合わせ
       this.refs.gameField.style.width = SCREEN_WIDTH +"px";
       this.refs.gameField.style.height = SCREEN_HEIGHT +"px";
-
-      // this.refs.gameField.style = {
-      //   width: SCREEN_WIDTH +"px",
-      //   height: SCREEN_HEIGHT +"px",
-      // };
 
       resizeCover(this.refs.filterNode);
       window.addEventListener('resize', function(){
@@ -72,6 +65,7 @@ var RRAIN = RRAIN || {};
         this.setupInputEvent();
         this.setupRepertoryList(musicList);
         this.game.init();
+
         console.log("init end");
       }.bind(this));
     },
@@ -81,7 +75,7 @@ var RRAIN = RRAIN || {};
       var unsupported = (ua.indexOf("android")>0 || ua.indexOf("MSIE")>0 || ua.indexOf("trident")>0);
 
       if (unsupported) {
-        alert('ご使用のブラウザは推奨環境下ではありません。\nGoogle chrome, iOS safariでのプレイをオススメします')
+        alert('ご使用のブラウザは推奨環境下ではありません。\nGoogle chrome (PC)、もしくはiOS safariでのプレイをオススメします')
         this.toggleSE(false);
       }
     },
@@ -92,7 +86,7 @@ var RRAIN = RRAIN || {};
       var onpointdown = function(e) {
         // ロード中などは何もしない
         if (!self.enableInput) return;
-        e.preventDefault();
+        // e.preventDefault();
 
         // TODO： ポーズ中など、より細かい状態に対応する？
         // ゲーム中： インタラクション
@@ -101,8 +95,16 @@ var RRAIN = RRAIN || {};
 
         // ゲーム中以外: リセットしてゲーム開始
         } else {
+          if (!self.music) {
+            alert("Select Music! 曲を選んで下さい");
+            return;
+          }
+
+          // DOM操作
+          self.refs.repertoryList.style.visibility = "hidden";
+          self.refs.pauseBtn.style.visibility = "visible";
           self.game.reset();
-          self.game.isPlaying = true;
+          self.game.start();
         }
       };
 
@@ -117,10 +119,10 @@ var RRAIN = RRAIN || {};
 
       // keydown
       this.canvas.addEventListener('mousedown', function(e){ e.preventDefault(); onpointdown(e);}, false);
-      this.canvas.addEventListener('touchstart', onpointdown, false);
+      this.canvas.addEventListener('touchstart',  function(e){ e.preventDefault(); onpointdown(e);}, false);
       document.addEventListener('keydown', function(e){
         // e.preventDefault();
-        onpointdown();
+        onpointdown(e);
       });
 
       // keyup
@@ -153,7 +155,7 @@ var RRAIN = RRAIN || {};
 
           self.updateMusicDetail(music);
 
-          // Reset all li style -> Change only selected li style
+          // Reset all li style > Change selected li style
           var childs = self.refs.repertoryList.childNodes;
           Object.keys(childs).forEach(function(i) {
             var cs = childs[i].style;
@@ -183,7 +185,7 @@ var RRAIN = RRAIN || {};
             // 譜面情報の取得
             var p2 = RRAIN.Loader.loadJson(DATA_PATH+music.fumen, "chart_"+music.name)
             .then(function(res){
-              // self.game.setupGame(res.data);
+              self.game.setupGame(res.data);
             })
             .catch(function(error){
               alert("譜面のロードに失敗しました");
@@ -200,7 +202,7 @@ var RRAIN = RRAIN || {};
 
             // ロード済み
             self.music = selectedMusic;
-            // self.game.setupGame(RRAIN.Loader.getAsset("chart_"+music.name).raw);
+            self.game.setupGame(RRAIN.Loader.getAsset("chart_"+music.name).data);
             postFunc();
           }
 
@@ -208,7 +210,7 @@ var RRAIN = RRAIN || {};
             self.toggleLoadingState(false);
             self.endhour = self.music.duration() + self.wait;
             self.music.play(); // 試聴
-            self.game.setMusic(self.music);
+            self.game.setMusic(self.music); // Gameに音楽をセット
             self.refs.musicNameDisplay.innerHTML = "♪ " + music.name;
           }
         }
@@ -246,7 +248,7 @@ var RRAIN = RRAIN || {};
     },
 
     toggleSE: function(force) {
-      if (force) {
+      if (force != null) {
         this.game.enableSE = force;
       } else {
         this.game.enableSE = !this.game.enableSE;
@@ -283,7 +285,7 @@ var RRAIN = RRAIN || {};
 
   ns.App = App;
 
-  /* utils */
+  /* getElementById shorthand */
   function $id(id) { return document.getElementById(id); }
 
   /* 指定要素の幅・高さを画面全体に広げる */
