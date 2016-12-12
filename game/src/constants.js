@@ -1,11 +1,11 @@
 
 /* 定数 */
 var DEBUG_MODE = false;
+
 // 画面描画用パラメータ
 var SCREEN_WIDTH = (window.innerWidth > 640) ? 640 : window.innerWidth * 0.9;
 var RATIO = SCREEN_WIDTH / 640; //640よりも小さい画面の場合に縮小比を保持
 var SCREEN_HEIGHT = Math.round(SCREEN_WIDTH/16 * 9); // 比率16:9 == 640:360
-var NOTE_LIST = null;
 var FPS = 60;
 
 // 画面描画用パラメータ
@@ -14,12 +14,9 @@ var NOTE_WIDTH = (SCREEN_WIDTH / GRID_NUM) * 0.8; // ノーツの幅：画面サ
 var NOTE_HEIGHT = 6 * RATIO;
 
 var NOTE_POS_SPAN = Math.round(SCREEN_WIDTH / GRID_NUM);
-// var NOTE_POSITIONS = [NOTE_POS_SPAN*3, NOTE_POS_SPAN*4, NOTE_POS_SPAN*5, NOTE_POS_SPAN*6];
-// var NOTE_POSITIONS = createSpanArray(NOTE_POS_SPAN, 4, 8);
-// var NOTE_POSITIONS_LEN = NOTE_POSITIONS.length;
 var NOTE_SPEED_RANGE = {
-    max: 5,
-    min: 0
+  max: 5,
+  min: 0
 };
 
 // 色
@@ -29,9 +26,9 @@ var WATER_COLOR = "#125779";
 var EFFECT_COLOR = NOTE_COLOR;
 // var EFFECT_COLOR = "rgba(152, 171, 236, 1)";
 var THEME_COLOR = {
-    morning: "rgb(249, 250, 207)",
-    daytime: "#B9F5EF",
-    night: "rgb(0, 0, 0)"
+  morning: "rgb(249, 250, 207)",
+  daytime: "#B9F5EF",
+  night: "rgb(0, 0, 0)"
 };
 var FILTER_COLOR = "rgba(164, 146, 146, 0.59)";
 // レパートリー背景
@@ -42,7 +39,7 @@ var DEFAULT_OPACITY = 0.5;
 // アセット位置
 var JUDGE_LINE_Y = SCREEN_HEIGHT * 0.7 | 0; //
 var NOTE_DEST_Y = JUDGE_LINE_Y - NOTE_HEIGHT * 0.5; // ノーツ最終位置Y
-var EFFECT_HEIGHT = JUDGE_LINE_Y * 0.4; // エフェクトの高さ
+var EFFECT_HEIGHT = JUDGE_LINE_Y * 0.3; // エフェクトの高さ
 
 var RATING_TEXT_POS_X = SCREEN_WIDTH * 0.5;
 var RATING_TEXT_POS_Y = SCREEN_HEIGHT * 0.4;
@@ -61,18 +58,50 @@ var GIRL_POS_X = SCREEN_WIDTH * 0.75;
 var GIRL_POS_Y = 75 * RATIO;
 
 // 判定範囲（sec）
-var RATING = {
-    out: 0.13,
-    good: 0.10,
-    nice: 0.05,
-    great: 0.03
-};
-// 加点設定
-var SCORE = {
-    // hold: 10,
-    good: 10,
-    nice: 50,
-    great: 100
+// var RATING = {
+//     out: 0.13,
+//     good: 0.10,
+//     nice: 0.05,
+//     great: 0.03
+// };
+
+var RATING_DATA_MAP = {
+  miss: {
+    message: "MISS...",
+    effectTime: 18,
+    color: "gray",
+  },
+  hold: {
+    effectTime: 4,
+    color: "#C2FAEF",
+  },
+  out: {
+    range: 0.13,
+  },
+  good: {
+    range: 0.100,
+    message: "GOOD",
+    effectTime: 20,
+    score: 10,
+    color: "#CAD6D9",
+    sound: "conga",
+  },
+  nice: {
+    range: 0.054,
+    message: "NICE!",
+    effectTime: 20,
+    score: 50,
+    color: "#93C5CB",
+    sound: "clap"
+  },
+  great: {
+    range: 0.032,
+    message: "GREAT!!",
+    effectTime: 25,
+    score: 100,
+    color: "#5DF3EE",
+    sound: "clap"
+  },
 };
 
 // path

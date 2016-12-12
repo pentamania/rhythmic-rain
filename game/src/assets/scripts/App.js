@@ -15,22 +15,23 @@ var RRAIN = RRAIN || {};
 
     // flag
     this.enableInput = true;
-    // this.isPlaying = false; // gameがもつ
 
     // Node refs
     this.refs = {
       musicDetail: $id("music-info"),
       repertoryList: $id("repertory"),
+      // repertoryWrapper: $id("repertory-wrapper"),
       musicNameDisplay: $id('music-name-display'),
       pauseBtn: $id('pause-btn'),
       filterNode: $id("load-filter"),
       gameField: $id('game-field'),
       noteSpeedDisplay: $id('note-speed-display'),
+      optionArea: $id('option-area'),
+      // restartBtn: $id('restart-btn'),
       // twitterShareLink: $id(),
       // startBtn: $id(),
-      // this.timingAdjustment: $id('');
-    // this.twitterShareLink = $id('');
-    // var debugElm = $id('debug');
+      // timingAdjustment: $id(''),
+      // debugElm: $id('debug'),
     };
 
     // if (!DEBUG_MODE) debugElm.parentNode.removeChild(debugElm);
@@ -48,7 +49,7 @@ var RRAIN = RRAIN || {};
       resizeCover(this.refs.filterNode);
       window.addEventListener('resize', function(){
         resizeCover(this.refs.filterNode);
-      });
+      }.bind(this));
 
       // ロード開始
       RRAIN.Loader.loadBatch({
@@ -68,6 +69,8 @@ var RRAIN = RRAIN || {};
 
         console.log("init end");
       }.bind(this));
+
+      this.changeState();
     },
 
     _checkBrowserSupport: function() {
@@ -83,15 +86,22 @@ var RRAIN = RRAIN || {};
     setupInputEvent: function() {
       var self = this;
 
-      var onpointdown = function(e) {
+      // keydown
+      var pointstartFunc = function(e) {
         // ロード中などは何もしない
         if (!self.enableInput) return;
         // e.preventDefault();
 
         // TODO： ポーズ中など、より細かい状態に対応する？
         // ゲーム中： インタラクション
-        if (self.game.isPlaying) {
+        // if (self.game.isPlaying) {
+        if (self.game.playState === "playing") {
           if (self.game.pointstart) self.game.pointstart(e);
+
+        // ポーズ中は何もしない
+        } else if (self.game.playState === "pause") {
+          self.game.play();
+          self.changeState("playing");
 
         // ゲーム中以外: リセットしてゲーム開始
         } else {
@@ -100,35 +110,48 @@ var RRAIN = RRAIN || {};
             return;
           }
 
-          // DOM操作
-          self.refs.repertoryList.style.visibility = "hidden";
-          self.refs.pauseBtn.style.visibility = "visible";
+          self.music.stop();
           self.game.reset();
-          self.game.start();
+          self.game.play();
+          self.changeState("playing");
         }
       };
 
-      var onpointup = function(e) {
-        e.preventDefault();
-        if (self.game.pointstart) self.game.pointstart(e);
-
-        // if (!enableInput) return;
-        // if (autoPlay) return;
-        // btnFlg = false;
-      }
-
-      // keydown
-      this.canvas.addEventListener('mousedown', function(e){ e.preventDefault(); onpointdown(e);}, false);
-      this.canvas.addEventListener('touchstart',  function(e){ e.preventDefault(); onpointdown(e);}, false);
+      this.canvas.addEventListener('mousedown', function(e){ e.preventDefault(); pointstartFunc(e);}, false);
+      this.canvas.addEventListener('touchstart',  function(e){ e.preventDefault(); pointstartFunc(e);}, false);
       document.addEventListener('keydown', function(e){
         // e.preventDefault();
-        onpointdown(e);
+        pointstartFunc(e);
       });
 
       // keyup
+      var onpointup = function(e) {
+        e.preventDefault();
+        if (self.game.pointend) self.game.pointend(e);
+      }
       this.canvas.addEventListener('mouseup', onpointup, false);
       this.canvas.addEventListener('touchend', onpointup, false);
       document.addEventListener('keyup', onpointup, false);
+
+      // pause
+      this.refs.pauseBtn.addEventListener('click', this._togglePause.bind(this), false)
+
+    },
+
+    _togglePause: function() {
+      // if (self.game.isPlaying) {
+      if (this.game.playState === "pause") {
+        // ポーズ解除
+        // this.refs.repertoryList.style.visibility = "hidden";
+        // this.refs.pauseBtn.style.visibility = "visible";
+        this.changeState("playing");
+        this.game.play();
+      } else {
+        // this.refs.repertoryList.style.visibility = "visible";
+        // this.refs.pauseBtn.style.visibility = "hidden";
+        this.changeState("pause");
+        this.game.pause();
+      }
     },
 
     /* レパートリーリスト要素を立ち上げ */
@@ -211,6 +234,7 @@ var RRAIN = RRAIN || {};
             self.endhour = self.music.duration() + self.wait;
             self.music.play(); // 試聴
             self.game.setMusic(self.music); // Gameに音楽をセット
+            self.game.reset(); // ゲームリセット
             self.refs.musicNameDisplay.innerHTML = "♪ " + music.name;
           }
         }
@@ -253,6 +277,35 @@ var RRAIN = RRAIN || {};
       } else {
         this.game.enableSE = !this.game.enableSE;
       }
+    },
+
+    changeState: function(state) {
+      this.game.playState = state;
+      // console.log("changestate "+state)
+
+      switch (state) {
+        case "pause":
+          this.refs.repertoryList.style.visibility = "visible";
+          this.refs.pauseBtn.style.visibility = "hidden";
+          break;
+
+        case "playing":
+          this.refs.repertoryList.style.visibility = "hidden";
+          this.refs.pauseBtn.style.visibility = "visible";
+          break;
+
+        case "idle":
+          this.refs.repertoryList.style.visibility = "visible";
+          // this.refs.repertoryList.style.visibility = "hidden";
+          break;
+
+        default:
+          this.refs.pauseBtn.style.visibility = "hidden";
+
+          break;
+
+      }
+
     },
 
     toggleLoadingState: function(show) {

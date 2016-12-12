@@ -31,8 +31,8 @@
         this.isStop = true;
         this._past = 0;
     }
-    Timer.prototype.setTime = function (time) {
-        this._time = time;
+    Timer.prototype.setTime = function (sec) {
+        this._time = sec*1000;
         this._past = 0;
     };
     Timer.prototype.reset = function () {
