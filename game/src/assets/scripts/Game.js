@@ -11,6 +11,7 @@ var RRAIN = RRAIN || {};
     this.canvas = app.canvas;
     this.bufferCanvas = document.createElement('canvas');
     this.app = app;
+    this.theme = "night";
 
     this.music = null;
     this.bpm = 120;
@@ -30,12 +31,13 @@ var RRAIN = RRAIN || {};
     this.score = 0;
     this.chainNum = 0;
     this.maxChain = 0;
+    this._fullChainNum = 0;
 
     // flags
     // this.isPlaying = false;
     this.playState = "halt";
     this.isPressed = true;
-    // this.isAutoPlay = true;
+    this.isAutoPlay = false;
     this.enableSE = true;
 
     this._notePositions = createSpanArray(NOTE_POS_SPAN, 4, 8)
@@ -62,9 +64,7 @@ var RRAIN = RRAIN || {};
       // 背景は一度しか描画しないので、転写で使いまわす
       var bctx = this.bufferCanvas.getContext('2d');
 
-      // 背景 > 女の子 > 水面 > 電灯の描画
-      // bctx.fillStyle = "rgb(0, 0, 0)"; // TODO: themeによって変える？
-      // bctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT); //bgcolor
+      // 女の子 > 水面 > 電灯の描画
       bctx.drawImage(girlImage, GIRL_POS_X, GIRL_POS_Y, 124*1.1*RATIO, 166*1.1*RATIO);
       drawGradRect(bctx, 0, JUDGE_LINE_Y, cw, ch-JUDGE_LINE_Y, [ [0, WATER_COLOR], [1, "rgba(255, 255, 255, 0)"] ]);
       bctx.drawImage(streetLightImage, LIGHT_POS_X, LIGHT_POS_Y, 132*RATIO, 358*RATIO);
@@ -87,11 +87,13 @@ var RRAIN = RRAIN || {};
 
     _update: function() {
       this.timer.update();
+
       var i, len;
       var noteTime;
       var noteList = this.noteList;
       var time = this.timer.time() ;
       var rTime;
+      if (this.isAutoPlay) this.isPressed = true;
 
       // if (DEBUG_MODE) $id('time').innerHTML = timer.time(); //DEBUG
 
@@ -176,8 +178,8 @@ var RRAIN = RRAIN || {};
       // 初期化
       ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      // 背景
-      ctx.fillStyle = "black";
+      // 背景、テーマによって変える
+      ctx.fillStyle = THEME_COLOR[this.theme];
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       ctx.drawImage(buffer, 0, 0, buffer.width, buffer.height);
 
@@ -282,12 +284,25 @@ var RRAIN = RRAIN || {};
         ctx.textAlign = 'center';
         ctx.fillStyle = "rgba(255, 255, 255, 0.99)"; // 色
         ctx.globalAlpha = 0.4; //opacity
-        ctx.fillText("TAP KEYBOARD or SCREEN to PLAY", RATING_TEXT_POS_X,  SCORE_TEXT_FONT_SIZE*2);
+        ctx.fillText("TAP KEYBOARD or SCREEN to PLAY/RESUME", RATING_TEXT_POS_X,  SCORE_TEXT_FONT_SIZE*2);
         ctx.globalAlpha = 1; //opacity
 
-        // if (score) {ctx.fillText("RESULT", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y);}
-        // if (score) {ctx.fillText("SCORE: "+score+"", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*1.5);}
-        if (this.maxChain != 0) {ctx.fillText("MAX-CHAIN: "+this.chainNum+" / "+this.maxChain, RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*3);}
+        // リザルト表示
+        if (this.score != 0) {
+          // 見出し
+          ctx.save();
+          ctx.fillStyle = "#45C1F4";
+          if (this.playState === "pause") {
+            ctx.fillText("PAUSE", RATING_TEXT_POS_X, RATING_TEXT_POS_Y);
+          } else {
+            ctx.fillText("RESULT", RATING_TEXT_POS_X, RATING_TEXT_POS_Y);
+          }
+          ctx.restore();
+
+          // トータルスコア
+          ctx.fillText("SCORE: "+this.score+"", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*1.5);
+        }
+        if (this.maxChain != 0) {ctx.fillText("MAX-CHAIN: "+this.maxChain+" / "+this._fullChainNum, RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*3);}
         // if (score) {ctx.fillText("結構歌えた！", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*5);}
 
         ctx.restore();
@@ -310,7 +325,19 @@ var RRAIN = RRAIN || {};
       this.noteList = [].concat(data.noteList);
       this.bpm = data.BPM;
       this.zerohour = data.zerohour;
-      // TODO 理チェイン
+      this.theme = data.theme || "evening";
+      // console.log(data);
+
+      // TODO 理論チェイン
+      this._fullChainNum = 0;
+      data.noteList.forEach(function(note) {
+        if (note.length){
+          this._fullChainNum += 2;
+        } else {
+          this._fullChainNum++;
+        }
+      }.bind(this));
+      // console.log(this._fullChainNum)
     },
 
     reset: function() {
@@ -325,7 +352,6 @@ var RRAIN = RRAIN || {};
       this.hitEffects = [];
 
       this.playState = "idle";
-      if (this.isAutoPlay) this.isPressed = true;
     },
 
     play: function() {
@@ -367,11 +393,10 @@ var RRAIN = RRAIN || {};
       var reaction = this.reaction.bind(this);
 
       // array(ロングノート)だったら
-      if (typeof noteTime == 'object') {
+      if (typeof noteTime === 'object') {
         _longEnd = noteTime[1] + this.wait;
         noteTime = noteTime[0];
-        // _longEnd += this.wait;
-        console.log("ln"+_longEnd)
+        // console.log("ln"+_longEnd)
       }
 
       noteTime += this.wait;
@@ -424,15 +449,13 @@ var RRAIN = RRAIN || {};
           });
 
           this.score += ratingData.score;
-
         }
 
       } else {
         // miss
         this.chainNum = 0; // チェイン切る
-        console.log(this.currentNoteIndex, rating);
         this.hitEffects.push({
-          life: 10,
+          life: ratingData.effectTime,
           posX: this._notePositions[this.currentNoteIndex%this._notePositionsLen],
           color: ratingData.color,
           message: ratingData.message,

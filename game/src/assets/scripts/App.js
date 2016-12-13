@@ -20,9 +20,10 @@ var RRAIN = RRAIN || {};
     this.refs = {
       musicDetail: $id("music-info"),
       repertoryList: $id("repertory"),
-      // repertoryWrapper: $id("repertory-wrapper"),
+      repertoryWrapper: $id("repertory-wrapper"),
       musicNameDisplay: $id('music-name-display'),
       pauseBtn: $id('pause-btn'),
+      autoPlayBtn: $id('autoplay-btn'),
       filterNode: $id("load-filter"),
       gameField: $id('game-field'),
       noteSpeedDisplay: $id('note-speed-display'),
@@ -42,10 +43,12 @@ var RRAIN = RRAIN || {};
   App.prototype = {
 
     init: function() {
+
       // サイズを合わせ
       this.refs.gameField.style.width = SCREEN_WIDTH +"px";
       this.refs.gameField.style.height = SCREEN_HEIGHT +"px";
 
+      // ロード画面が全体を覆うようにする
       resizeCover(this.refs.filterNode);
       window.addEventListener('resize', function(){
         resizeCover(this.refs.filterNode);
@@ -67,7 +70,6 @@ var RRAIN = RRAIN || {};
         this.setupRepertoryList(musicList);
         this.game.init();
 
-        console.log("init end");
       }.bind(this));
 
       this.changeState();
@@ -92,18 +94,17 @@ var RRAIN = RRAIN || {};
         if (!self.enableInput) return;
         // e.preventDefault();
 
-        // TODO： ポーズ中など、より細かい状態に対応する？
-        // ゲーム中： インタラクション
+        // ゲーム中 -> インタラクション
         // if (self.game.isPlaying) {
         if (self.game.playState === "playing") {
           if (self.game.pointstart) self.game.pointstart(e);
 
-        // ポーズ中は何もしない
+        // ポーズ中 -> ポーズ解除
         } else if (self.game.playState === "pause") {
-          self.game.play();
           self.changeState("playing");
+          self.game.play();
 
-        // ゲーム中以外: リセットしてゲーム開始
+        // それ以外(idle中など) -> リセットしてゲーム開始
         } else {
           if (!self.music) {
             alert("Select Music! 曲を選んで下さい");
@@ -136,19 +137,19 @@ var RRAIN = RRAIN || {};
       // pause
       this.refs.pauseBtn.addEventListener('click', this._togglePause.bind(this), false)
 
+      // autoplay button
+      this.refs.autoPlayBtn.onchange = function(e) {
+        console.log(e.target.checked);
+        self.game.isAutoPlay = e.target.checked;
+      }
     },
 
     _togglePause: function() {
-      // if (self.game.isPlaying) {
       if (this.game.playState === "pause") {
         // ポーズ解除
-        // this.refs.repertoryList.style.visibility = "hidden";
-        // this.refs.pauseBtn.style.visibility = "visible";
         this.changeState("playing");
         this.game.play();
       } else {
-        // this.refs.repertoryList.style.visibility = "visible";
-        // this.refs.pauseBtn.style.visibility = "hidden";
         this.changeState("pause");
         this.game.pause();
       }
@@ -255,7 +256,7 @@ var RRAIN = RRAIN || {};
         if (key === "author") {
           // 作者名表示 アンカーつける
           var inner = "<a href=" + musicObj['url'] + ">" + val + "</a>";
-          li.innerHTML = key.toUpperCase()+": "+ inner;
+          li.innerHTML = "ARTIST: "+ inner;
         } else if (key === "difficulty"){
           // 難易度： 星の数で表す
           li.innerHTML += key.toUpperCase()+": ";
@@ -285,25 +286,26 @@ var RRAIN = RRAIN || {};
 
       switch (state) {
         case "pause":
-          this.refs.repertoryList.style.visibility = "visible";
+          // this.refs.repertoryWrapper.style.visibility = "visible";
+          this.refs.repertoryWrapper.style.display = "block";
           this.refs.pauseBtn.style.visibility = "hidden";
           break;
 
         case "playing":
-          this.refs.repertoryList.style.visibility = "hidden";
+          // this.refs.repertoryWrapper.style.visibility = "hidden";
+          this.refs.repertoryWrapper.style.display = "none";
           this.refs.pauseBtn.style.visibility = "visible";
           break;
 
         case "idle":
-          this.refs.repertoryList.style.visibility = "visible";
-          // this.refs.repertoryList.style.visibility = "hidden";
+          // this.refs.repertoryWrapper.style.visibility = "visible";
+          this.refs.repertoryWrapper.style.display = "block";
+          this.refs.pauseBtn.style.visibility = "hidden";
           break;
 
         default:
           this.refs.pauseBtn.style.visibility = "hidden";
-
           break;
-
       }
 
     },
@@ -321,6 +323,7 @@ var RRAIN = RRAIN || {};
       this.refs.filterNode.style.visibility = visibility
     },
 
+    // todo
     varyNoteSpeed: function(increment) {
       var noteSpeed = this.noteSpeed;
 

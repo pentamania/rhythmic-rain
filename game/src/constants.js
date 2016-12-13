@@ -1,12 +1,12 @@
-
+'use strict';
 /* 定数 */
 var DEBUG_MODE = false;
+var FPS = 60;
 
 // 画面描画用パラメータ
 var SCREEN_WIDTH = (window.innerWidth > 640) ? 640 : window.innerWidth * 0.9;
 var RATIO = SCREEN_WIDTH / 640; //640よりも小さい画面の場合に縮小比を保持
 var SCREEN_HEIGHT = Math.round(SCREEN_WIDTH/16 * 9); // 比率16:9 == 640:360
-var FPS = 60;
 
 // 画面描画用パラメータ
 var GRID_NUM = 14; // 画面幅の分割数
@@ -31,7 +31,13 @@ var THEME_COLOR = {
   night: "rgb(0, 0, 0)"
 };
 var FILTER_COLOR = "rgba(164, 146, 146, 0.59)";
-// レパートリー背景
+var THEME_COLOR = {
+  day: "#62bcb8",
+  evening: "#e2441d",
+  night: "black",
+};
+
+// レパートリー
 var DEFAULT_COLOR = 'rgb(60, 100, 214)';
 var ACTIVE_COLOR = 'rgb(161, 182, 241)';
 var DEFAULT_OPACITY = 0.5;
@@ -57,18 +63,10 @@ var LIGHT_POS_Y = 110 * RATIO;
 var GIRL_POS_X = SCREEN_WIDTH * 0.75;
 var GIRL_POS_Y = 75 * RATIO;
 
-// 判定範囲（sec）
-// var RATING = {
-//     out: 0.13,
-//     good: 0.10,
-//     nice: 0.05,
-//     great: 0.03
-// };
-
 var RATING_DATA_MAP = {
   miss: {
     message: "MISS...",
-    effectTime: 18,
+    effectTime: 8,
     color: "gray",
   },
   hold: {
@@ -83,7 +81,7 @@ var RATING_DATA_MAP = {
     message: "GOOD",
     effectTime: 20,
     score: 10,
-    color: "#CAD6D9",
+    color: "#7FBBCA",
     sound: "conga",
   },
   nice: {
@@ -91,7 +89,7 @@ var RATING_DATA_MAP = {
     message: "NICE!",
     effectTime: 20,
     score: 50,
-    color: "#93C5CB",
+    color: "#B4EA56",
     sound: "clap"
   },
   great: {
