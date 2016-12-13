@@ -10,7 +10,7 @@ var SCREEN_HEIGHT = Math.round(SCREEN_WIDTH/16 * 9); // 比率16:9 == 640:360
 
 // 画面描画用パラメータ
 var GRID_NUM = 14; // 画面幅の分割数
-var NOTE_WIDTH = (SCREEN_WIDTH / GRID_NUM) * 0.8; // ノーツの幅：画面サイズで変える？
+var NOTE_WIDTH = (SCREEN_WIDTH / GRID_NUM) * 0.7;
 var NOTE_HEIGHT = 6 * RATIO;
 
 var NOTE_POS_SPAN = Math.round(SCREEN_WIDTH / GRID_NUM);

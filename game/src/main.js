@@ -1,4 +1,7 @@
-new RRAIN.App();
+window.onload = function() {
+  new RRAIN.App();
+}
+
 // ;(function(window){
 
 

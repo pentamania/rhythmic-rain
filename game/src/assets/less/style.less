@@ -4,10 +4,12 @@
 // mixins
 .app-layer {
   z-index: 2;
+  position: absolute;
 }
 
 .UI-layer {
   z-index: 3;
+  position: absolute;
 }
 
 html {
@@ -20,7 +22,7 @@ html {
   font-size: 18px;
 }
 
-body{
+body {
   /*background: rgb(12, 154, 133);*/
   background: url("images/background.jpg") center center no-repeat fixed;
   background-size: cover;
@@ -29,11 +31,50 @@ body{
 }
 
 .container {
-  width:640px;
+  width: 640px;
 }
 .title {
   text-align: center;
 }
+
+.u-abs-br {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+.u-abs-bl {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.u-padding-mid {
+  padding: .4rem;
+}
+
+.u-horizontal-list > * {
+  margin-left: .4rem;
+}
+
+// themes ==============================
+.t-blue {
+  background: #4D85D9;
+  color: white;
+
+  &:hover {
+    background:  #45AFBF;
+  }
+}
+
+.t-green {
+  background: #4DD97B;
+  color: white;
+
+  &:hover {
+    background:  #53BF45;
+  }
+}
+// ==============================
 
 #game-field {
   position: relative;
@@ -42,12 +83,6 @@ body{
 
 canvas {
   position: absolute;
-}
-#bg{
-  z-index: 1;
-}
-#app{
-  z-index: 2;
 }
 
 .p-btn {
@@ -67,13 +102,14 @@ canvas {
   cursor: pointer;
   font-size: 0.8rem;
 }
-#music-name-display{
+
+#music-name-display {
   position: absolute;
   bottom: 8px;
   left: 8px;
 }
 
-#repertory-wrapper{
+#repertory-wrapper {
   display: block;
   min-height: 300px;
   overflow: auto;
@@ -117,7 +153,6 @@ canvas {
   }
 }
 
-
 @media screen and (max-width: 640px) {
   // #repertory-wrapper{width: 90%;}
   /*#repertory li{width: 50%;}*/
@@ -130,7 +165,7 @@ canvas {
   margin-top:4px;
 }
 
-#load-filter{
+.p-filter {
   display:table;
   background: rgba(22, 133, 144, 0.63);
   background-size: cover;
@@ -160,47 +195,45 @@ canvas {
   padding: 4px;
   opacity: 0.6;
 }
-
 /*
 * component: counter
 */
-.counter-wrapper{
-  /* main parameters */
-  @width: 50px;
-  @color: #4D85D9;
-  @hoverColor: #45AFBF;
-  @fontSize: @width/5;
+// .counter-wrapper{
+//   /* main parameters */
+//   @width: 50px;
+//   @color: #4D85D9;
+//   @hoverColor: #45AFBF;
+//   @fontSize: @width/5;
 
-  // float: left;
-  display: inline-block;
-  text-align: center;
-  width: @width;
-  font-size: @fontSize;
-  cursor: pointer;
+//   // float: left;
+//   display: inline-block;
+//   text-align: center;
+//   width: @width;
+//   font-size: @fontSize;
+//   cursor: pointer;
 
-  .counter-header{
-  }
+//   .counter-header{
+//   }
 
-  .half-circle{
-    @rad: @width/2;
-    height: @rad;
-    width: @rad*2.4;
-    background: @color;
-    text-align: center;
-    vertical-align: middle;
-    display: table-cell;
-    &:hover{
-      background: @hoverColor;
-    }
-    &.upper{
-      border-radius:50px 50px 0 0;
-    }
-    &.lower{
-      border-radius: 0 0 50px 50px;
-    }
-  }
-}
-
+//   .half-circle{
+//     @rad: @width/2;
+//     height: @rad;
+//     width: @rad*2.4;
+//     background: @color;
+//     text-align: center;
+//     vertical-align: middle;
+//     display: table-cell;
+//     &:hover{
+//       background: @hoverColor;
+//     }
+//     &.upper{
+//       border-radius:50px 50px 0 0;
+//     }
+//     &.lower{
+//       border-radius: 0 0 50px 50px;
+//     }
+//   }
+// }
 
 
 /******************************

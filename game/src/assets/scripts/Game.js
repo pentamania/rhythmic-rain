@@ -3,7 +3,7 @@
  * Game core class
  * ゲーム処理・描画等に関わる
  */
-var RRAIN = RRAIN || {};
+;var RRAIN = RRAIN || {};
 (function(ns){
 
   var Game = function(app) {
@@ -24,7 +24,7 @@ var RRAIN = RRAIN || {};
     this.noteList = [];
 
     // 設定関連
-    this.adjustTime = 0;
+    this.adjustedGap = 0;
     this.noteSpeedRate = 1;
 
     // 記録
@@ -47,13 +47,13 @@ var RRAIN = RRAIN || {};
   Game.prototype = {
 
     init: function() {
-      this._setInitCanvas();
+      this._initCanvas();
 
       // スタート
       this._loop();
     },
 
-    _setInitCanvas: function() {
+    _initCanvas: function() {
       var girlImage = RRAIN.Loader.getAsset("girl");
       var streetLightImage = RRAIN.Loader.getAsset("streetLight")
 
@@ -91,7 +91,7 @@ var RRAIN = RRAIN || {};
       var i, len;
       var noteTime;
       var noteList = this.noteList;
-      var time = this.timer.time() ;
+      var time = this.timer.time();
       var rTime;
       if (this.isAutoPlay) this.isPressed = true;
 
@@ -99,7 +99,7 @@ var RRAIN = RRAIN || {};
 
       // 時間が来たら音楽再生開始: 一回のみ
       if (!this.music._played && (this.wait-this.zerohour) < time) {
-        console.log("music start");
+        // console.log("music start");
         this.music.play();
         this.music._played = true;
       }
@@ -111,13 +111,9 @@ var RRAIN = RRAIN || {};
         // ロングノートだったら
         // if (typeof noteTime === 'object') {
         if (noteTime.length) {
-          noteTime = noteTime[0];
-        }
-
-        // 無入力判定： 判定ラインを超え、かつ判定時間を過ぎたらmiss判定、そして次のターゲットへ
-        // ロングノート判定中は引っかからないようにする
-        if (this._activeLongNote == null && noteTime+this.wait + RATING_DATA_MAP.good.range < time) {
-          this.judge();
+          noteTime = noteTime[0] + this.adjustedGap;
+        } else {
+          noteTime += this.adjustedGap;
         }
 
         // オートプレイ: great範囲内に入ったら即座に反応
@@ -127,11 +123,18 @@ var RRAIN = RRAIN || {};
             this.judge();
           }
         }
+
+        // 無入力判定： 判定ラインを超え、かつ判定時間を過ぎたらmiss判定、そして次のターゲットへ
+        // ロングノート判定中は引っかからないようにする
+        if (this._activeLongNote == null && noteTime+this.wait + RATING_DATA_MAP.good.range < time) {
+          this.judge();
+        }
       }
 
       // long note 処理
       if (this._activeLongNote != null) {
-        rTime = this._activeLongNote - time + this.adjustTime;
+        // rTime = this._activeLongNote - time + this.adjustedGap;
+        rTime = this._activeLongNote - time;
 
         // ボタンを押している
         if (this.isPressed) {
@@ -201,7 +204,7 @@ var RRAIN = RRAIN || {};
         }
 
         // 待ち時間を加算
-        noteTime += this.wait;
+        noteTime += this.wait + this.adjustedGap;
 
         // 描画位置を決める
         relativeTime = noteTime - timer.time();
@@ -234,7 +237,7 @@ var RRAIN = RRAIN || {};
       if (this.playState === "playing") {
         // チェイン数
         if (this.chainNum !== 0){
-          ctx.fillText(this.chainNum+" CHAIN", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y + 16);
+          ctx.fillText(this.chainNum+" CHAIN", RATING_TEXT_POS_X, RATING_TEXT_POS_Y + 16);
         }
 
         // スコア
@@ -309,9 +312,16 @@ var RRAIN = RRAIN || {};
       }
     },
 
-    setNoteSpeedRate: function(v) {
-      // TODO: 計算
-      this.noteSpeedRate = v;
+    setNoteSpeed: function(v) {
+      var rate = 1+0.125*v;
+      this.noteSpeedRate = Math.max(rate, 0.1);
+    },
+
+    adjustTiming: function(v) {
+      // 正の数ほど判定が遅くなる（早ずれ気味のときに修正）
+      // 負の数ほど判定が早ずれ
+      this.adjustedGap = v/1000;
+      console.log(this.adjustedGap)
     },
 
     setMusic: function(music) {
@@ -325,10 +335,9 @@ var RRAIN = RRAIN || {};
       this.noteList = [].concat(data.noteList);
       this.bpm = data.BPM;
       this.zerohour = data.zerohour;
-      this.theme = data.theme || "evening";
-      // console.log(data);
+      this.theme = data.theme || "night";
 
-      // TODO 理論チェイン
+      // 理論チェイン数
       this._fullChainNum = 0;
       data.noteList.forEach(function(note) {
         if (note.length){
@@ -394,15 +403,16 @@ var RRAIN = RRAIN || {};
 
       // array(ロングノート)だったら
       if (typeof noteTime === 'object') {
-        _longEnd = noteTime[1] + this.wait;
+        _longEnd = noteTime[1] + this.wait + this.adjustedGap;
         noteTime = noteTime[0];
         // console.log("ln"+_longEnd)
       }
 
-      noteTime += this.wait;
+      noteTime += this.wait + this.adjustedGap;
 
       // 正判定位置からどれくらいずれているか
-      var rTime = noteTime - this.timer.time() + this.adjustTime;
+      // var rTime = noteTime - this.timer.time() + this.adjustedGap;
+      var rTime = noteTime - this.timer.time();
       var rTimeAbs = Math.abs(rTime);
       var RDM = RATING_DATA_MAP;
 
@@ -545,4 +555,4 @@ var RRAIN = RRAIN || {};
     }
   };
 
-}(RRAIN))
+}(RRAIN));

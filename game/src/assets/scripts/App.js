@@ -3,7 +3,7 @@
  * App class
  * アプリ全体を管理するクラス
  */
-var RRAIN = RRAIN || {};
+;var RRAIN = RRAIN || {};
 (function(ns){
   var App = function() {
     var canvas = this.canvas = $id("app");
@@ -30,19 +30,17 @@ var RRAIN = RRAIN || {};
       optionArea: $id('option-area'),
       // restartBtn: $id('restart-btn'),
       // twitterShareLink: $id(),
-      // startBtn: $id(),
-      // timingAdjustment: $id(''),
       // debugElm: $id('debug'),
     };
 
     // if (!DEBUG_MODE) debugElm.parentNode.removeChild(debugElm);
 
-    this.init();
+    this._init();
   };
 
   App.prototype = {
 
-    init: function() {
+    _init: function(){
 
       // サイズを合わせ
       this.refs.gameField.style.width = SCREEN_WIDTH +"px";
@@ -54,7 +52,10 @@ var RRAIN = RRAIN || {};
         resizeCover(this.refs.filterNode);
       }.bind(this));
 
-      // ロード開始
+      // DOM初期状態
+      this.changeState();
+
+      // アセットのロード開始
       RRAIN.Loader.loadBatch({
         "image": IMAGE_ASSETS,
         "sound": SOUND_ASSETS,
@@ -62,17 +63,19 @@ var RRAIN = RRAIN || {};
           "musicList": MUSIC_LIST_PATH
         }
       })
-      .then(function() {
-        var musicList = this.musicList = RRAIN.Loader.getAsset("musicList").data.list;
+      .then(this.init.bind(this));
+    },
 
-        this._checkBrowserSupport();
-        this.setupInputEvent();
-        this.setupRepertoryList(musicList);
-        this.game.init();
+    init: function() {
+      var musicList = this.musicList = RRAIN.Loader.getAsset("musicList").data.list;
 
-      }.bind(this));
+      this._checkBrowserSupport();
+      this.setupInputEvent();
+      this.setupRepertoryList(musicList);
+      this._setupOptions();
 
-      this.changeState();
+      this.game.init();
+      // this.adjustTiming(-100);
     },
 
     _checkBrowserSupport: function() {
@@ -128,7 +131,7 @@ var RRAIN = RRAIN || {};
       // keyup
       var onpointup = function(e) {
         e.preventDefault();
-        if (self.game.pointend) self.game.pointend(e);
+        if (self.game.pointend && self.game.playState === "playing") self.game.pointend(e);
       }
       this.canvas.addEventListener('mouseup', onpointup, false);
       this.canvas.addEventListener('touchend', onpointup, false);
@@ -139,9 +142,30 @@ var RRAIN = RRAIN || {};
 
       // autoplay button
       this.refs.autoPlayBtn.onchange = function(e) {
-        console.log(e.target.checked);
+        // console.log(e.target.checked);
         self.game.isAutoPlay = e.target.checked;
       }
+    },
+
+    _setupOptions: function() {
+      var size = 40;
+      // Rain speed change
+      var counter = createCounter({
+        label: "SPEED",
+        callback: this.varyNoteSpeed.bind(this),
+        buttonClass: "t-blue",
+        width: size,
+      });
+      this.refs.optionArea.appendChild(counter);
+
+      // timing adjust
+      counter = createCounter({
+        label: "ADJUST",
+        callback: this.adjustTiming.bind(this),
+        buttonClass: "t-green",
+        width: size,
+      });
+      this.refs.optionArea.appendChild(counter);
     },
 
     _togglePause: function() {
@@ -162,8 +186,6 @@ var RRAIN = RRAIN || {};
       musicList.forEach(function(music, index) {
         var li = document.createElement('li');
         li.textContent = music.name;
-        // li.style.background = (index === activeMusicPointer) ? ACTIVE_COLOR : DEFAULT_COLOR;
-        // li.style.opacity = (index === activeMusicPointer) ? 1.0 : DEFAULT_OPACITY;
         li.style.background = DEFAULT_COLOR;
         li.style.opacity = DEFAULT_OPACITY;
 
@@ -173,6 +195,8 @@ var RRAIN = RRAIN || {};
         // 各選択肢にクリック・タップイベント設定
         li.addEventListener('mousedown', _handleClick, false);
         li.addEventListener('touchstart', _handleClick, false);
+
+        self.refs.repertoryList.appendChild(li);
 
         function _handleClick(e) {
           if (self.music) self.music.stop(); // 再生中なら止める
@@ -219,11 +243,8 @@ var RRAIN = RRAIN || {};
 
             // ロードを終えたら
             Promise.all([p1,p2])
-            .then(postFunc)
-            ;
-
+            .then(postFunc);
           } else {
-
             // ロード済み
             self.music = selectedMusic;
             self.game.setupGame(RRAIN.Loader.getAsset("chart_"+music.name).data);
@@ -232,15 +253,13 @@ var RRAIN = RRAIN || {};
 
           function postFunc() {
             self.toggleLoadingState(false);
-            self.endhour = self.music.duration() + self.wait;
+            // self.endhour = self.music.duration() + self.wait;
             self.music.play(); // 試聴
             self.game.setMusic(self.music); // Gameに音楽をセット
             self.game.reset(); // ゲームリセット
             self.refs.musicNameDisplay.innerHTML = "♪ " + music.name;
           }
         }
-
-        self.refs.repertoryList.appendChild(li);
       });
     },
 
@@ -320,26 +339,22 @@ var RRAIN = RRAIN || {};
         visibility = "hidden";
         this.enableInput = true;
       }
-      this.refs.filterNode.style.visibility = visibility
+      this.refs.filterNode.style.visibility = visibility;
     },
 
-    // todo
-    varyNoteSpeed: function(increment) {
-      var noteSpeed = this.noteSpeed;
+    varyNoteSpeed: function(val) {
+      this.game.setNoteSpeed(val);
+    },
 
-      if (increment === true && noteSpeed < NOTE_SPEED_RANGE.max){
-        this.noteSpeed += 1;
-      } else if (!increment && NOTE_SPEED_RANGE.min < noteSpeed) {
-        this.noteSpeed -= 1;
-      }
-
-      this.game.setNoteSpeed(this.noteSpeed);
-      this.noteSpeedDisplay.innerHTML = this.noteSpeed;
+    adjustTiming: function(val) {
+      this.game.adjustTiming(val);
     },
 
   };
 
   ns.App = App;
+
+  // == utils ==
 
   /* getElementById shorthand */
   function $id(id) { return document.getElementById(id); }
@@ -361,4 +376,4 @@ var RRAIN = RRAIN || {};
     target.style.width = MaxWidth + "px";
   }
 
-}(RRAIN))
+}(RRAIN));

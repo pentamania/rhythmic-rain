@@ -17,7 +17,7 @@
 
 // } );
 
-var RRAIN = RRAIN || {};
+;var RRAIN = RRAIN || {};
 (function(ns){
 
   var Loader = {
