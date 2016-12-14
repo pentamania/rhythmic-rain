@@ -151,7 +151,6 @@
 
         // 途中で離してしまった
         } else {
-          console.log("release")
           this.reaction('miss');
           this._activeLongNote = null;
           this.currentNoteIndex++;
@@ -306,7 +305,6 @@
           ctx.fillText("SCORE: "+this.score+"", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*1.5);
         }
         if (this.maxChain != 0) {ctx.fillText("MAX-CHAIN: "+this.maxChain+" / "+this._fullChainNum, RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*3);}
-        // if (score) {ctx.fillText("結構歌えた！", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*5);}
 
         ctx.restore();
       }
@@ -346,7 +344,6 @@
           this._fullChainNum++;
         }
       }.bind(this));
-      // console.log(this._fullChainNum)
     },
 
     reset: function() {
@@ -390,6 +387,7 @@
       this.app.changeState("idle");
       // this.isPlaying = false;
       this.timer.pause();
+      this.app.setTwitterShareLink(this.score);
     },
 
     judge: function(noteTime) {

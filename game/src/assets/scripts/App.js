@@ -1,13 +1,14 @@
 
 /**
  * App class
+ *
  * アプリ全体を管理するクラス
  */
 ;var RRAIN = RRAIN || {};
 (function(ns){
   var App = function() {
-    var canvas = this.canvas = $id("app");
 
+    this.canvas = $id("app");
     this.game = new ns.Game(this);
     this.music = null;
     this.musicList;
@@ -22,14 +23,16 @@
       repertoryList: $id("repertory"),
       repertoryWrapper: $id("repertory-wrapper"),
       musicNameDisplay: $id('music-name-display'),
+      filterElement: $id("load-filter"),
+
+      gameField: $id('game-field'),
       pauseBtn: $id('pause-btn'),
       autoPlayBtn: $id('autoplay-btn'),
-      filterNode: $id("load-filter"),
-      gameField: $id('game-field'),
-      noteSpeedDisplay: $id('note-speed-display'),
       optionArea: $id('option-area'),
+
       // restartBtn: $id('restart-btn'),
-      // twitterShareLink: $id(),
+      resultOptions: $id('result-options'),
+      twitterShareBtn: $id('twitter-share-btn'),
       // debugElm: $id('debug'),
     };
 
@@ -40,16 +43,16 @@
 
   App.prototype = {
 
-    _init: function(){
+    _init: function() {
 
       // サイズを合わせ
       this.refs.gameField.style.width = SCREEN_WIDTH +"px";
       this.refs.gameField.style.height = SCREEN_HEIGHT +"px";
 
       // ロード画面が全体を覆うようにする
-      resizeCover(this.refs.filterNode);
+      resizeCover(this.refs.filterElement);
       window.addEventListener('resize', function(){
-        resizeCover(this.refs.filterNode);
+        resizeCover(this.refs.filterElement);
       }.bind(this));
 
       // DOM初期状態
@@ -74,6 +77,9 @@
       this.setupRepertoryList(musicList);
       this._setupOptions();
 
+      // ツイートリンク等の位置を調整
+      this.refs.resultOptions.style.top = RESULT_OPT_POSITION+"px";
+
       this.game.init();
       // this.adjustTiming(-100);
     },
@@ -85,6 +91,25 @@
       if (unsupported) {
         alert('ご使用のブラウザは推奨環境下ではありません。\nGoogle chrome (PC)、もしくはiOS safariでのプレイをオススメします')
         this.toggleSE(false);
+      }
+    },
+
+    setTwitterShareLink: function(score) {
+      // console.log(this.music)
+      var msg = "雨がビニール傘を叩くときの音が好き"
+      var pre = 'https://twitter.com/share?';
+      var euc = encodeURIComponent;
+      var tweetText = msg+" - "+this.music._musicName+" スコア： "+score;
+      var queries = [
+        "text="+euc(tweetText),
+        "hashtags="+euc("リズミックレイン"),
+        "url="+euc(location.href)
+      ];
+      var url = pre+queries.join('&');
+
+      // this.refs.twitterShareBtn.setAttribute('href', url);
+      this.refs.twitterShareBtn.onclick = function() {
+        window.open(url, 'share window', 'width=480, height=320');
       }
     },
 
@@ -255,6 +280,8 @@
             self.toggleLoadingState(false);
             // self.endhour = self.music.duration() + self.wait;
             self.music.play(); // 試聴
+            self.music._musicName = music.name;
+            // self._currentMusicName = music.name;
             self.game.setMusic(self.music); // Gameに音楽をセット
             self.game.reset(); // ゲームリセット
             self.refs.musicNameDisplay.innerHTML = "♪ " + music.name;
@@ -299,6 +326,15 @@
       }
     },
 
+    varyNoteSpeed: function(val) {
+      this.game.setNoteSpeed(val);
+    },
+
+    adjustTiming: function(val) {
+      this.game.adjustTiming(val);
+    },
+
+
     changeState: function(state) {
       this.game.playState = state;
       // console.log("changestate "+state)
@@ -314,16 +350,20 @@
           // this.refs.repertoryWrapper.style.visibility = "hidden";
           this.refs.repertoryWrapper.style.display = "none";
           this.refs.pauseBtn.style.visibility = "visible";
+          this.refs.resultOptions.style.visibility = "hidden";
           break;
 
         case "idle":
           // this.refs.repertoryWrapper.style.visibility = "visible";
           this.refs.repertoryWrapper.style.display = "block";
           this.refs.pauseBtn.style.visibility = "hidden";
+          this.refs.resultOptions.style.visibility = "visible";
           break;
 
         default:
+          // 初期状態
           this.refs.pauseBtn.style.visibility = "hidden";
+          this.refs.resultOptions.style.visibility = "hidden";
           break;
       }
 
@@ -339,17 +379,8 @@
         visibility = "hidden";
         this.enableInput = true;
       }
-      this.refs.filterNode.style.visibility = visibility;
+      this.refs.filterElement.style.visibility = visibility;
     },
-
-    varyNoteSpeed: function(val) {
-      this.game.setNoteSpeed(val);
-    },
-
-    adjustTiming: function(val) {
-      this.game.adjustTiming(val);
-    },
-
   };
 
   ns.App = App;

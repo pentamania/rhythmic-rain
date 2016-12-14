@@ -2,16 +2,20 @@
 /* 定数 */
 var DEBUG_MODE = false;
 var FPS = 60;
+var TWEET_MESSAGES = [
+  "お父さんはいつ返ってくるんだろう...",
+  "雨がビニール傘を叩くときの音が好き",
+]
 
 // 画面描画用パラメータ
 var SCREEN_WIDTH = (window.innerWidth > 640) ? 640 : window.innerWidth * 0.9;
 var RATIO = SCREEN_WIDTH / 640; //640よりも小さい画面の場合に縮小比を保持
 var SCREEN_HEIGHT = Math.round(SCREEN_WIDTH/16 * 9); // 比率16:9 == 640:360
 
-// 画面描画用パラメータ
 var GRID_NUM = 14; // 画面幅の分割数
 var NOTE_WIDTH = (SCREEN_WIDTH / GRID_NUM) * 0.7;
 var NOTE_HEIGHT = 6 * RATIO;
+var RESULT_OPT_POSITION = SCREEN_HEIGHT*0.66;
 
 var NOTE_POS_SPAN = Math.round(SCREEN_WIDTH / GRID_NUM);
 var NOTE_SPEED_RANGE = {
@@ -19,17 +23,18 @@ var NOTE_SPEED_RANGE = {
   min: 0
 };
 
+
 // 色
 var NOTE_COLOR = "rgb(139, 236, 242)";
 var LONG_NOTE_COLOR = "rgb(77, 60, 212)";
 var WATER_COLOR = "#125779";
 var EFFECT_COLOR = NOTE_COLOR;
 // var EFFECT_COLOR = "rgba(152, 171, 236, 1)";
-var THEME_COLOR = {
-  morning: "rgb(249, 250, 207)",
-  daytime: "#B9F5EF",
-  night: "rgb(0, 0, 0)"
-};
+// var THEME_COLOR = {
+//   morning: "rgb(249, 250, 207)",
+//   daytime: "#B9F5EF",
+//   night: "rgb(0, 0, 0)"
+// };
 var FILTER_COLOR = "rgba(164, 146, 146, 0.59)";
 var THEME_COLOR = {
   day: "#62bcb8",

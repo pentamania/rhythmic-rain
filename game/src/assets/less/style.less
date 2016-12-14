@@ -1,6 +1,9 @@
 @import url("http://yui.yahooapis.com/3.15.0/build/cssreset/cssreset-min.css");
 @import url("https://fonts.googleapis.com/css?family=Audiowide|Merienda+One' rel='stylesheet' type='text/css");
 
+@baseFontSize: 18px;
+@mq-fs-wu640 : .5rem;
+
 // mixins
 .app-layer {
   z-index: 2;
@@ -19,22 +22,35 @@ html {
 
   -webkit-text-size-adjust: 100%;
   font-family: Audiowide, cursive, monospace, sans-serif;
-  font-size: 18px;
+  font-size: @baseFontSize;
 }
 
 body {
-  /*background: rgb(12, 154, 133);*/
   background: url("images/background.jpg") center center no-repeat fixed;
   background-size: cover;
   background-color: black;
   color: rgb(208, 218, 213);
+
+  @media screen and (max-width: 640px) {
+    font-size: @mq-fs-wu640;
+  }
 }
 
 .container {
   width: 640px;
 }
+
 .title {
   text-align: center;
+}
+
+.p-btn {
+  display: inline-block;
+  text-align: center;
+  padding: 0.2rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  border-radius: 1px;
 }
 
 .u-abs-br {
@@ -44,10 +60,33 @@ body {
 }
 .u-abs-bl {
   position: absolute;
+  bottom: 8px;
+  left: 8px;
+  // bottom: 0;
+  // right: 0;
+}
+.u-abs-tr {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+.u-abs-center {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   bottom: 0;
+  margin: auto;
+}
+.u-abs-band {
+  position: absolute;
+  left: 0;
   right: 0;
 }
 
+.u-text-cnt {
+  text-align: center;
+}
 .u-padding-mid {
   padding: .4rem;
 }
@@ -57,6 +96,16 @@ body {
 }
 
 // themes ==============================
+.t-gray-b {
+  @color: #687696;
+  background: white;
+  border: solid 2px @color;
+  color: @color;
+
+  &:hover {
+    background:  #92A5D0;
+  }
+}
 .t-blue {
   background: #4D85D9;
   color: white;
@@ -81,34 +130,6 @@ body {
   margin: 8px auto;
 }
 
-canvas {
-  position: absolute;
-}
-
-.p-btn {
-  .UI-layer;
-
-  position: absolute;
-  top: 8px;
-  right: 8px;
-
-  @color: #687696;
-  background: white;
-  border: solid 2px @color;
-  border-radius: 2px;
-  color: @color;
-  text-align: center;
-  padding: 0.2rem;
-  cursor: pointer;
-  font-size: 0.8rem;
-}
-
-#music-name-display {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-}
-
 #repertory-wrapper {
   display: block;
   min-height: 300px;
@@ -116,13 +137,13 @@ canvas {
   margin:0 auto;
   width: 640px;
 
-  .repertory-title{
+  .repertory-title {
     width: 100%;
     font-size: 1.2rem;
     text-align: center;
   }
 
-  #repertory{
+  #repertory {
     display: block;
     text-align: center;
     width: 100%;
@@ -131,7 +152,7 @@ canvas {
     overflow: auto;
     margin: 20px auto;
 
-    li{
+    li {
       box-sizing: border-box;
       font-size: 0.8rem;
       width: 100%;
@@ -179,13 +200,13 @@ canvas {
   left: 0;
   visibility: hidden;
 
-  span{
+  span {
     display: table-cell;
     vertical-align: middle;
   }
 }
 
-#option{
+#option {
   display: inline-block;
   position: absolute;
   box-sizing: border-box;
@@ -195,9 +216,7 @@ canvas {
   padding: 4px;
   opacity: 0.6;
 }
-/*
-* component: counter
-*/
+
 // .counter-wrapper{
 //   /* main parameters */
 //   @width: 50px;
@@ -243,17 +262,17 @@ canvas {
 
 ******************************/
 .social-link-area {
-    width: 100% ;
-    min-height: 190px ;
-    // background: rgba('#f5f1e9', 0) ;  /* 背景色 */
-    padding: 1.0em 0 ;
+  width: 100% ;
+  min-height: 190px ;
+  // background: rgba('#f5f1e9', 0) ;  /* 背景色 */
+  padding: 1.0em 0 ;
 }
 
 /* デスクトップPCでは高さを拡張する */
 @media screen and ( min-width:480px ) {
-    .social-link-area {
-        min-height: 119px ;
-    }
+  .social-link-area {
+    min-height: 119px ;
+  }
 }
 
 

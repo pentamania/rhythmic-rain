@@ -15,17 +15,20 @@
             <h1 class="title">RHYTHMIC RAIN</h1>
 
             <section id="game-field">
-                <canvas id="bg"></canvas>
                 <canvas id="app" class="app-layer"></canvas>
 
-                <div id="pause-btn" class="p-btn UI-layer">II</div>
-                <button id="reset^btn">reset</button>
-                <div id="music-name-display" class="UI-layer">♪</div>
+                <ul id="result-options" class="u-abs-band u-text-cnt UI-layer">
+                    <a id="twitter-share-btn" class="p-btn t-blue">Tweet</a>
+                    <a id="other-share-btn" class="p-btn t-blue">fff</a>
+                </ul>
+                <div id="pause-btn" class="t-gray-b p-btn u-abs-tr UI-layer">II</div>
+                <button id="reset-btn">reset</button>
+                <div id="music-name-display" class="u-abs-bl UI-layer">♪</div>
                 <div id="option-area" class="UI-layer u-abs-br u-padding-mid u-horizontal-list"></div>
             </section>
 
             <section id="repertory-wrapper" class="container">
-                <h3 class="repertory-title">~ SELECT MUSIC ~</h3>
+                <h3 class="repertory-title">-SELECT MUSIC-</h3>
                 <ul id="repertory"></ul>
                 <ul id="music-info"></ul>
             </section>
@@ -75,9 +78,11 @@
                 <img src="./assets/images/gif-load-drip-blue.gif" alt="loading-animation" />
             </span>
         </div>
+
         <a href="http://pentamania.github.io/rhythmic-rain/game/dist">
           <img src="https://ga-beacon.appspot.com/UA-69580107-2/pentamania.github.io/rhythmic-rain/game/dist?pixel" />
         </a>
+
         <script src="all.min.js" charset="utf-8"></script>
     </body>
 </html>
