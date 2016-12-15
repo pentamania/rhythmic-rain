@@ -10,30 +10,30 @@
         <!-- <link href='https://fonts.googleapis.com/css?family=Audiowide|Merienda+One' rel='stylesheet' type='text/css'> -->
         <link href='./assets/style.css' rel='stylesheet' type='text/css'>
     </head>
+
     <body>
-        <div class="wrapper">
-            <h1 class="title">RHYTHMIC RAIN</h1>
+        <div class="wrapper u-padding-mid">
+            <h1 class="p-topic u-mt-mid">RHYTHMIC RAIN</h1>
 
             <section id="game-field">
                 <canvas id="app" class="app-layer"></canvas>
 
                 <ul id="result-options" class="u-abs-band u-text-cnt UI-layer">
                     <a id="twitter-share-btn" class="p-btn t-blue">Tweet</a>
-                    <a id="other-share-btn" class="p-btn t-blue">fff</a>
                 </ul>
                 <div id="pause-btn" class="t-gray-b p-btn u-abs-tr UI-layer">II</div>
                 <button id="reset-btn">reset</button>
                 <div id="music-name-display" class="u-abs-bl UI-layer">♪</div>
-                <div id="option-area" class="UI-layer u-abs-br u-padding-mid u-horizontal-list"></div>
+                <div id="option-area" class="UI-layer u-abs-br u-padding-mid u-horizontal-list u-half-trans"></div>
             </section>
 
             <section id="repertory-wrapper" class="container">
-                <h3 class="repertory-title">-SELECT MUSIC-</h3>
-                <ul id="repertory"></ul>
-                <ul id="music-info"></ul>
+                <h3 class="repertory-title u-mt-mid">- SELECT MUSIC -</h3>
+                <ul id="repertory" class="u-mt-mid"></ul>
+                <ul id="music-info" class="u-mt-mid u-text-cnt t-cleargray"></ul>
             </section>
 
-            <div id="debug" class="container">
+            <div id="debug-container" class="container">
                 <div id="time"></div>
                 AUTOPLAY: <input type="checkbox" id="autoplay-btn" value="autoplay">
             </div>

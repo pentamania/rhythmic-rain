@@ -1,11 +1,13 @@
 'use strict';
+
 /* 定数 */
 var DEBUG_MODE = false;
 var FPS = 60;
 var TWEET_MESSAGES = [
   "お父さんはいつ返ってくるんだろう...",
   "雨がビニール傘を叩くときの音が好き",
-]
+  "雨の日は落ち着く",
+];
 
 // 画面描画用パラメータ
 var SCREEN_WIDTH = (window.innerWidth > 640) ? 640 : window.innerWidth * 0.9;
@@ -18,17 +20,15 @@ var NOTE_HEIGHT = 6 * RATIO;
 var RESULT_OPT_POSITION = SCREEN_HEIGHT*0.66;
 
 var NOTE_POS_SPAN = Math.round(SCREEN_WIDTH / GRID_NUM);
-var NOTE_SPEED_RANGE = {
-  max: 5,
-  min: 0
-};
-
+// var NOTE_SPEED_RANGE = {
+//   max: 5,
+//   min: 0
+// };
 
 // 色
 var NOTE_COLOR = "rgb(139, 236, 242)";
 var LONG_NOTE_COLOR = "rgb(77, 60, 212)";
 var WATER_COLOR = "#125779";
-var EFFECT_COLOR = NOTE_COLOR;
 // var EFFECT_COLOR = "rgba(152, 171, 236, 1)";
 // var THEME_COLOR = {
 //   morning: "rgb(249, 250, 207)",
@@ -94,7 +94,7 @@ var RATING_DATA_MAP = {
     message: "NICE!",
     effectTime: 20,
     score: 50,
-    color: "#B4EA56",
+    color: "#EA9447",
     sound: "clap"
   },
   great: {
@@ -107,14 +107,14 @@ var RATING_DATA_MAP = {
   },
 };
 
-// path
+// paths
 var SOUND_ASSETS = {
-    clap:"./assets/sounds/clap.mp3",
-    conga: "./assets/sounds/conga.mp3"
+  clap:"./assets/sounds/clap.mp3",
+  conga: "./assets/sounds/conga.mp3"
 };
 var IMAGE_ASSETS = {
-    streetLight: "./assets/images/streetLight2.png",
-    girl: "./assets/images/girl.png",
-}
+  streetLight: "./assets/images/streetLight2.png",
+  girl: "./assets/images/girl.png",
+};
 var MUSIC_LIST_PATH = '../data/music_list.json';
 var DATA_PATH = "../data/";

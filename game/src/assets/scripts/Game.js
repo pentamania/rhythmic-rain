@@ -3,7 +3,7 @@
  * Game core class
  * ゲーム処理・描画等に関わる
  */
-;var RRAIN = RRAIN || {};
+var RRAIN = RRAIN || {};
 (function(ns){
 
   var Game = function(app) {
@@ -35,7 +35,7 @@
 
     // flags
     // this.isPlaying = false;
-    this.playState = "halt";
+    this.playState = "initial";
     this.isPressed = true;
     this.isAutoPlay = false;
     this.enableSE = true;
@@ -59,7 +59,7 @@
 
       // Resize canvas
       var cw = this.canvas.width = this.bufferCanvas.width = SCREEN_WIDTH;
-      var ch = this.canvas.height = this.bufferCanvas.height  = SCREEN_HEIGHT;
+      var ch = this.canvas.height = this.bufferCanvas.height = SCREEN_HEIGHT;
 
       // 背景は一度しか描画しないので、転写で使いまわす
       var bctx = this.bufferCanvas.getContext('2d');
@@ -78,7 +78,7 @@
       // if (this.isPlaying) {
       if (this.playState === "playing") {
         this._update();
-      };
+      }
 
       this._render();
 
@@ -167,6 +167,7 @@
       var buffer = this.bufferCanvas;
       var timer = this.timer;
       var noteHeight; // LNの場合は伸びる
+
        // ハイスピ等の補正
       var corr = this.bpm * 1.75 * RATIO * this.noteSpeedRate;
 
@@ -234,6 +235,7 @@
       // プレイ中のみ表示
       // if (this.isPlaying) {
       if (this.playState === "playing") {
+
         // チェイン数
         if (this.chainNum !== 0){
           ctx.fillText(this.chainNum+" CHAIN", RATING_TEXT_POS_X, RATING_TEXT_POS_Y + 16);
@@ -266,14 +268,15 @@
 
         // progress bar
         ctx.save();
-        var remainRatio = this.timer.time() / this.endhour;
+        var remainRatio = this.music.seek() / this.endhour;
+        remainRatio = Math.min(remainRatio, 1.0);
         ctx.fillStyle = "#d5e9f1"; // bg色
         ctx.fillRect(PROGRESSBAR_X, PROGRESSBAR_Y, PROGRESSBAR_WIDTH, PROGRESSBAR_HEIGHT);
         ctx.fillStyle = "#5099b6"; // ゲージ色
         ctx.fillRect(PROGRESSBAR_X,PROGRESSBAR_Y, PROGRESSBAR_WIDTH * remainRatio, PROGRESSBAR_HEIGHT);
         ctx.restore();
       }
-      // スタート＆リザルト画面
+      // スタート or リザルト画面
       // if (!this.isPlaying) {
       else {
         ctx.save();
@@ -291,6 +294,7 @@
 
         // リザルト表示
         if (this.score != 0) {
+        // if (this.playState !== "initial") {
           // 見出し
           ctx.save();
           ctx.fillStyle = "#45C1F4";
@@ -303,8 +307,11 @@
 
           // トータルスコア
           ctx.fillText("SCORE: "+this.score+"", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*1.5);
+
+          // Max chain
+          ctx.fillText("MAX-CHAIN: "+this.maxChain+" / "+this._fullChainNum, RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*3);
+          // if (this.maxChain != 0) {ctx.fillText("MAX-CHAIN: "+this.maxChain+" / "+this._fullChainNum, RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*3);}
         }
-        if (this.maxChain != 0) {ctx.fillText("MAX-CHAIN: "+this.maxChain+" / "+this._fullChainNum, RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*3);}
 
         ctx.restore();
       }
@@ -319,7 +326,7 @@
       // 正の数ほど判定が遅くなる（早ずれ気味のときに修正）
       // 負の数ほど判定が早ずれ
       this.adjustedGap = v/1000;
-      console.log(this.adjustedGap)
+      // console.log(this.adjustedGap)
     },
 
     setMusic: function(music) {
@@ -383,7 +390,7 @@
     },
 
     end: function() {
-      console.log("game end");
+      // console.log("game end");
       this.app.changeState("idle");
       // this.isPlaying = false;
       this.timer.pause();
@@ -391,9 +398,7 @@
     },
 
     judge: function(noteTime) {
-      // if (!this.isPlaying) return;
-
-      var noteTime = (noteTime) ? noteTime : this.noteList[this.currentNoteIndex];
+      noteTime = (noteTime) ? noteTime : this.noteList[this.currentNoteIndex];
       if (typeof noteTime === "undefined") return;
 
       var _longEnd; // ロング最終位置を一時保持
@@ -432,10 +437,8 @@
 
     // effect描画等
     reaction: function(rating) {
-
-      // if (rating === "hold") return;
-
       var ratingData = RATING_DATA_MAP[rating];
+
       if (rating !== "miss") {
         if (rating === "hold") {
           this.hitEffects.push({
@@ -476,9 +479,6 @@
 
       // 最大チェイン記録
       this.maxChain = Math.max(this.chainNum, this.maxChain);
-      // if (maxChain == 0 || maxChain <= chainNum) {
-      //     maxChain = chainNum;
-      // }
     },
 
     playShot: function(key) {
@@ -522,7 +522,6 @@
     }
 
     // グラデーションをfillStyleプロパティにセット
-    // context.globalAlpha = (alpha) ? alpha : 1;
     context.fillStyle = grad;
 
     // 矩形を描画
@@ -531,14 +530,14 @@
     context.restore();
   }
 
-  /* arrayから */
-  function createSpanArray(span, m, n, randomize){
+  /* ある位置から一定間隔(span)ずつずらした数値群の配列を返す（？） */
+  function createSpanArray(span, m, n, randomize) {
     var array = [];
     for (var i = m; i < m+n; i++) {
       array.push(span * i);
     }
     if (randomize === true){
-      for(var i = 0; i < array.length; i++) {
+      for(i = 0; i < array.length; i++) {
         swap(array, i, ((Math.random() * (array.length - i)) + i) | 0);
       }
     }
@@ -551,6 +550,6 @@
       a[s] = a[d];
       a[d] = t;
     }
-  };
+  }
 
 }(RRAIN));

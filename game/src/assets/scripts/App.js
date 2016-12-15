@@ -4,7 +4,9 @@
  *
  * アプリ全体を管理するクラス
  */
-;var RRAIN = RRAIN || {};
+var RRAIN = RRAIN || {};
+var createCounter = createCounter;
+
 (function(ns){
   var App = function() {
 
@@ -33,10 +35,11 @@
       // restartBtn: $id('restart-btn'),
       resultOptions: $id('result-options'),
       twitterShareBtn: $id('twitter-share-btn'),
-      // debugElm: $id('debug'),
     };
 
-    // if (!DEBUG_MODE) debugElm.parentNode.removeChild(debugElm);
+    // デバッグ要素消す
+    var debugElm = $id('debug-container');
+    if (!DEBUG_MODE) debugElm.parentNode.removeChild(debugElm);
 
     this._init();
   };
@@ -56,8 +59,9 @@
       }.bind(this));
 
       // DOM初期状態
-      this.changeState();
+      this.changeState("initial");
 
+      this.toggleLoadingState(true);
       // アセットのロード開始
       RRAIN.Loader.loadBatch({
         "image": IMAGE_ASSETS,
@@ -66,10 +70,15 @@
           "musicList": MUSIC_LIST_PATH
         }
       })
-      .then(this.init.bind(this));
+      .then(this.init.bind(this))
+      .catch(function(){
+        this.toggleLoadingState(false);
+        alert("何かおかしいようです");
+      }.bind(this));
     },
 
     init: function() {
+      this.toggleLoadingState(false);
       var musicList = this.musicList = RRAIN.Loader.getAsset("musicList").data.list;
 
       this._checkBrowserSupport();
@@ -89,14 +98,13 @@
       var unsupported = (ua.indexOf("android")>0 || ua.indexOf("MSIE")>0 || ua.indexOf("trident")>0);
 
       if (unsupported) {
-        alert('ご使用のブラウザは推奨環境下ではありません。\nGoogle chrome (PC)、もしくはiOS safariでのプレイをオススメします')
+        alert('ご使用のブラウザは推奨環境下ではありません。\nGoogle chrome (PC)、もしくはiOS safariでのプレイをオススメします');
         this.toggleSE(false);
       }
     },
 
     setTwitterShareLink: function(score) {
-      // console.log(this.music)
-      var msg = "雨がビニール傘を叩くときの音が好き"
+      var msg = "";
       var pre = 'https://twitter.com/share?';
       var euc = encodeURIComponent;
       var tweetText = msg+" - "+this.music._musicName+" スコア： "+score;
@@ -110,7 +118,7 @@
       // this.refs.twitterShareBtn.setAttribute('href', url);
       this.refs.twitterShareBtn.onclick = function() {
         window.open(url, 'share window', 'width=480, height=320');
-      }
+      };
     },
 
     setupInputEvent: function() {
@@ -135,7 +143,7 @@
         // それ以外(idle中など) -> リセットしてゲーム開始
         } else {
           if (!self.music) {
-            alert("Select Music! 曲を選んで下さい");
+            // alert("Select Music! 曲を選んで下さい");
             return;
           }
 
@@ -157,19 +165,19 @@
       var onpointup = function(e) {
         e.preventDefault();
         if (self.game.pointend && self.game.playState === "playing") self.game.pointend(e);
-      }
+      };
       this.canvas.addEventListener('mouseup', onpointup, false);
       this.canvas.addEventListener('touchend', onpointup, false);
       document.addEventListener('keyup', onpointup, false);
 
       // pause
-      this.refs.pauseBtn.addEventListener('click', this._togglePause.bind(this), false)
+      this.refs.pauseBtn.addEventListener('click', this._togglePause.bind(this), false);
 
       // autoplay button
       this.refs.autoPlayBtn.onchange = function(e) {
         // console.log(e.target.checked);
         self.game.isAutoPlay = e.target.checked;
-      }
+      };
     },
 
     _setupOptions: function() {
@@ -208,7 +216,7 @@
     setupRepertoryList: function(musicList) {
       var self = this;
 
-      musicList.forEach(function(music, index) {
+      musicList.forEach(function(music) {
         var li = document.createElement('li');
         li.textContent = music.name;
         li.style.background = DEFAULT_COLOR;
@@ -250,8 +258,7 @@
               self.music = res;
             })
             .catch(function(error){
-              alert("音源のロードに失敗しました");
-              console.error(error);
+              alert("音源のロードに失敗しました"+error);
               self.toggleLoadingState(false);
             });
 
@@ -261,8 +268,8 @@
               self.game.setupGame(res.data);
             })
             .catch(function(error){
-              alert("譜面のロードに失敗しました");
-              console.error(error);
+              alert("譜面のロードに失敗しました"+error);
+              // console.error(error);
               self.toggleLoadingState(false);
             });
 
@@ -334,7 +341,6 @@
       this.game.adjustTiming(val);
     },
 
-
     changeState: function(state) {
       this.game.playState = state;
       // console.log("changestate "+state)
@@ -379,6 +385,7 @@
         visibility = "hidden";
         this.enableInput = true;
       }
+
       this.refs.filterElement.style.visibility = visibility;
     },
   };

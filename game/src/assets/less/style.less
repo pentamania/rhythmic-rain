@@ -1,10 +1,36 @@
 @import url("http://yui.yahooapis.com/3.15.0/build/cssreset/cssreset-min.css");
 @import url("https://fonts.googleapis.com/css?family=Audiowide|Merienda+One' rel='stylesheet' type='text/css");
+@import "socialArea";
 
 @baseFontSize: 18px;
-@mq-fs-wu640 : .5rem;
+@baseFontSize-mqu640: 11px;
 
-// mixins
+/* ref: https://hail2u.net/blog/webdesign/yui3-css-reset-problem.html*/
+html {
+  background-color: transparent;
+  background-image: none;
+  -webkit-text-size-adjust: 100%;
+  font-family: Audiowide, cursive, monospace, sans-serif;
+  font-size: @baseFontSize;
+
+  @media screen and (max-width: 640px) {
+    font-size: @baseFontSize-mqu640;
+  }
+}
+
+body {
+  background: url("images/background.jpg") center center no-repeat fixed;
+  background-size: cover;
+  background-color: black;
+  color: rgb(208, 218, 213);
+}
+
+.container {
+  width: 640px;
+  @media screen and (max-width: 640px) {
+    width: 90%;
+  }
+}
 .app-layer {
   z-index: 2;
   position: absolute;
@@ -15,32 +41,8 @@
   position: absolute;
 }
 
-html {
-  /*https://hail2u.net/blog/webdesign/yui3-css-reset-problem.html*/
-  background-color: transparent;
-  background-image: none;
-
-  -webkit-text-size-adjust: 100%;
-  font-family: Audiowide, cursive, monospace, sans-serif;
-  font-size: @baseFontSize;
-}
-
-body {
-  background: url("images/background.jpg") center center no-repeat fixed;
-  background-size: cover;
-  background-color: black;
-  color: rgb(208, 218, 213);
-
-  @media screen and (max-width: 640px) {
-    font-size: @mq-fs-wu640;
-  }
-}
-
-.container {
-  width: 640px;
-}
-
-.title {
+.p-topic {
+  font-size: 1.3rem;
   text-align: center;
 }
 
@@ -49,9 +51,31 @@ body {
   text-align: center;
   padding: 0.2rem;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 1.3rem;
   border-radius: 1px;
 }
+
+.p-filter {
+  display:table;
+  background: rgba(22, 133, 144, 0.63);
+  background-size: cover;
+  text-align: center;
+  color: white;
+  min-width: 100%;
+  min-height: 100%;
+  z-index: 100;
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+
+  span {
+    display: table-cell;
+    vertical-align: middle;
+  }
+}
+
+// utils ==============================
 
 .u-abs-br {
   position: absolute;
@@ -87,8 +111,17 @@ body {
 .u-text-cnt {
   text-align: center;
 }
+
 .u-padding-mid {
   padding: .4rem;
+}
+
+.u-mt-mid {
+  margin-top: .6rem;
+}
+
+.u-half-trans {
+  opacity: .6;
 }
 
 .u-horizontal-list > * {
@@ -96,8 +129,10 @@ body {
 }
 
 // themes ==============================
+
 .t-gray-b {
   @color: #687696;
+
   background: white;
   border: solid 2px @color;
   color: @color;
@@ -106,6 +141,7 @@ body {
     background:  #92A5D0;
   }
 }
+
 .t-blue {
   background: #4D85D9;
   color: white;
@@ -123,23 +159,32 @@ body {
     background:  #53BF45;
   }
 }
+
+.t-cleargray {
+  background: rgba(86, 89, 86, 0.66);
+  color: white;
+
+  // &:hover {
+    // background:  #53BF45;
+  // }
+}
 // ==============================
 
 #game-field {
   position: relative;
-  margin: 8px auto;
+  margin: 0 auto;
 }
 
 #repertory-wrapper {
   display: block;
   min-height: 300px;
   overflow: auto;
-  margin:0 auto;
-  width: 640px;
+  margin: 0 auto;
+  // width: 640px;
 
   .repertory-title {
     width: 100%;
-    font-size: 1.2rem;
+    font-size: 1rem;
     text-align: center;
   }
 
@@ -147,10 +192,8 @@ body {
     display: block;
     text-align: center;
     width: 100%;
-    height: 96px;
-    font-size: 0;
+    height: 100px;
     overflow: auto;
-    margin: 20px auto;
 
     li {
       box-sizing: border-box;
@@ -167,54 +210,11 @@ body {
       vertical-align: top;
       overflow:hidden;
 
-      &:hover{
+      &:hover {
 
       }
     }
   }
-}
-
-@media screen and (max-width: 640px) {
-  // #repertory-wrapper{width: 90%;}
-  /*#repertory li{width: 50%;}*/
-  .container{width: 90%;}
-}
-
-#music-info{
-  background: rgba(86, 89, 86, 0.66);
-  text-align: center;
-  margin-top:4px;
-}
-
-.p-filter {
-  display:table;
-  background: rgba(22, 133, 144, 0.63);
-  background-size: cover;
-  text-align: center;
-  color: white;
-  min-width: 100%;
-  min-height: 100%;
-  z-index: 100;
-  position: absolute;
-  top: 0;
-  left: 0;
-  visibility: hidden;
-
-  span {
-    display: table-cell;
-    vertical-align: middle;
-  }
-}
-
-#option {
-  display: inline-block;
-  position: absolute;
-  box-sizing: border-box;
-  bottom: 0;
-  right: 0;
-  overflow: hidden;
-  padding: 4px;
-  opacity: 0.6;
 }
 
 // .counter-wrapper{
@@ -253,127 +253,4 @@ body {
 //     }
 //   }
 // }
-
-
-/******************************
-
- ソーシャルエリア全体を囲む要素
- * 他のコンテンツと距離を取りたい場合は[margin]を設定して下さい
-
-******************************/
-.social-link-area {
-  width: 100% ;
-  min-height: 190px ;
-  // background: rgba('#f5f1e9', 0) ;  /* 背景色 */
-  padding: 1.0em 0 ;
-}
-
-/* デスクトップPCでは高さを拡張する */
-@media screen and ( min-width:480px ) {
-  .social-link-area {
-    min-height: 119px ;
-  }
-}
-
-
-/******************************
-
- [ul]要素
-
-******************************/
-/* スマホ */
-ul.social-button {
-  width: 238px ;
-  margin: 24px auto ;
-  padding: 0 ;
-  border: none ;
-  list-style-type: none ;
-}
-
-/* デスクトップ */
-@media screen and ( min-width:480px ) {
-  ul.social-button {
-    width: 410px ;
-  }
-}
-
-
-/******************************
-
- [li]要素
-
-******************************/
-ul.social-button li {
-    float: left ;
-    text-align: center ;
-    height: 71px ;
-    margin: 0 8px ;
-    padding:0 ;
-}
-
-
-/******************************
-
- 各種ボタン
-
-******************************/
-/* [Twitter] */
-.sc-tw {
-    width: 71px ;
-}
-
-.sc-tw svg {
-    width: 30px ;
-    height: 30px ;
- }
-
-.sc-tw a {
-    height: 56px ;
-    margin: 0 auto ;
-    padding-top: 6px ;
-    display: block ;
-    background: #1B95E0 ;
-    font-size: 12px ;
-    color: #fff ;
-    font-weight: 700 ;
-    text-decoration: none ;
-    letter-spacing: .5px ;
-    border-radius: 2px ;
-}
-
-.sc-tw a:hover {
-    color: #fff ;
-    background: #0c7abf ;
-}
-
-.sc-tw span:before {
-    white-space: pre ;
-    content: '\A' ;
-}
-
-/* [Facebook] */
-.sc-fb {
-    z-index: 99 ;
-    width: 69px ;
-}
-
-/* [LINE] */
-.sc-li {
-    width: 50px ;
-}
-
-.sc-li-img {
-    border: none ;
-    margin: 0 auto ;
-    padding:0 ;
-    width: 36px ;
-    height: 60px ;
-}
-
-/* デスクトップPCではLINEボタンを表示しない */
-@media screen and ( min-width:480px ) {
-    .sc-li {
-        display: none ;
-    }
-}
 

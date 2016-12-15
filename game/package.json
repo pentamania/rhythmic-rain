@@ -6,6 +6,9 @@
   "devDependencies": {
     "chokidar-cli": "1.2.0",
     "del": "^2.2.2",
+    "eslint": "^3.12.2",
+    "eslint-config-airbnb-base": "^11.0.0",
+    "eslint-plugin-import": "^2.2.0",
     "gulp": "^3.9.0",
     "gulp-concat": "^2.6.1",
     "imagemin-cli": "2.1.0",
