@@ -29,7 +29,6 @@ var NOTE_POS_SPAN = Math.round(SCREEN_WIDTH / GRID_NUM);
 var NOTE_COLOR = "rgb(139, 236, 242)";
 var LONG_NOTE_COLOR = "rgb(77, 60, 212)";
 var WATER_COLOR = "#125779";
-// var EFFECT_COLOR = "rgba(152, 171, 236, 1)";
 // var THEME_COLOR = {
 //   morning: "rgb(249, 250, 207)",
 //   daytime: "#B9F5EF",
