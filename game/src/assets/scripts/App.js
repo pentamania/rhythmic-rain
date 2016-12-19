@@ -104,7 +104,7 @@ var createCounter = createCounter;
     },
 
     setTwitterShareLink: function(score) {
-      var msg = "";
+      var msg = "☔";
       var pre = 'https://twitter.com/share?';
       var euc = encodeURIComponent;
       var tweetText = msg+" - "+this.music._musicName+" スコア： "+score;

@@ -1,13 +1,13 @@
 'use strict';
 
-/* 定数 */
+/* 定数・コンフィグ*/
 var DEBUG_MODE = false;
 var FPS = 60;
-var TWEET_MESSAGES = [
-  "お父さんはいつ返ってくるんだろう...",
-  "雨がビニール傘を叩くときの音が好き",
-  "雨の日は落ち着く",
-];
+// var TWEET_MESSAGES = [
+//   "お父さんはいつ返ってくるんだろう...",
+//   "雨がビニール傘を叩くときの音が好き",
+//   "雨の日は落ち着く",
+// ];
 
 // 画面描画用パラメータ
 var SCREEN_WIDTH = (window.innerWidth > 640) ? 640 : window.innerWidth * 0.9;
@@ -15,15 +15,17 @@ var RATIO = SCREEN_WIDTH / 640; //640よりも小さい画面の場合に縮小�
 var SCREEN_HEIGHT = Math.round(SCREEN_WIDTH/16 * 9); // 比率16:9 == 640:360
 
 var GRID_NUM = 14; // 画面幅の分割数
-var NOTE_WIDTH = (SCREEN_WIDTH / GRID_NUM) * 0.7;
-var NOTE_HEIGHT = 6 * RATIO;
+var NOTE_WIDTH = (SCREEN_WIDTH / GRID_NUM) * 0.2;
+// var NOTE_WIDTH = (SCREEN_WIDTH / GRID_NUM) * 0.7;
+var NOTE_HEIGHT = 30 * RATIO;
+// var NOTE_HEIGHT = 6 * RATIO;
 var RESULT_OPT_POSITION = SCREEN_HEIGHT*0.66;
 
 var NOTE_POS_SPAN = Math.round(SCREEN_WIDTH / GRID_NUM);
-// var NOTE_SPEED_RANGE = {
-//   max: 5,
-//   min: 0
-// };
+
+var JUDGE_LINE_Y = SCREEN_HEIGHT * 0.7 | 0; //
+// var NOTE_DEST_Y = JUDGE_LINE_Y - NOTE_HEIGHT * 0.5; // ノーツ最終位置Y
+var EFFECT_HEIGHT = JUDGE_LINE_Y * 0.3; // エフェクトの高さ
 
 // 色
 var NOTE_COLOR = "rgb(139, 236, 242)";
@@ -47,10 +49,6 @@ var ACTIVE_COLOR = 'rgb(161, 182, 241)';
 var DEFAULT_OPACITY = 0.5;
 
 // アセット位置
-var JUDGE_LINE_Y = SCREEN_HEIGHT * 0.7 | 0; //
-var NOTE_DEST_Y = JUDGE_LINE_Y - NOTE_HEIGHT * 0.5; // ノーツ最終位置Y
-var EFFECT_HEIGHT = JUDGE_LINE_Y * 0.3; // エフェクトの高さ
-
 var RATING_TEXT_POS_X = SCREEN_WIDTH * 0.5;
 var RATING_TEXT_POS_Y = SCREEN_HEIGHT * 0.4;
 var SCORE_TEXT_FONT_SIZE = 20 * RATIO;

@@ -186,20 +186,21 @@ var RRAIN = RRAIN || {};
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       ctx.drawImage(buffer, 0, 0, buffer.width, buffer.height);
 
-      // ノーツレイヤー
+      // ノーツ描画
       ctx.save();
       for (i=this.currentNoteIndex, len=noteList.length; i<len; i++) {
         drawingPointX = this._notePositions[i%this._notePositionsLen];
         noteTime = noteList[i];
 
-        // noteTimeがarrayだったら == ロングノートだったら
         if (noteTime.length) {
+          // noteTimeがarrayだったら == ロングノートだったら
           ctx.fillStyle = LONG_NOTE_COLOR;
-          // 最終位置に合わせて、ノーツ高さを変更する
-          noteHeight = - (noteTime[1] - noteTime[0]) * corr; //上方向に伸ばすため、マイナス値
+          // 最終位置に合わせて、ノーツ高さを変更する（基準を底辺側にするため、マイナス値を指定）
+          noteHeight = -(noteTime[1] - noteTime[0]) * corr;
           noteTime = noteTime[0];
         } else {
-          noteHeight = NOTE_HEIGHT;
+          // 単ノーツ
+          noteHeight = -NOTE_HEIGHT;
           ctx.fillStyle = NOTE_COLOR;
         }
 
@@ -209,21 +210,22 @@ var RRAIN = RRAIN || {};
         // 描画位置を決める
         relativeTime = noteTime - timer.time();
         deltaY = relativeTime * corr;
-        drawingPointY = NOTE_DEST_Y - deltaY;
+        // drawingPointY = NOTE_DEST_Y - deltaY;
+        drawingPointY = JUDGE_LINE_Y - deltaY;
 
         // 画面外だったら描画をスキップして次のループへ
         if (drawingPointY < -10) continue;
 
         // 判定ライン位置でストップ & ロングノートの場合高さを縮める
-        if (relativeTime < 0){
+        if (relativeTime < 0) {
           noteHeight -= relativeTime * corr;
-          drawingPointY = NOTE_DEST_Y;
+          // drawingPointY = NOTE_DEST_Y;
+          drawingPointY = JUDGE_LINE_Y;
         }
 
         // ノーツ描く
         ctx.fillRect(drawingPointX, drawingPointY, NOTE_WIDTH, noteHeight);
       }
-
       ctx.restore();
 
       // UI系 スコア表示とか
@@ -237,7 +239,7 @@ var RRAIN = RRAIN || {};
       if (this.playState === "playing") {
 
         // チェイン数
-        if (this.chainNum !== 0){
+        if (this.chainNum !== 0) {
           ctx.fillText(this.chainNum+" CHAIN", RATING_TEXT_POS_X, RATING_TEXT_POS_Y + 16);
         }
 
@@ -276,9 +278,8 @@ var RRAIN = RRAIN || {};
         ctx.fillRect(PROGRESSBAR_X,PROGRESSBAR_Y, PROGRESSBAR_WIDTH * remainRatio, PROGRESSBAR_HEIGHT);
         ctx.restore();
       }
-      // スタート or リザルト画面
-      // if (!this.isPlaying) {
       else {
+        // スタート or リザルト画面
         ctx.save();
 
         // くろフィルター
