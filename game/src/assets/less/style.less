@@ -67,9 +67,6 @@ a {
 }
 
 .p-filter {
-  background: rgba(22, 133, 144, 0.63);
-  color: white;
-
   display:table;
   background-size: cover;
   text-align: center;
@@ -84,6 +81,19 @@ a {
   span {
     display: table-cell;
     vertical-align: middle;
+  }
+}
+
+.p-list {
+  font-size: 0.7rem;
+  padding: .2rem;
+  list-style-type: circle;
+  list-style-position: inside;
+
+  li {
+    margin-bottom: .3rem;
+    word-wrap : break-word;
+    overflow-wrap : break-word;
   }
 }
 
@@ -129,7 +139,7 @@ a {
 }
 
 .u-mt-mid {
-  margin-top: .6rem;
+  margin-top: .8rem;
 }
 
 .u-half-trans {
@@ -163,6 +173,11 @@ a {
   }
 }
 
+.t-clearblue {
+  background: rgba(22, 133, 144, 0.63);
+  color: white;
+}
+
 .t-green {
   background: #4DD97B;
   color: white;
@@ -175,12 +190,9 @@ a {
 .t-cleargray {
   background: rgba(86, 89, 86, 0.66);
   color: white;
-
-  // &:hover {
-    // background:  #53BF45;
-  // }
 }
-// ==============================
+
+// プロジェクト固有 ==============================
 
 #game-field {
   position: relative;
@@ -189,16 +201,10 @@ a {
 
 #repertory-wrapper {
   display: block;
+  // width: 640px;
   // min-height: 300px;
   overflow: auto;
   margin: 0 auto;
-  // width: 640px;
-
-  .repertory-title {
-    width: 100%;
-    font-size: 1rem;
-    text-align: center;
-  }
 
   #repertory {
     display: block;
@@ -213,10 +219,9 @@ a {
       width: 100%;
       height: 32px;
       color: white;
-      z-index:3;
+      // z-index:3;
       cursor: pointer;
       padding: 0.4em;
-      /*margin-left: 4px;*/
       margin-bottom: 4px;
       display: inline-block;
       vertical-align: top;
