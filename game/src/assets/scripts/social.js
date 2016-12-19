@@ -1,9 +1,9 @@
 /* DOMの読み込み完了後に処理 */
-// if (window.addEventListener) {
-//     window.addEventListener( "load" , shareButtonReadSyncer, false );
-// } else {
-//     window.attachEvent( "onload", shareButtonReadSyncer );
-// }
+if (window.addEventListener) {
+    window.addEventListener( "load" , shareButtonReadSyncer, false );
+} else {
+    window.attachEvent( "onload", shareButtonReadSyncer );
+}
 
 /* シェアボタンを読み込む関数 */
 function shareButtonReadSyncer(){

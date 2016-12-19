@@ -5,25 +5,25 @@
             "author": "MATSU",
             "url": "http://dova-s.jp/_contents/author/profile089.html",
             "difficulty": 3,
-            "theme": "night",
+            "BPM": "130",
             "src": "music/Game_gadget_at_midnight.mp3",
             "fumen": "fumen/Game_gadget_at_midnight.json"
-        },{
-            "name": "Morning (EASY)",
-            "author": "しゃろう",
-            "url": "http://dova-s.jp/_contents/author/profile106.html",
-            "difficulty": 1,
-            "theme": "day",
-            "src": "music/Morning.mp3",
-            "fumen": "fumen/morning.json"
         },{
             "name": "野良猫は宇宙を目指した (EASY)",
             "author": "しゃろう",
             "url": "http://dova-s.jp/_contents/author/profile106.html",
             "difficulty": 2,
-            "theme": "day",
+            "BPM": "90",
             "src": "music/野良猫は宇宙を目指した.mp3",
             "fumen": "fumen/野良猫は宇宙を目指した.json"
+        },{
+            "name": "Morning (EASY)",
+            "author": "しゃろう",
+            "url": "http://dova-s.jp/_contents/author/profile106.html",
+            "difficulty": 1,
+            "BPM": "118",
+            "src": "music/Morning.mp3",
+            "fumen": "fumen/morning.json"
         }
     ]
 }

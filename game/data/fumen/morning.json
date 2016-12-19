@@ -1,6 +1,7 @@
 {
   "audioSrc": "blob:http%3A//localhost/40a2db04-db53-4927-ad9a-058356670cdb",
-  "musicName": "Morning_shortVer.ogg",
+  "musicName": "Morning (EASY)",
+  "theme": "day",
   "BPM": "118",
   "zerohour": 1.05,
   "noteList": [

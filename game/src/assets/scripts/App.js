@@ -83,8 +83,8 @@ var createCounter = createCounter;
       var musicList = this.musicList = RRAIN.Loader.getAsset("musicList").data.list;
 
       this._checkBrowserSupport();
-      this.setupInputEvent();
-      this.setupRepertoryList(musicList);
+      this._setupInputEvent();
+      this._setupRepertoryList(musicList);
       this._setupOptions();
 
       // ツイートリンク等の位置を調整
@@ -122,7 +122,7 @@ var createCounter = createCounter;
       };
     },
 
-    setupInputEvent: function() {
+    _setupInputEvent: function() {
       var self = this;
 
       // keydown
@@ -179,7 +179,7 @@ var createCounter = createCounter;
         self.game.isAutoPlay = e.target.checked;
       };
 
-      // autoplay button
+      // randomize button
       this.refs.randomizeBtn.onchange = function(e) {
         if (e.target.checked) {
           self.game.setNotePositions(true);
@@ -222,7 +222,7 @@ var createCounter = createCounter;
     },
 
     /* レパートリーリスト要素を立ち上げ */
-    setupRepertoryList: function(musicList) {
+    _setupRepertoryList: function(musicList) {
       var self = this;
 
       musicList.forEach(function(music) {
@@ -306,20 +306,24 @@ var createCounter = createCounter;
       });
     },
 
-    updateMusicDetail: function(musicObj) {
+    updateMusicDetail: function(musicData) {
       this.refs.musicDetail.innerHTML = null;
 
-      Object.keys(musicObj).forEach(function(key) {
+      Object.keys(musicData).forEach(function(key) {
         if (key === "src" || key === "fumen" || key === "url") return;
         // if (key !== "name" || key !== "author" || key !== "difficulty") return;
 
-        var val = musicObj[key];
+        var val = musicData[key];
         var li = document.createElement('li');
         if (key === "author") {
           // 作者名表示 アンカーつける
-          var inner = "<a href=" + musicObj['url'] + ">" + val + "</a>";
-          li.innerHTML = "ARTIST: "+ inner;
-        } else if (key === "difficulty"){
+          var a = document.createElement('a');
+          a.setAttribute('href', musicData['url']);
+          a.setAttribute('target', "_blank");
+          a.innerText = val;
+          li.innerHTML = "ARTIST: ";
+          li.appendChild(a);
+        } else if (key === "difficulty") {
           // 難易度： 星の数で表す
           li.innerHTML += key.toUpperCase()+": ";
           for (var i = 0; i < val; i++) {
@@ -327,7 +331,7 @@ var createCounter = createCounter;
           }
         } else {
           // その他、特に加工せず表示
-          li.textContent = key.toUpperCase()+": "+ musicObj[key];
+          li.textContent = key.toUpperCase()+": "+ musicData[key];
         }
 
         this.refs.musicDetail.appendChild(li);

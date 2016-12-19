@@ -29,13 +29,19 @@ label {
   cursor: pointer;
 }
 
+a {
+  text-decoration: none;
+}
+
 .container {
   width: 640px;
   margin: 0 auto;
+
   @media screen and (max-width: 640px) {
     width: 90%;
   }
 }
+
 .app-layer {
   z-index: 2;
   position: absolute;
@@ -61,11 +67,12 @@ label {
 }
 
 .p-filter {
-  display:table;
   background: rgba(22, 133, 144, 0.63);
+  color: white;
+
+  display:table;
   background-size: cover;
   text-align: center;
-  color: white;
   min-width: 100%;
   min-height: 100%;
   z-index: 100;
@@ -182,7 +189,7 @@ label {
 
 #repertory-wrapper {
   display: block;
-  min-height: 300px;
+  // min-height: 300px;
   overflow: auto;
   margin: 0 auto;
   // width: 640px;
@@ -214,10 +221,6 @@ label {
       display: inline-block;
       vertical-align: top;
       overflow:hidden;
-
-      &:hover {
-
-      }
     }
   }
 }
@@ -258,4 +261,3 @@ label {
 //     }
 //   }
 // }
-
