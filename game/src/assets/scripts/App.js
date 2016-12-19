@@ -30,6 +30,7 @@ var createCounter = createCounter;
       gameField: $id('game-field'),
       pauseBtn: $id('pause-btn'),
       autoPlayBtn: $id('autoplay-btn'),
+      randomizeBtn: $id('randomize-btn'),
       optionArea: $id('option-area'),
 
       // restartBtn: $id('restart-btn'),
@@ -73,7 +74,7 @@ var createCounter = createCounter;
       .then(this.init.bind(this))
       .catch(function(){
         this.toggleLoadingState(false);
-        alert("何かおかしいようです");
+        alert("アセットのロードに失敗しました");
       }.bind(this));
     },
 
@@ -173,10 +174,18 @@ var createCounter = createCounter;
       // pause
       this.refs.pauseBtn.addEventListener('click', this._togglePause.bind(this), false);
 
-      // autoplay button
+      // autoplay button (For debug)
       this.refs.autoPlayBtn.onchange = function(e) {
-        // console.log(e.target.checked);
         self.game.isAutoPlay = e.target.checked;
+      };
+
+      // autoplay button
+      this.refs.randomizeBtn.onchange = function(e) {
+        if (e.target.checked) {
+          self.game.setNotePositions(true);
+        } else {
+          self.game.setNotePositions();
+        }
       };
     },
 

@@ -40,8 +40,9 @@ var RRAIN = RRAIN || {};
     this.isAutoPlay = false;
     this.enableSE = true;
 
-    this._notePositions = createSpanArray(NOTE_POS_SPAN, 4, 8)
-    this._notePositionsLen = this._notePositions.length;
+    this._notePositions = [];
+    this._notePositionsLen = 0;
+    this.setNotePositions(false);
   };
 
   Game.prototype = {
@@ -321,6 +322,11 @@ var RRAIN = RRAIN || {};
     setNoteSpeed: function(v) {
       var rate = 1+0.125*v;
       this.noteSpeedRate = Math.max(rate, 0.1);
+    },
+
+    setNotePositions: function(randomize) {
+      this._notePositions = createSpanArray(NOTE_POS_SPAN, 4, 8, randomize);
+      this._notePositionsLen = this._notePositions.length;
     },
 
     adjustTiming: function(v) {
