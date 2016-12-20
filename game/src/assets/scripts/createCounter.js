@@ -24,9 +24,9 @@
     var onchange = params.callback;
     var width = params.width || 40;
     var height = width*.55;
-    var fontSize = width*.3;
+    var fontSize = width*.3 | 0;
     var unit = params.unit || 1;
-    var buttonClass =　params.buttonClass || "";
+    var buttonClass = params.buttonClass || "";
 
     // Container
     var container = $div();
@@ -44,7 +44,7 @@
     $addStyle(label, {
       width: "inherit",
       textAlign: "center",
-      fontSize: fontSize*.7+"px",
+      fontSize: fontSize*.8+"px",
     });
     container.appendChild(label)
 
@@ -79,7 +79,7 @@
       // width: width+"px",
       width: "inherit",
       textAlign: "center",
-      fontSize: (fontSize/2)+"px",
+      fontSize: (fontSize)+"px",
     });
     container.appendChild(valueNode);
 

@@ -72,9 +72,9 @@ var createCounter = createCounter;
         }
       })
       .then(this.init.bind(this))
-      .catch(function(){
+      .catch(function(e){
         this.toggleLoadingState(false);
-        alert("アセットのロードに失敗しました");
+        alert("アセットのロードに失敗しました " + e);
       }.bind(this));
     },
 
@@ -82,7 +82,6 @@ var createCounter = createCounter;
       this.toggleLoadingState(false);
       var musicList = this.musicList = RRAIN.Loader.getAsset("musicList").data.list;
 
-      this._checkBrowserSupport();
       this._setupInputEvent();
       this._setupRepertoryList(musicList);
       this._setupOptions();
@@ -91,6 +90,7 @@ var createCounter = createCounter;
       this.refs.resultOptions.style.top = RESULT_OPT_POSITION+"px";
 
       this.game.init();
+      this._checkBrowserSupport();
       // this.adjustTiming(-100);
     },
 
@@ -105,7 +105,7 @@ var createCounter = createCounter;
     },
 
     setTwitterShareLink: function(score) {
-      var msg = "☔";
+      var msg = "☔"; // 傘の絵文字
       var pre = 'https://twitter.com/share?';
       var euc = encodeURIComponent;
       var tweetText = msg+" - "+this.music._musicName+" スコア： "+score;
@@ -307,7 +307,12 @@ var createCounter = createCounter;
     },
 
     updateMusicDetail: function(musicData) {
-      this.refs.musicDetail.innerHTML = null;
+      var container = this.refs.musicDetail;
+
+      // 一旦空にする Ref: http://stackoverflow.com/questions/5057759/how-do-i-clear-the-contents-of-a-div-without-innerhtml
+      while (container.hasChildNodes()) {
+        container.removeChild(container.firstChild);
+      }
 
       Object.keys(musicData).forEach(function(key) {
         if (key === "src" || key === "fumen" || key === "url") return;
@@ -321,7 +326,7 @@ var createCounter = createCounter;
           a.setAttribute('href', musicData['url']);
           a.setAttribute('target', "_blank");
           a.innerText = val;
-          li.innerHTML = "ARTIST: ";
+          li.innerText = "ARTIST: ";
           li.appendChild(a);
         } else if (key === "difficulty") {
           // 難易度： 星の数で表す
@@ -334,7 +339,7 @@ var createCounter = createCounter;
           li.textContent = key.toUpperCase()+": "+ musicData[key];
         }
 
-        this.refs.musicDetail.appendChild(li);
+        container.appendChild(li);
       }.bind(this));
     },
 

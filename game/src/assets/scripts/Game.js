@@ -9,35 +9,35 @@ var RRAIN = RRAIN || {};
   var Game = function(app) {
     this.timer = new Timer();
     this.canvas = app.canvas;
-    this.bufferCanvas = document.createElement('canvas');
+    this._bufferCanvas = document.createElement('canvas');
     this.app = app;
-    this.theme = "night";
 
     this.music = null;
-    this.bpm = 120;
+    this._bpm = 120;
     this.wait = 2.3; // sec
+    this._theme = "night";
 
     // 判定
-    this.currentNoteIndex = 0;
+    this._currentNoteIndex = 0;
     this._activeLongNote = null;
-    this.hitEffects = [];
-    this.noteList = [];
+    this._hitEffects = [];
+    this._noteList = [];
 
     // 設定関連
-    this.adjustedGap = 0;
-    this.noteSpeedRate = 1;
+    this._adjustedGap = 0;
+    this._noteSpeedRate = 1;
 
     // 記録
     this.score = 0;
-    this.chainNum = 0;
-    this.maxChain = 0;
+    this._chainNum = 0;
+    this._maxChain = 0;
     this._fullChainNum = 0;
 
     // flags
     // this.isPlaying = false;
-    this.playState = "initial";
-    this.isPressed = true;
     this.isAutoPlay = false;
+    this.playState = "initial";
+    this._isPressed = true;
     this.enableSE = true;
 
     this._notePositions = [];
@@ -56,14 +56,14 @@ var RRAIN = RRAIN || {};
 
     _initCanvas: function() {
       var girlImage = RRAIN.Loader.getAsset("girl");
-      var streetLightImage = RRAIN.Loader.getAsset("streetLight")
+      var streetLightImage = RRAIN.Loader.getAsset("streetLight");
 
       // Resize canvas
-      var cw = this.canvas.width = this.bufferCanvas.width = SCREEN_WIDTH;
-      var ch = this.canvas.height = this.bufferCanvas.height = SCREEN_HEIGHT;
+      var cw = this.canvas.width = this._bufferCanvas.width = SCREEN_WIDTH;
+      var ch = this.canvas.height = this._bufferCanvas.height = SCREEN_HEIGHT;
 
       // 背景は一度しか描画しないので、転写で使いまわす
-      var bctx = this.bufferCanvas.getContext('2d');
+      var bctx = this._bufferCanvas.getContext('2d');
 
       // 女の子 > 水面 > 電灯の描画
       bctx.drawImage(girlImage, GIRL_POS_X, GIRL_POS_Y, 124*1.1*RATIO, 166*1.1*RATIO);
@@ -91,10 +91,10 @@ var RRAIN = RRAIN || {};
 
       var i, len;
       var noteTime;
-      var noteList = this.noteList;
+      var noteList = this._noteList;
       var time = this.timer.time();
       var rTime;
-      if (this.isAutoPlay) this.isPressed = true;
+      if (this.isAutoPlay) this._isPressed = true;
 
       // if (DEBUG_MODE) $id('time').innerHTML = timer.time(); //DEBUG
 
@@ -106,55 +106,55 @@ var RRAIN = RRAIN || {};
       }
 
       // ノーツ状態変更
-      for (i=this.currentNoteIndex, len=noteList.length; i < len; i++) {
+      for (i=this._currentNoteIndex, len=noteList.length; i < len; i++) {
         noteTime = noteList[i];
 
         // ロングノートだったら
         // if (typeof noteTime === 'object') {
         if (noteTime.length) {
-          noteTime = noteTime[0] + this.adjustedGap;
+          noteTime = noteTime[0] + this._adjustedGap;
         } else {
-          noteTime += this.adjustedGap;
+          noteTime += this._adjustedGap;
         }
 
         // オートプレイ: great範囲内に入ったら即座に反応
         // ロングノート判定中にロングノート情報を消さないようにする
         if (this.isAutoPlay && !this._activeLongNote) {
           if (noteTime + this.wait - RATING_DATA_MAP.great.range*0.5 < time) {
-            this.judge();
+            this._judge();
           }
         }
 
         // 無入力判定： 判定ラインを超え、かつ判定時間を過ぎたらmiss判定、そして次のターゲットへ
         // ロングノート判定中は引っかからないようにする
         if (this._activeLongNote == null && noteTime+this.wait + RATING_DATA_MAP.good.range < time) {
-          this.judge();
+          this._judge();
         }
       }
 
       // long note 処理
       if (this._activeLongNote != null) {
-        // rTime = this._activeLongNote - time + this.adjustedGap;
+        // rTime = this._activeLongNote - time + this._adjustedGap;
         rTime = this._activeLongNote - time;
 
         // ボタンを押している
-        if (this.isPressed) {
+        if (this._isPressed) {
           // 終了時間に達していない
           if (0 < rTime) {
-            // this.reaction('hold');
+            // this._reaction('hold');
 
           // 規定時間まで押しつづけた
           } else {
-            this.reaction('great');
+            this._reaction('great');
             this._activeLongNote = null;
-            this.currentNoteIndex++;
+            this._currentNoteIndex++;
           }
 
         // 途中で離してしまった
         } else {
-          this.reaction('miss');
+          this._reaction('miss');
           this._activeLongNote = null;
-          this.currentNoteIndex++;
+          this._currentNoteIndex++;
         }
       }
 
@@ -163,33 +163,32 @@ var RRAIN = RRAIN || {};
     _render: function() {
       // Memo: corrをマイナスにすると、画面の下側からノーツが降る
       var ctx = this.canvas.getContext('2d');
-      var noteList = this.noteList;
+      var noteList = this._noteList;
       var len = noteList.length;
-      var buffer = this.bufferCanvas;
+      var buffer = this._bufferCanvas;
       var timer = this.timer;
       var noteHeight; // LNの場合は伸びる
 
        // ハイスピ等の補正
-      var corr = this.bpm * 1.75 * RATIO * this.noteSpeedRate;
+      var corr = this._bpm * 1.75 * RATIO * this._noteSpeedRate;
 
       var relativeTime = 0;
       var deltaY; // 判定ラインまでの距離
       var drawingPointX = 100; // X軸 描画開始位置
       var drawingPointY; // Y軸 描画開始位置
-      var effectPosX = null; // エフェクトX位置
       var i, effect, noteTime;
 
       // 初期化
       ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
       // 背景、テーマによって変える
-      ctx.fillStyle = THEME_COLOR[this.theme];
+      ctx.fillStyle = THEME_COLOR[this._theme];
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       ctx.drawImage(buffer, 0, 0, buffer.width, buffer.height);
 
       // ノーツ描画
       ctx.save();
-      for (i=this.currentNoteIndex, len=noteList.length; i<len; i++) {
+      for (i=this._currentNoteIndex, len=noteList.length; i<len; i++) {
         drawingPointX = this._notePositions[i%this._notePositionsLen];
         noteTime = noteList[i];
 
@@ -200,13 +199,13 @@ var RRAIN = RRAIN || {};
           noteHeight = -(noteTime[1] - noteTime[0]) * corr;
           noteTime = noteTime[0];
         } else {
-          // 単ノーツ
-          noteHeight = -NOTE_HEIGHT;
+          // 単ノーツ: 上下反転しても対応
+          noteHeight = (corr < 0) ? NOTE_HEIGHT : -NOTE_HEIGHT;
           ctx.fillStyle = NOTE_COLOR;
         }
 
         // 待ち時間を加算
-        noteTime += this.wait + this.adjustedGap;
+        noteTime += this.wait + this._adjustedGap;
 
         // 描画位置を決める
         relativeTime = noteTime - timer.time();
@@ -240,8 +239,8 @@ var RRAIN = RRAIN || {};
       if (this.playState === "playing") {
 
         // チェイン数
-        if (this.chainNum !== 0) {
-          ctx.fillText(this.chainNum+" CHAIN", RATING_TEXT_POS_X, RATING_TEXT_POS_Y + 16);
+        if (this._chainNum !== 0) {
+          ctx.fillText(this._chainNum+" CHAIN", RATING_TEXT_POS_X, RATING_TEXT_POS_Y + 16);
         }
 
         // スコア
@@ -249,13 +248,13 @@ var RRAIN = RRAIN || {};
         ctx.fillText(this.score, SCORE_TEXT_POS_X, SCORE_TEXT_POS_Y);
 
         // エフェクト（破壊的なのでfor-reverse文）
-        for (i = this.hitEffects.length - 1; i >= 0; i -= 1) {
-          effect = this.hitEffects[i];
+        for (i = this._hitEffects.length - 1; i >= 0; i -= 1) {
+          effect = this._hitEffects[i];
           ctx.save();
           ctx.globalAlpha = effect.life * 0.1; //opacity
           drawGradRect(ctx, effect.posX, JUDGE_LINE_Y-EFFECT_HEIGHT,  NOTE_WIDTH, EFFECT_HEIGHT, [[0,"rgba(0, 0, 0, 0)"], [1, effect.color]]);
           effect.life--;
-          if (effect.life < 0) this.hitEffects.splice(i, 1);
+          if (effect.life < 0) this._hitEffects.splice(i, 1);
           ctx.restore();
 
           // "great!"とか
@@ -311,8 +310,8 @@ var RRAIN = RRAIN || {};
           ctx.fillText("SCORE: "+this.score+"", RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*1.5);
 
           // Max chain
-          ctx.fillText("MAX-CHAIN: "+this.maxChain+" / "+this._fullChainNum, RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*3);
-          // if (this.maxChain != 0) {ctx.fillText("MAX-CHAIN: "+this.maxChain+" / "+this._fullChainNum, RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*3);}
+          ctx.fillText("MAX-CHAIN: "+this._maxChain+" / "+this._fullChainNum, RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*3);
+          // if (this._maxChain != 0) {ctx.fillText("MAX-CHAIN: "+this._maxChain+" / "+this._fullChainNum, RATING_TEXT_POS_X,  RATING_TEXT_POS_Y+SCORE_TEXT_FONT_SIZE*3);}
         }
 
         ctx.restore();
@@ -321,8 +320,8 @@ var RRAIN = RRAIN || {};
 
     setNoteSpeed: function(v) {
       var rate = 1+0.125*v;
-      this.noteSpeedRate = Math.max(rate, 0.1);
-      // this.noteSpeedRate = rate;
+      // this._noteSpeedRate = Math.max(rate, 0.1);
+      this._noteSpeedRate = rate;
     },
 
     setNotePositions: function(randomize) {
@@ -333,8 +332,8 @@ var RRAIN = RRAIN || {};
     adjustTiming: function(v) {
       // 正の数ほど判定が遅くなる（早ずれ気味のときに修正）
       // 負の数ほど判定が早ずれ
-      this.adjustedGap = v/1000;
-      // console.log(this.adjustedGap)
+      this._adjustedGap = v/1000;
+      // console.log(this._adjustedGap)
     },
 
     setMusic: function(music) {
@@ -345,10 +344,10 @@ var RRAIN = RRAIN || {};
     },
 
     setupGame: function(data) {
-      this.noteList = [].concat(data.noteList);
-      this.bpm = data.BPM;
+      this._noteList = [].concat(data.noteList);
+      this._bpm = data.BPM;
       this.zerohour = data.zerohour;
-      this.theme = data.theme || "night";
+      this._theme = data.theme || "night";
 
       // 理論チェイン数
       this._fullChainNum = 0;
@@ -362,15 +361,15 @@ var RRAIN = RRAIN || {};
     },
 
     reset: function() {
-      this.currentNoteIndex = 0;
+      this._currentNoteIndex = 0;
       // this.music.stop();
       this.music._played = false;
       this.timer.reset();
 
-      this.chainNum = 0;
-      this.maxChain = 0;
+      this._chainNum = 0;
+      this._maxChain = 0;
       this.score = 0;
-      this.hitEffects = [];
+      this._hitEffects = [];
 
       this.playState = "idle";
     },
@@ -405,24 +404,24 @@ var RRAIN = RRAIN || {};
       this.app.setTwitterShareLink(this.score);
     },
 
-    judge: function(noteTime) {
-      noteTime = (noteTime) ? noteTime : this.noteList[this.currentNoteIndex];
+    _judge: function(noteTime) {
+      noteTime = (noteTime) ? noteTime : this._noteList[this._currentNoteIndex];
+
       if (typeof noteTime === "undefined") return;
 
       var _longEnd; // ロング最終位置を一時保持
-      var reaction = this.reaction.bind(this);
+      var reaction = this._reaction.bind(this);
 
       // array(ロングノート)だったら
       if (typeof noteTime === 'object') {
-        _longEnd = noteTime[1] + this.wait + this.adjustedGap;
+        _longEnd = noteTime[1] + this.wait + this._adjustedGap;
         noteTime = noteTime[0];
-        // console.log("ln"+_longEnd)
       }
 
-      noteTime += this.wait + this.adjustedGap;
+      noteTime += this.wait + this._adjustedGap;
 
       // 正判定位置からどれくらいずれているか
-      // var rTime = noteTime - this.timer.time() + this.adjustedGap;
+      // var rTime = noteTime - this.timer.time() + this._adjustedGap;
       var rTime = noteTime - this.timer.time();
       var rTimeAbs = Math.abs(rTime);
       var RDM = RATING_DATA_MAP;
@@ -444,25 +443,26 @@ var RRAIN = RRAIN || {};
     },
 
     // effect描画等
-    reaction: function(rating) {
+    _reaction: function(rating) {
       var ratingData = RATING_DATA_MAP[rating];
+      var posX = this._notePositions[this._currentNoteIndex%this._notePositionsLen];
 
       if (rating !== "miss") {
         if (rating === "hold") {
-          this.hitEffects.push({
+          this._hitEffects.push({
             life: ratingData.effectTime,
-            posX: this._notePositions[this.currentNoteIndex%this._notePositionsLen],
+            posX: posX,
             color: ratingData.color,
             message: "",
           });
 
         } else {
-          this.chainNum++;
+          this._chainNum++;
 
-          this.playShot(ratingData.sound);
-          this.hitEffects.push({
+          this._playShot(ratingData.sound);
+          this._hitEffects.push({
             life: ratingData.effectTime,
-            posX: this._notePositions[this.currentNoteIndex%this._notePositionsLen],
+            posX: posX,
             color: ratingData.color,
             message: ratingData.message,
           });
@@ -472,40 +472,40 @@ var RRAIN = RRAIN || {};
 
       } else {
         // miss
-        this.chainNum = 0; // チェイン切る
-        this.hitEffects.push({
+        this._chainNum = 0; // チェイン切る
+        this._hitEffects.push({
           life: ratingData.effectTime,
-          posX: this._notePositions[this.currentNoteIndex%this._notePositionsLen],
+          posX: posX,
           color: ratingData.color,
           message: ratingData.message,
         });
       }
 
       // ロングノートでなければターゲット進める
-      if (this._activeLongNote == null) this.currentNoteIndex++;
-      // this.currentNoteIndex++;
+      if (this._activeLongNote == null) this._currentNoteIndex++;
+      // this._currentNoteIndex++;
 
-      // 最大チェイン記録
-      this.maxChain = Math.max(this.chainNum, this.maxChain);
+      // 最大チェインを記録
+      this._maxChain = Math.max(this._chainNum, this._maxChain);
     },
 
-    playShot: function(key) {
+    _playShot: function(key) {
       if (!this.enableSE) return;
       RRAIN.Loader.getAsset(key).play();
     },
 
     pointstart: function() {
-      if (this.isAutoPlay || this.isPressed) return;
-      // console.log("push!", this.currentNoteIndex);
+      if (this.isAutoPlay || this._isPressed) return;
+      // console.log("push!", this._currentNoteIndex);
 
-      this.isPressed = true;
-      this.judge();
+      this._isPressed = true;
+      this._judge();
     },
 
     pointend: function() {
-      if (this.isAutoPlay || !this.isPressed) return;
+      if (this.isAutoPlay || !this._isPressed) return;
 
-      this.isPressed = false;
+      this._isPressed = false;
     },
 
   };
