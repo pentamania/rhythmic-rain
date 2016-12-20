@@ -322,6 +322,7 @@ var RRAIN = RRAIN || {};
     setNoteSpeed: function(v) {
       var rate = 1+0.125*v;
       this.noteSpeedRate = Math.max(rate, 0.1);
+      // this.noteSpeedRate = rate;
     },
 
     setNotePositions: function(randomize) {

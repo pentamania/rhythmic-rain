@@ -3,44 +3,50 @@
     <head>
         <meta charset="utf-8">
         <meta name="author" content="pentamania">
+        <meta name="description" content="雨音をバックに鼻歌でも奏でよう">
         <meta http-equiv="x-ua-compatible" content="IE=Edge">
         <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
         <title>RHYTHMIC RAIN</title>
-        <!-- <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.15.0/build/cssreset/cssreset-min.css"> -->
-        <!-- <link href='https://fonts.googleapis.com/css?family=Audiowide|Merienda+One' rel='stylesheet' type='text/css'> -->
         <link href='./assets/style.css' rel='stylesheet' type='text/css'>
     </head>
     <body>
-        <div class="wrapper">
-            <h1 class="title">RHYTHMIC RAIN</h1>
+        <div class="wrapper u-padding-mid">
+            <h1 class="p-topic u-mt-mid">RHYTHMIC RAIN</h1>
 
             <section id="game-field">
-                <canvas id="app"></canvas>
+                <canvas id="app" class="app-layer"></canvas>
+                <ul id="result-options" class="u-abs-band u-text-cnt UI-layer">
+                    <a id="twitter-share-btn" class="p-btn t-blue">Tweet</a>
+                </ul>
+                <div id="pause-btn" class="t-gray-b p-btn u-abs-tr UI-layer">II</div>
+                <div id="music-name-display" class="u-abs-bl UI-layer">♪ (NO MUSIC)</div>
+                <div id="option-area" class="UI-layer u-abs-br u-padding-mid u-horizontal-list u-half-trans"></div>
+            </section>
 
-                <div id="pause-btn" class="UI-layer">II</div>
-                <div id="music-name-display" class="UI-layer">♪</div>
-                <div id="option" class="UI-layer">
-                    <div class="counter-wrapper">
-                        <div id="note-speed-up-button" class="half-circle upper">fast</div>
-                        <div id="note-speed-display" class="counter-body">0</div>
-                        <div id="note-speed-down-button" class="half-circle lower">slow</div>
-                        <p class="counter-header">SPEED</p>
-                    </div>
-                </div>
+            <section id="game-options" class="container">
+                <input type="checkbox" id="randomize-btn" value="randomize"> <LABEL for="randomize-btn">RANDOMIZE</LABEL>
             </section>
 
             <section id="repertory-wrapper" class="container">
-                <h3 class="repertory-title">~ SELECT MUSIC ~</h3>
+                <h3 class="p-topic u-mt-mid">REPERTORY</h3>
                 <ul id="repertory"></ul>
-                <ul id="music-info"></ul>
+                <ul id="music-info" class="u-mt-mid u-text-cnt t-cleargray"></ul>
             </section>
 
-            <div id="debug" class="container">
+            <section id="debug-container" class="container">
                 <div id="time"></div>
-                <button id="resetBtn">reset</button>
-                <input type="number" id="seek" value=""><br>
-                AUTOPLAY: <input type="checkbox" id="autoPlayBtn" value="autoplay">
-            </div>
+                <input type="checkbox" id="autoplay-btn" value="autoplay"> <LABEL for="autoplay-btn">AUTOPLAY</LABEL>
+            </section>
+
+            <section class="container u-mt-mid t-clearblue">
+                <h2 class="p-topic">HOW TO PLAY</h2>
+                <ul class="p-list">
+                    <li>上のリストから楽曲を選択し、スクリーンをタップ/クリックするかキーボードをタイプしてゲームをスタートします。</li>
+                    <li>雨ノーツが降ってくるので、地表に到達するタイミングでスクリーンタップ・キーボードタイプします。</li>
+                    <li>濃い色のノーツは押した後、終点に到達するまで、タップ・キーを離さないようにします。</li>
+                    <li>タイミングに応じてGREAT、NICE、GOOD、MISSの評価がされますが、あまり気にしないで下さい。</li>
+                </ul>
+            </section>
 
             <section class="social-link-area container">
                 <ul class="social-button">
@@ -69,27 +75,23 @@
                     <!-- LINE [画像は公式ウェブサイトからダウンロードして下さい] -->
                     <!-- <li class="sc-li"><a href="http://line.me/R/msg/text/?https://syncer.jp"><img src="./linebutton_36x60.png" width="36" height="60" alt="LINEに送る" class="sc-li-img"></a></li> -->
                 </ul>
-
                 <!-- Facebook用 -->
                 <div id="fb-root"></div>
             </section><!-- social-link-area -->
 
         </div><!-- wrapper -->
 
-        <div id="load-filter">
+        <div id="load-filter" class="p-filter t-clearblue">
             <span>
                 <div class="">Now loading...</div>
                 <img src="./assets/images/gif-load-drip-blue.gif" alt="loading-animation" />
             </span>
         </div>
+
         <a href="http://pentamania.github.io/rhythmic-rain/game/dist">
           <img src="https://ga-beacon.appspot.com/UA-69580107-2/pentamania.github.io/rhythmic-rain/game/dist?pixel" />
         </a>
-        <!-- <script src="./assets/scripts/lib/soundjs-0.6.1.min.js" charset="utf-8"></script> -->
-        <!-- <script src="./assets/scripts/utils.js" charset="utf-8"></script> -->
-        <!-- <script src="./assets/scripts/loader.js" charset="utf-8"></script> -->
-        <!-- <script src="./assets/lib/socialLink.js" charset="utf-8"></script> -->
-        <!-- <script src="app.js" charset="utf-8"></script> -->
+
         <script src="all.min.js" charset="utf-8"></script>
     </body>
 </html>

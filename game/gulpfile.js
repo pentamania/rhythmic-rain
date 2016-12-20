@@ -5,9 +5,19 @@ const gulp = require("gulp"),
 ;
 
 gulp.task('clean', (cb)=> {
-  return del(['./tmp/*.*'], cb)
-  // return del(['./tmp/*.*', './dist/*.*'], cb)
+  // return del(['./tmp/*.*'], cb)
+  return del(['./tmp/*.*', './dist/*.*'], cb)
 });
+
+// html ==============================
+gulp.task('build:html', (cb)=> {
+  return gulp.src(['src/*.html'])
+  .pipe(gulp.dest('dist/'));
+})
+
+gulp.task('watch:html', (cb)=> {
+  return gulp.watch('src/*.html', ['build:html'])
+})
 
 // css ==============================
 gulp.task('build:css', (cb)=> {
@@ -16,7 +26,7 @@ gulp.task('build:css', (cb)=> {
   });
 })
 
-gulp.task('watch:less', (cb)=> {
+gulp.task('watch:css', (cb)=> {
   return gulp.watch('./src/**/*.less', ['build:css']);
 })
 
@@ -40,7 +50,7 @@ gulp.task('watch:js', (cb)=> {
   return gulp.watch('./src/**/*.js', ['js:minify']);
 })
 
-// その他アセット
+// その他アセット類 ==============================
 gulp.task('imagemin', (cb)=> {
   exec('npm run build:image', (err, stdout, stderr)=> {
     cb(err);
@@ -52,7 +62,9 @@ gulp.task('sound', (cb)=> {
   .pipe(gulp.dest('dist/assets/sounds'));
 })
 
-// TOOD:全ビルド clean -> css/js/assets -> end
-gulp.task('build:app', ['clean'], (cb)=> {
-  return gulp.src(['js:minify'])
-})
+// App ==============================
+
+// TODO: 全ビルド clean -> css/js/assets -> end
+// gulp.task('build', ['clean'], (cb)=> {
+  // return gulp.src(['js:minify'])
+// })
