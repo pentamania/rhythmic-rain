@@ -247,8 +247,9 @@ var createCounter = createCounter;
 
           // Reset all li style > Change selected li style
           var childs = self.refs.repertoryList.childNodes;
-          Object.keys(childs).forEach(function(i) {
-            var cs = childs[i].style;
+          childs = Array.prototype.slice.call(childs);
+          childs.forEach(function(child){
+            var cs = child.style;
             cs.background = DEFAULT_COLOR;
             cs.opacity = 0.5;
           });
