@@ -1,11 +1,14 @@
-## About game
-Simple JavaScript rhythm action game using HTML5 canvas.
-
+# RHYTHMIC RAIN
 [Play now](http://pentamania.github.io/rhythmic-rain/game/dist/index.html)
 
-Recommended browser: Google Chrome(PC), iOS safari(SP/tab)
+## About
+This is a simple javaScript rhythm action game using HTML5 canvas.
 
-### How to Play
-Tap any key or screen at the timing when the note object reaches the surface.
-If the target is long, you should hold the key until it reaches the end.
+Recommended browsers: Google Chrome(PC), iOS safari(SP/tab)
 
+## How to Play
+Select music from the repretory, and tap or click the screen/keyboard to start game.
+While the game, tap any key or screen at the timing when the rain object reaches the surface.
+Against the deep-colored target, you should hold the key until it reaches its end.
+
+Have fun!
