@@ -8,6 +8,7 @@ var FPS = 60;
 //   "雨がビニール傘を叩くときの音が好き",
 //   "雨の日は落ち着く",
 // ];
+var RANDOMIZE_INIT_STAT = true;
 
 // 画面描画用パラメータ
 var SCREEN_WIDTH = (window.innerWidth > 640) ? 640 : window.innerWidth * 0.9;

@@ -78,6 +78,7 @@ var createCounter = createCounter;
       }.bind(this));
     },
 
+    // アセットロード後の処理
     init: function() {
       this.toggleLoadingState(false);
       var musicList = this.musicList = RRAIN.Loader.getAsset("musicList").data.list;
@@ -86,11 +87,13 @@ var createCounter = createCounter;
       this._setupRepertoryList(musicList);
       this._setupOptions();
 
-      // ツイートリンク等の位置を調整
+      // ツイートリンク等の位置を調整 ロード前でOK？
       this.refs.resultOptions.style.top = RESULT_OPT_POSITION+"px";
+      this.refs.randomizeBtn.checked = RANDOMIZE_INIT_STAT;
 
       this.game.init();
       this._checkBrowserSupport();
+
       // this.adjustTiming(-100);
     },
 
@@ -410,6 +413,7 @@ var createCounter = createCounter;
   };
 
   ns.App = App;
+
 
   // == utils ==
 

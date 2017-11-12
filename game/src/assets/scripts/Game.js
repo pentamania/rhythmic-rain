@@ -42,7 +42,7 @@ var RRAIN = RRAIN || {};
 
     this._notePositions = [];
     this._notePositionsLen = 0;
-    this.setNotePositions(false);
+    this.setNotePositions(RANDOMIZE_INIT_STAT);
   };
 
   Game.prototype = {
