@@ -407,7 +407,10 @@ var RRAIN = RRAIN || {};
     _judge: function(noteTime) {
       noteTime = (noteTime) ? noteTime : this._noteList[this._currentNoteIndex];
 
-      if (typeof noteTime === "undefined") return;
+      if (typeof noteTime === "undefined") {
+       this._playShot("empty");
+       return;
+      }
 
       var _longEnd; // ロング最終位置を一時保持
       var reaction = this._reaction.bind(this);
@@ -427,7 +430,10 @@ var RRAIN = RRAIN || {};
       var RDM = RATING_DATA_MAP;
 
       // 判定範囲外なら何もせず終了
-      if (RDM.out.range < rTime) return;
+      if (RDM.out.range < rTime) {
+        this._playShot("empty");
+        return;
+      }
       // console.log(note)
 
       // ロング成功時

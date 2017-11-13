@@ -64,7 +64,7 @@ gulp.task('sound', (cb)=> {
 
 // App ==============================
 
-// TODO: 全ビルド clean -> css/js/assets -> end
+// TODO: 全ビルド clean -> css/js/assetsのビルド
 // gulp.task('build', ['clean'], (cb)=> {
   // return gulp.src(['js:minify'])
 // })

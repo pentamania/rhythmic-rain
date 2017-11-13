@@ -108,7 +108,8 @@ var RATING_DATA_MAP = {
 // paths
 var SOUND_ASSETS = {
   clap:"./assets/sounds/clap.mp3",
-  conga: "./assets/sounds/conga.mp3"
+  conga: "./assets/sounds/conga.mp3",
+  empty: "./assets/sounds/snap.mp3",
 };
 var IMAGE_ASSETS = {
   streetLight: "./assets/images/streetLight2.png",
