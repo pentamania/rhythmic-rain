@@ -13,24 +13,13 @@
     "gulp-concat": "^2.6.1",
     "imagemin-cli": "2.1.0",
     "less": "2.6.1",
+    "pleeease": "^4.2.1",
     "pleeease-cli": "4.0.0",
-    "uglifyjs": "2.6.2"
+    "uglify-js": "^3.1.10"
   },
   "scripts": {
-    "clean": "rm -rf ./dist/* ./tmp/*",
-    "js:concat:lib": "cat src/assets/scripts/lib/*.js src/assets/scripts/*.js > ./tmp/lib.js",
-    "js:minify": "uglifyjs ./tmp/lib.js src/constants.js src/main.js > ./dist/all.min.js",
-    "build:js": "npm run js:concat:lib && npm run js:minify",
-    "css:compile": "lessc src/assets/less/style.less tmp/assets/style.css",
-    "css:min": "pleeease compile",
-    "build:css": "npm run css:compile && npm run css:min",
-    "build:image": "imagemin src/assets/images/*.{png,jpg,gif} dist/assets/images",
-    "build:sound": "cp -r src/assets/sounds dist/assets/sounds",
-    "build:assets": "npm run build:image & npm run build:sound",
-    "build:html": "cp src/index.html dist",
-    "release": "npm run clean && npm run build:html & npm run build:assets & npm run build:js & npm run build:css",
-    "build": "npm run build:html & npm run build:js & npm run build:css",
-    "watch:css": "chokidar \"src/assets/less/*.less\" -c \"npm run build:css\"",
+    "build:release": "gulp clean && npm run build",
+    "build": "gulp html:copy & gulp asset:copy & gulp js:minify & gulp css:compile",
     "watch": "chokidar \"src/\" -c \"npm run build\""
   },
   "repository": {

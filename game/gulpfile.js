@@ -1,70 +1,108 @@
 const gulp = require("gulp"),
       concat = require("gulp-concat"),
       del = require('del'),
-      exec = require('child_process').exec
+      UglifyJS = require("uglify-js"),
+      less = require('less'),
+      pleeease = require('pleeease'),
+      // exec = require('child_process').exec,
+      fs = require('fs')
 ;
+// todo...
+const pathOpts = {
+  srcLess: "./src/less",
+  destCSS: "./dist/style.css",
+  srcJS: "./src/scripts",
+  tmpJS: "./tmp/all.js",
+  destJS: "./dist/all.min.js",
+};
+
 
 gulp.task('clean', (cb)=> {
-  // return del(['./tmp/*.*'], cb)
-  return del(['./tmp/*.*', './dist/*.*'], cb)
+  return del(['./tmp/**/*', './dist/**/*'], cb)
 });
 
-// html ==============================
-gulp.task('build:html', (cb)=> {
-  return gulp.src(['src/*.html'])
-  .pipe(gulp.dest('dist/'));
-})
-
-gulp.task('watch:html', (cb)=> {
-  return gulp.watch('src/*.html', ['build:html'])
-})
-
 // css ==============================
-gulp.task('build:css', (cb)=> {
-  exec('npm run build:css', (err, stdout, stderr)=> {
+gulp.task('css:compile', (cb)=> {
+  // 環境で変える？
+  const opt = {
+    less: {
+      paths: [pathOpts.srcLess]
+    },
+    sourcemaps: false,
+    // "browsers": ["last 3 versions", "Android 2.3"],
+    // 'minifier': false,
+  };
+  const srcScript = fs.readFileSync(pathOpts.srcLess+"/style.less", "utf8");
+
+  pleeease.process(srcScript, opt)
+  .then(function(output) {
+    fs.writeFileSync(pathOpts.destCSS, output, "utf8");
+    cb();
+  })
+  .catch(function(err) {
     cb(err);
   });
 })
-
-gulp.task('watch:css', (cb)=> {
-  return gulp.watch('./src/**/*.less', ['build:css']);
+gulp.task('css:watch', (cb)=> {
+  return gulp.watch('./src/less/*.less', ['css:compile']);
 })
 
 // js ==============================
-gulp.task('js:concat:lib', (cb)=> {
+gulp.task('js:concat', (cb)=> {
   return gulp.src([
-    'src/assets/scripts/lib/*.js',
-    'src/assets/scripts/*.js'
+    'src/scripts/lib/*.js',
+    'src/scripts/constants.js',
+    'src/scripts/*.js',
+    'src/main.js',
   ])
-  .pipe(concat('lib.js'))
+  .pipe(concat('all.js'))
   .pipe(gulp.dest('tmp'));
+});
+gulp.task('js:minify', ['js:concat'], (cb)=> {
+  const options = {
+    output: {
+      comments: /^!/, // "/*! ... */"などビックリマークで始まるコメントを残す
+      // comments: "some", // @liceneseなどを残す
+    },
+  };
+  const srcScript = fs.readFileSync(pathOpts.tmpJS, "utf8");
+  const minified = UglifyJS.minify(srcScript, options).code;
+  if (minified != null) {
+    fs.writeFileSync(pathOpts.destJS, minified, "utf8");
+  } else {
+    throw new Error('some error..')
+  }
+  cb();
 })
 
-gulp.task('js:minify', ['js:concat:lib'], (cb)=> {
-  exec('npm run js:minify', (err, stdout, stderr)=> {
-    cb(err);
-  });
+gulp.task('js:watch', (cb)=> {
+  return gulp.watch(pathOpt.srcJS+'/*.js', ['js:minify']);
 })
 
-gulp.task('watch:js', (cb)=> {
-  return gulp.watch('./src/**/*.js', ['js:minify']);
+
+// html ==============================
+gulp.task('html:copy', (cb)=> {
+  return gulp.src(['src/*.html'])
+  .pipe(gulp.dest('dist/'));
 })
+// gulp.task('html:watch', (cb)=> {
+//   return gulp.watch('src/*.html', ['html:copy'])
+// })
+
 
 // その他アセット類 ==============================
-gulp.task('imagemin', (cb)=> {
-  exec('npm run build:image', (err, stdout, stderr)=> {
-    cb(err);
-  });
-})
 
-gulp.task('sound', (cb)=> {
+gulp.task('image:copy', (cb)=> {
+  return gulp.src(['src/assets/images/*.*'])
+  .pipe(gulp.dest('dist/assets/images'));
+})
+gulp.task('sound:copy', (cb)=> {
   return gulp.src(['src/assets/sounds/*.*'])
   .pipe(gulp.dest('dist/assets/sounds'));
 })
+// まとめて
+gulp.task('asset:copy', ['image:copy', 'sound:copy'], (cb)=> {
+  console.log('copying assets...')
+  cb();
+})
 
-// App ==============================
-
-// TODO: 全ビルド clean -> css/js/assetsのビルド
-// gulp.task('build', ['clean'], (cb)=> {
-  // return gulp.src(['js:minify'])
-// })
