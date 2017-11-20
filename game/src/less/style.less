@@ -4,6 +4,7 @@
 
 @baseFontSize: 18px;
 @baseFontSize-mqu640: 14px;
+@image_path: "./assets/images";
 
 /* ref: https://hail2u.net/blog/webdesign/yui3-css-reset-problem.html*/
 html {
@@ -19,7 +20,7 @@ html {
 }
 
 body {
-  background: url("images/background.jpg") center center no-repeat fixed;
+  background: url("@{image_path}/background.jpg") center center no-repeat fixed;
   background-size: cover;
   background-color: black;
   color: rgb(208, 218, 213);
