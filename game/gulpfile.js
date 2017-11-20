@@ -2,9 +2,7 @@ const gulp = require("gulp"),
       concat = require("gulp-concat"),
       del = require('del'),
       UglifyJS = require("uglify-js"),
-      less = require('less'),
       pleeease = require('pleeease'),
-      // exec = require('child_process').exec,
       fs = require('fs')
 ;
 // todo...
