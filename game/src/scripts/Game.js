@@ -35,7 +35,8 @@ var RRAIN = RRAIN || {};
 
     // flags
     // this.isPlaying = false;
-    this.isAutoPlay = false;
+    this.isAutoPlay = AUTOPLAY_INIT_STAT;
+    // this.isOnceAutoPlayed = false;
     this.playState = "initial";
     this._isPressed = true;
     this.enableSE = true;
@@ -370,6 +371,7 @@ var RRAIN = RRAIN || {};
       this._maxChain = 0;
       this.score = 0;
       this._hitEffects = [];
+      // this.isOnceAutoPlayed = false;
 
       this.playState = "idle";
     },
@@ -398,9 +400,11 @@ var RRAIN = RRAIN || {};
 
     end: function() {
       // console.log("game end");
-      this.app.changeState("idle");
+      this.app.changeState("result");
       // this.isPlaying = false;
       this.timer.pause();
+      // var score = (this.isOnceAutoPlayed) ? this.score : "--";
+      // this.app.setTwitterShareLink(score);
       this.app.setTwitterShareLink(this.score);
     },
 

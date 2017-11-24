@@ -32,6 +32,7 @@ var createCounter = createCounter;
       autoPlayBtn: $id('autoplay-btn'),
       randomizeBtn: $id('randomize-btn'),
       optionArea: $id('option-area'),
+      gameOptions: $id('game-options'),
 
       // restartBtn: $id('restart-btn'),
       resultOptions: $id('result-options'),
@@ -90,6 +91,7 @@ var createCounter = createCounter;
       // ツイートリンク等の位置を調整 ロード前でOK？
       this.refs.resultOptions.style.top = RESULT_OPT_POSITION+"px";
       this.refs.randomizeBtn.checked = RANDOMIZE_INIT_STAT;
+      this.refs.autoPlayBtn.checked = AUTOPLAY_INIT_STAT;
 
       this.game.init();
       this._checkBrowserSupport();
@@ -108,6 +110,7 @@ var createCounter = createCounter;
     },
 
     setTwitterShareLink: function(score) {
+      score = (!this.refs.autoPlayBtn.checked) ? score : "--"
       var msg = "☔"; // 傘の絵文字
       var pre = 'https://twitter.com/share?';
       var euc = encodeURIComponent;
@@ -177,9 +180,12 @@ var createCounter = createCounter;
       // pause
       this.refs.pauseBtn.addEventListener('click', this._togglePause.bind(this), false);
 
-      // autoplay button (For debug)
+      // autoplay button
       this.refs.autoPlayBtn.onchange = function(e) {
         self.game.isAutoPlay = e.target.checked;
+        if (e.target.checked === true) {
+          self.game.isOnceAutoPlayed = true;
+        }
       };
 
       // randomize button
@@ -305,6 +311,7 @@ var createCounter = createCounter;
             self.game.setMusic(self.music); // Gameに音楽をセット
             self.game.reset(); // ゲームリセット
             self.refs.musicNameDisplay.innerHTML = "♪ " + music.name;
+            self.changeState('idle');
           }
         }
       });
@@ -369,13 +376,13 @@ var createCounter = createCounter;
 
       switch (state) {
         case "pause":
-          // this.refs.repertoryWrapper.style.visibility = "visible";
           this.refs.repertoryWrapper.style.display = "block";
           this.refs.pauseBtn.style.visibility = "hidden";
           break;
 
         case "playing":
           // this.refs.repertoryWrapper.style.visibility = "hidden";
+          this.refs.gameOptions.style.display = "none";
           this.refs.repertoryWrapper.style.display = "none";
           this.refs.pauseBtn.style.visibility = "visible";
           this.refs.resultOptions.style.visibility = "hidden";
@@ -383,6 +390,14 @@ var createCounter = createCounter;
 
         case "idle":
           // this.refs.repertoryWrapper.style.visibility = "visible";
+          this.refs.gameOptions.style.display = "block";
+          this.refs.repertoryWrapper.style.display = "block";
+          this.refs.pauseBtn.style.visibility = "hidden";
+          this.refs.resultOptions.style.visibility = "hidden";
+          break;
+
+        case "result":
+          this.refs.gameOptions.style.display = "block";
           this.refs.repertoryWrapper.style.display = "block";
           this.refs.pauseBtn.style.visibility = "hidden";
           this.refs.resultOptions.style.visibility = "visible";

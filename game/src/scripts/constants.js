@@ -9,6 +9,7 @@ var FPS = 60;
 //   "雨の日は落ち着く",
 // ];
 var RANDOMIZE_INIT_STAT = true;
+var AUTOPLAY_INIT_STAT = false;
 
 // 画面描画用パラメータ
 var SCREEN_WIDTH = (window.innerWidth > 640) ? 640 : window.innerWidth * 0.9;
