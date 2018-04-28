@@ -35,14 +35,15 @@ var RRAIN = RRAIN || {};
 
     // flags
     // this.isPlaying = false;
-    this.isAutoPlay = false;
+    this.isAutoPlay = AUTOPLAY_INIT_STAT;
+    // this.isOnceAutoPlayed = false;
     this.playState = "initial";
     this._isPressed = true;
     this.enableSE = true;
 
     this._notePositions = [];
     this._notePositionsLen = 0;
-    this.setNotePositions(false);
+    this.setNotePositions(RANDOMIZE_INIT_STAT);
   };
 
   Game.prototype = {
@@ -370,6 +371,7 @@ var RRAIN = RRAIN || {};
       this._maxChain = 0;
       this.score = 0;
       this._hitEffects = [];
+      // this.isOnceAutoPlayed = false;
 
       this.playState = "idle";
     },
@@ -398,16 +400,21 @@ var RRAIN = RRAIN || {};
 
     end: function() {
       // console.log("game end");
-      this.app.changeState("idle");
+      this.app.changeState("result");
       // this.isPlaying = false;
       this.timer.pause();
+      // var score = (this.isOnceAutoPlayed) ? this.score : "--";
+      // this.app.setTwitterShareLink(score);
       this.app.setTwitterShareLink(this.score);
     },
 
     _judge: function(noteTime) {
       noteTime = (noteTime) ? noteTime : this._noteList[this._currentNoteIndex];
 
-      if (typeof noteTime === "undefined") return;
+      if (typeof noteTime === "undefined") {
+       this._playShot("empty");
+       return;
+      }
 
       var _longEnd; // ロング最終位置を一時保持
       var reaction = this._reaction.bind(this);
@@ -427,7 +434,10 @@ var RRAIN = RRAIN || {};
       var RDM = RATING_DATA_MAP;
 
       // 判定範囲外なら何もせず終了
-      if (RDM.out.range < rTime) return;
+      if (RDM.out.range < rTime) {
+        this._playShot("empty");
+        return;
+      }
       // console.log(note)
 
       // ロング成功時

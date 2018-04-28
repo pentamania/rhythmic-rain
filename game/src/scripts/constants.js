@@ -8,6 +8,8 @@ var FPS = 60;
 //   "雨がビニール傘を叩くときの音が好き",
 //   "雨の日は落ち着く",
 // ];
+var RANDOMIZE_INIT_STAT = true;
+var AUTOPLAY_INIT_STAT = false;
 
 // 画面描画用パラメータ
 var SCREEN_WIDTH = (window.innerWidth > 640) ? 640 : window.innerWidth * 0.9;
@@ -107,7 +109,8 @@ var RATING_DATA_MAP = {
 // paths
 var SOUND_ASSETS = {
   clap:"./assets/sounds/clap.mp3",
-  conga: "./assets/sounds/conga.mp3"
+  conga: "./assets/sounds/conga.mp3",
+  empty: "./assets/sounds/snap.mp3",
 };
 var IMAGE_ASSETS = {
   streetLight: "./assets/images/streetLight2.png",

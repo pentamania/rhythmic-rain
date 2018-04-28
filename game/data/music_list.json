@@ -8,7 +8,17 @@
             "BPM": "130",
             "src": "music/Game_gadget_at_midnight.mp3",
             "fumen": "fumen/Game_gadget_at_midnight.json"
-        },{
+        },
+        {
+            "name": "Dancer (NORMAL)",
+            "author": "しゃろう",
+            "url": "http://dova-s.jp/_contents/author/profile106.html",
+            "difficulty": 2,
+            "BPM": "135",
+            "src": "music/Dancer.mp3",
+            "fumen": "fumen/Dancer.json"
+        },
+        {
             "name": "野良猫は宇宙を目指した (EASY)",
             "author": "しゃろう",
             "url": "http://dova-s.jp/_contents/author/profile106.html",
@@ -16,7 +26,8 @@
             "BPM": "90",
             "src": "music/野良猫は宇宙を目指した.mp3",
             "fumen": "fumen/野良猫は宇宙を目指した.json"
-        },{
+        },
+        {
             "name": "Morning (EASY)",
             "author": "しゃろう",
             "url": "http://dova-s.jp/_contents/author/profile106.html",
